@@ -1,7 +1,14 @@
 const express = require('express');
-const app = express();
 const cors = require('cors');
-const { syncModels } = require('./models');
+const { syncModels } = require('./app/models');
+const route = require('./routes/index');
+const dotenv = require('dotenv');
+dotenv.config();
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
     origin: ['http://localhost:5173','http://localhost:5174'],
@@ -9,9 +16,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.get('/api', (req, res) => {
-  res.json({ characters: ['doraemon', 'conan', 'luffy', 'zoro'] });
-});
+route(app);
 
 // syncModels() will connect and create tables to the database
 syncModels();
