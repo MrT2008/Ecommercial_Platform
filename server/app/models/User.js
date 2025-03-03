@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const bcrypt = require('bcrypt');
-const sequelize = require('../configs/configDB');
+const sequelize = require('../configs/dbConfig');
 
 const User = sequelize.define('User', {
   id: {
@@ -12,14 +12,22 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+    validate: {
+      isEmail: true,
+    },
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   role: {
-    type: DataTypes.ENUM('admin', 'user'),
-    defaultValue: 'user',
+    type: DataTypes.ENUM('manager', 'moderator', 'buyer'),
+    defaultValue: 'buyer',
+  },
+  googleId: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true, // Only for Google users
   },
 }, {
   tableName: 'users',
@@ -28,40 +36,33 @@ const User = sequelize.define('User', {
     beforeCreate: async (user) => {
       const salt = await bcrypt.genSalt();
       user.password = await bcrypt.hash(user.password, salt);
-    },
-    afterCreate: (user) => {
-      console.log('Created user:', user.email);
+      console.log(`[USER CREATED] ${user.email}`);
     },
     beforeUpdate: async (user) => {
       if (user.changed('password')) {  // re-hash if password is modified
         const salt = await bcrypt.genSalt();
         user.password = await bcrypt.hash(user.password, salt);
+        console.log(`[USER UPDATED] ${user.email}`);
       }
     },
-    afterUpdate: (user) => {
-      console.log('After updating user:', user.email);
-    },
-    beforeDestroy: (user) => {
-      console.log('Before deleting user:', user.email);
-    },
-    afterDestroy: (user) => {
-      console.log('After deleting user:', user.email);
-    },
+    afterCreate: (user) => console.log(`[USER CREATED] ${user.email}`),
+    afterUpdate: (user) => console.log(`[USER UPDATED] ${user.email}`),
+    afterDestroy: (user) => console.log(`[USER DELETED] ${user.email}`),
   }
 });
 
 User.login = async function (email, password) {
-  const user = await User.findOne({ where: { email } });
-  if (!user) {
-    throw new Error('Incorrect email');
-  }
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) throw new Error("Incorrect email");
+    console.log(`[USER LOGIN] ${user.email}`);
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new Error("Incorrect password");
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw new Error('Incorrect password');
+    return user;
+  } catch (error) {
+    throw error;
   }
-
-  return user;
 };
 
 module.exports = User;
