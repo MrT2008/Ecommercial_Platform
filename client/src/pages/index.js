@@ -1,0 +1,1 @@
+// Chứa các trang chính (Home, Login, Cart, Checkout...).
