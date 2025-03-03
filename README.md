@@ -49,6 +49,12 @@ This project is an e-commerce platform that consists of a server and a client ap
    ```bash
    npm start
    ```
+   
+6. **Run the client**
+   cd client: 
+   Check vite: npm list vite 
+   If "vite is not found" : npm list vite
+   Run client: npm run dev
 
 ## Usage
 Once the server is running, you can access the API at `http://localhost:8080`. Refer to the API documentation for available endpoints and their usage.
