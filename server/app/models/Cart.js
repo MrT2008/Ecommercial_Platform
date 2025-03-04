@@ -1,21 +1,21 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../configs/dbConfig');
-const Order = require('./Order');
+const User = require('./User');
 const Product = require('./Product');
 
-class OrderItem extends Model {}
+class Cart extends Model {}
 
-OrderItem.init({
-    orderItemID: {
+Cart.init({
+    cartID: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
-    orderID: {
+    userID: {
         type: DataTypes.INTEGER,
         references: {
-            model: Order,
-            key: 'orderID',
+            model: User,
+            key: 'userID',
         },
         onDelete: 'CASCADE'
     },
@@ -26,20 +26,18 @@ OrderItem.init({
             key: 'productID',
         },
         onDelete: 'CASCADE'
+        // confusions that whether to use onDelete or not in this case 
+        // if not, like shopee
     },
     quantity: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 1,
     },
-    priceAtPurchase: { // Stores price at the time of order
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-    },
 }, {
     sequelize,
-    modelName: 'OrderItems',
+    modelName: 'Carts',
     timestamps: true,
 });
 
-module.exports = OrderItem;
+module.exports = Cart;
