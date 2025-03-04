@@ -1,9 +1,26 @@
-const { DataTypes } = require('sequelize');
-const bcrypt = require('bcrypt');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../configs/dbConfig');
+const bcrypt = require('bcrypt');
 
-const User = sequelize.define('User', {
-  id: {
+class User extends Model {
+  static async login(email, password) {
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) throw new Error("Incorrect email");
+    console.log(`[USER LOGIN] ${user.email}`);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new Error("Incorrect password");
+
+    return user;
+    } catch (error) {
+      throw error;
+    }
+  };
+}
+
+User.init({
+  userID: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -20,9 +37,20 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  role: {
-    type: DataTypes.ENUM('manager', 'moderator', 'buyer'),
-    defaultValue: 'buyer',
+  name: {
+    type: DataTypes.STRING,
+    defaultValue: 'user'+Date.now()+Math.floor(Math.random()*1000),
+  },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      is: /^[0-9]{10,11}$/,
+    },
+  },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   googleId: {
     type: DataTypes.STRING,
@@ -30,7 +58,8 @@ const User = sequelize.define('User', {
     allowNull: true, // Only for Google users
   },
 }, {
-  tableName: 'users',
+  sequelize,
+  tableName: 'Users',
   timestamps: true, // automatically adds createdAt and updatedAt
   hooks: {
     beforeCreate: async (user) => {
@@ -45,24 +74,7 @@ const User = sequelize.define('User', {
         console.log(`[USER UPDATED] ${user.email}`);
       }
     },
-    afterCreate: (user) => console.log(`[USER CREATED] ${user.email}`),
-    afterUpdate: (user) => console.log(`[USER UPDATED] ${user.email}`),
-    afterDestroy: (user) => console.log(`[USER DELETED] ${user.email}`),
   }
 });
-
-User.login = async function (email, password) {
-  try {
-    const user = await User.findOne({ where: { email } });
-    if (!user) throw new Error("Incorrect email");
-    console.log(`[USER LOGIN] ${user.email}`);
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new Error("Incorrect password");
-
-    return user;
-  } catch (error) {
-    throw error;
-  }
-};
 
 module.exports = User;
