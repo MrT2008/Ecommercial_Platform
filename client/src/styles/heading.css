@@ -1,0 +1,79 @@
+:root{
+    --main-color: #000144;
+    --secondary-color: #FFBD4B;
+    --white: #ffffff;
+    --black: #000000;
+    --gray: #f5f5f5;
+    --blur: rgba(0, 0, 0, 0.5);
+    --shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+.login-page{
+    width: 100vw;
+}
+.heading{
+    color: var(--white);
+    background-color: var(--main-color);
+}
+.heading p{
+    word-wrap: break-word;
+}
+
+#languages{
+    background-color: var(--main-color);
+}
+
+.logo #ez{
+    color: var(--secondary-color);
+}
+.logo #mall{
+    color: var(--main-color);
+}
+
+.button#signin, .button.login{
+    background-color: var(--secondary-color);
+    color: var(--main-color);
+
+}
+.button#signup{
+    background-color: var(--white);
+    color: var(--main-color);
+    border: solid 0.1rem var(--main-color);
+}
+
+
+.heading-bar{
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-bottom: solid 0.1rem var(--gray);
+    
+}
+.sign-btns{
+    width: 30%;
+    display: flex;
+    justify-content: space-around;
+    width: 30%;
+    max-width: 250px;
+    min-width: 200px;
+    margin-right: 1em;
+}
+.sign-btns .sign-up{
+    background-color: var(--secondary-color);
+    color: var(--main-color);
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 0.5em;
+    cursor: pointer;
+}
+.sign-btns .sign-in{
+    background-color: var(--white);
+    color: var(--main-color);
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 0.5em;
+    cursor: pointer;
+    border: solid 0.1rem var(--main-color); 
+}
+
+
