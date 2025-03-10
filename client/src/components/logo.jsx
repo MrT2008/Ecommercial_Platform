@@ -1,9 +1,9 @@
-const Logo = ({size=""}) => {
+const Logo = ({size="", changeColor="", changeID ="" }) => {
     return (
         <div className={`logo font-bold ${size}`}>
             <h2>
-                <span id="ez">EZ</span>
-                <span id="mall">Mall</span>
+                <span className={`${changeColor} ${changeID}` } id="ez">EZ</span>
+                <span className={`${changeColor} ${changeID}`} id="mall">Mall</span>
             </h2>
         </div>
     );

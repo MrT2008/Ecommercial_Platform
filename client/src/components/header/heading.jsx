@@ -1,4 +1,4 @@
-import './../../styles/heading.css';
+import './../../styles/global.css';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faEarthAmericas} from '@fortawesome/free-solid-svg-icons';
 const Heading = () => {

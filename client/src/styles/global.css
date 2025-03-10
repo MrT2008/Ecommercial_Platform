@@ -17,6 +17,10 @@
 .heading p{
     word-wrap: break-word;
 }
+select#language{
+    background-color: var(--main-color);
+    color: var(--white);
+}
 
 #languages{
     background-color: var(--main-color);
@@ -27,6 +31,12 @@
 }
 .logo #mall{
     color: var(--main-color);
+}
+.logo #ez.white.ez{
+    color: var(--white);
+}
+.logo #mall.white.mall{
+    color: var(--white);
 }
 
 .button#signin, .button.login{
@@ -40,40 +50,6 @@
     border: solid 0.1rem var(--main-color);
 }
 
-
-.heading-bar{
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-bottom: solid 0.1rem var(--gray);
-    
+.footer{
+    background-color: var(--main-color);
 }
-.sign-btns{
-    width: 30%;
-    display: flex;
-    justify-content: space-around;
-    width: 30%;
-    max-width: 250px;
-    min-width: 200px;
-    margin-right: 1em;
-}
-.sign-btns .sign-up{
-    background-color: var(--secondary-color);
-    color: var(--main-color);
-    border: none;
-    padding: 0.5em 1em;
-    border-radius: 0.5em;
-    cursor: pointer;
-}
-.sign-btns .sign-in{
-    background-color: var(--white);
-    color: var(--main-color);
-    border: none;
-    padding: 0.5em 1em;
-    border-radius: 0.5em;
-    cursor: pointer;
-    border: solid 0.1rem var(--main-color); 
-}
-
-

@@ -1,7 +1,9 @@
 import {useState} from 'react';
 import Heading from '../components/header/heading';
 import HeadingBar from '../components/header/main';
-import LoginContainer from '../components/login/main';
+import LoginContainer from '../components/homeSign/loginContainer';
+import Footer from '../components/footer/main';
+
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -15,6 +17,7 @@ const Login = () => {
             <Heading />
             <HeadingBar />
             <LoginContainer />
+            <Footer />
         </div>
     );
 };
