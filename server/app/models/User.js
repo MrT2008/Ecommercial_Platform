@@ -57,9 +57,22 @@ User.init({
     unique: true,
     allowNull: true, // Only for Google users
   },
+  userStatus: {
+    type: DataTypes.ENUM('active', 'ban'),
+    defaultValue: 'active',
+},
+  imageURL: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+        isURL: true,
+        notEmpty: true
+    }
+  }
 }, {
   sequelize,
-  tableName: 'Users',
+  modelName: 'Users',
   timestamps: true, // automatically adds createdAt and updatedAt
   hooks: {
     beforeCreate: async (user) => {

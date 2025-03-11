@@ -1,4 +1,5 @@
 const sequelize = require('../configs/dbConfig');
+
 const syncModels = async () => {
   try {
     await sequelize.authenticate();
@@ -20,6 +21,13 @@ const OrderDetail = require('./OrderDetail');
 const Cart = require('./Cart');
 const Review = require('./Review');
 const Transaction = require('./Transaction');
+const Announcement = require('./Announcement');
+const Category = require('./Category');
+const PaymentMethod = require('./PaymentMethod');
+const Promotion = require('./Promotion');
+const ShipInfo = require('./ShipInfo');
+const UserPayment = require('./UserPayment')
+const ProductType = require('./ProductType')
 
 const models = {
   User,
@@ -32,7 +40,15 @@ const models = {
   Cart,
   Review,
   Transaction,
+  Announcement,
+  Category,
+  PaymentMethod,
+  Promotion,
+  ShipInfo,
+  UserPayment,
+  ProductType,
 };
+
 
 // User N-M Role via UserRole
 User.belongsToMany(Role, { through: UserRole, foreignKey: "userID" });
@@ -71,5 +87,33 @@ Review.belongsTo(Product, { foreignKey: "productID" });
 // Order 1-N Transaction
 Order.hasMany(Transaction, { foreignKey: 'orderID' });
 Transaction.belongsTo(Order, { foreignKey: 'orderID' });
+
+//User N-M PaymentMethod (via UserPayment)
+User.belongsToMany(PaymentMethod, {through: UserPayment, foreignKey: "userID", onDelete: 'CASCADE'});
+PaymentMethod.belongsToMany(User, {through: UserPayment, foreignKey: "paymentMethodID", onDelete: 'CASCADE'});
+UserPayment.belongsTo(User, {foreignKey: "userID", onDelete: 'CASCADE'});
+UserPayment.belongsTo(PaymentMethod, {foreignKey: "paymentMethodID", onDelete: 'CASCADE'});
+
+//User 1-N ShipInfo
+User.hasMany(ShipInfo, {foreignKey: "userID"});
+ShipInfo.belongsTo(User, {foreignKey: "userID"});
+
+//User 1-N Announcement
+User.hasMany(Announcement, {foreignKey: "userID"});
+Announcement.belongsTo(User, {foreignKey: "userID"});
+
+//Product N-M Category (via ProductType)
+Product.belongsToMany(Category, {through: ProductType, foreignKey: "productID", onDelete: 'CASCADE'});
+Category.belongsToMany(Product, {through: ProductType, foreignKey: "categoryID", onDelete: 'CASCADE'});
+ProductType.belongsTo(Product, {foreignKey: "productID", onDelete: 'CASCADE'});
+ProductType.belongsTo(Category, {foreignKey: "categoryID", onDelete: 'CASCADE'});
+
+//Shop 1-N Category
+Shop.hasMany(Category, {foreignKey: "shopID"});
+Category.belongsTo(Shop, {foreignKey: "shopID"});
+
+//Shop 1-N Promotion
+Shop.hasMany(Promotion, {foreignKey: "shopID"});
+Promotion.belongsTo(Shop, {foreignKey: "shopID"})
 
 module.exports = { models, syncModels };

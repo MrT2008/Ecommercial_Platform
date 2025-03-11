@@ -1,32 +1,46 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../configs/dbConfig');
-const User = require('./User');
+const { now } = require('sequelize/lib/utils');
+const User = require('./User')
 
-class Shop extends Model {}
+class ShipInfo extends Model {}
 
-Shop.init({
-    shopID: {
+ShipInfo.init({
+    shipInfoID: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
     },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
-    ownerID: {
+
+    /*Trên erd có foreign key của transaction nhưng shipinfo vs transaction k có mqh nào hết? */
+    // transactionID: {
+    //     type: DataTypes.INTEGER,
+    //     references: {
+    //         model: 'transactions',
+    //         key: 'transactionID'
+    //     }
+    // },
+
+    userID: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
             key: 'userID',
         },
     },
-    phone: {
+    inUsed: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        validate: {
+            notEmpty: true
+        }
+    },
+    receiverName: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-            is: /^[0-9]{10,11}$/,
+            notEmpty: true,
+            len: [2, 999]
         }
     },
     address: {
@@ -37,23 +51,10 @@ Shop.init({
             len: [2, 999]
         }
     },
-    email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        validate: {
-            notEmpty: true,
-            isEmail: true,
-        }
-    },
-    theme: {
-        type: DataTypes.STRING,
-        defaultValue: '#FFFFFF',
-    },
 }, {
     sequelize,
-    modelName: 'Shops',
+    modelName: 'ShipInfos',
     timestamps: true,
 });
 
-module.exports = Shop;
+module.exports = ShipInfo;

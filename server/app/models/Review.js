@@ -20,8 +20,7 @@ Review.init({
     },
     productID: {
         type: DataTypes.INTEGER,
-        references: {
-            
+        references: {  
             model: Product,
             key: 'productID',
         },
@@ -32,11 +31,18 @@ Review.init({
         validate: {
             min: 1,
             max: 5,
+            notEmpty: true
         },
     },
     comment: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
+    },
+    imageURL: {
+        type: DataTypes.STRING,
+        validate: {
+            isURL: true
+        }
     },
 }, {
     sequelize,

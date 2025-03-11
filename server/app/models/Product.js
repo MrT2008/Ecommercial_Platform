@@ -14,11 +14,15 @@ Product.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    discription: {
+    description: {
         type: DataTypes.TEXT,
         allowNull: false,
     },
     price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+    },
+    salePrice: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
     },
@@ -34,6 +38,21 @@ Product.init({
             key: 'shopID',
         },
     },
+    thumbnailURL: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            isURL: true,
+            notEmpty: true
+        }
+    },
+    status: {
+        type: DataTypes.ENUM('active', 'inactive', 'soldout', 'ban'),
+        defaultValue: 'active',
+        validate: {
+            isIn: [['active', 'inactive', 'soldout', 'ban']],
+        }
+    }
 }, {
     sequelize,
     modelName: 'Products',
