@@ -1,4 +1,4 @@
-import template from './../../assets/template.svg';
+import template from './../../assets/template.png';
 
 const Template = () => {
   return (
