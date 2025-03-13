@@ -7,8 +7,8 @@ const HeadingBar = () => {
             <Logo size="text-2xl" />
             <SearchBar />
             <div className="flex w-1/4 items-center justify-around">
-                <Button text="Sign In" id="signin"/>
-                <Button text="Sign Up" id="signup"/>
+                <Button text="Sign In" id="signin" href="/signin"/>
+                <Button text="Sign Up" id="signup" href="/signup"/>
             </div>
         </div>
     )
