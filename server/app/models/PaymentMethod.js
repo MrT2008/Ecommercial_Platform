@@ -4,7 +4,7 @@ const sequelize = require('../configs/dbConfig');
 class PaymentMethod extends Model {}
 
 PaymentMethod.init({
-    paymentMethodID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -17,12 +17,22 @@ PaymentMethod.init({
             len: [3, 999]
         }
     },
+    bankAccountNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            notEmpty: true,
+            len: [3, 999]
+        }
+    },
     inUsed: {
-        type: DataTypes.BOOLEAN
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     },
 }, {
     sequelize,
-    modelName: 'PaymentMethods',
+    modelName: 'PaymentMethod',
+    tableName: 'payment_methods',
     timestamps: true,
 });
 

@@ -5,7 +5,7 @@ const User = require('./User');
 class Order extends Model {}
 
 Order.init({
-    orderID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -14,7 +14,7 @@ Order.init({
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userID',
+            key: 'userId',
         },
     },
     status: {
@@ -23,7 +23,8 @@ Order.init({
     }
 }, {
     sequelize,
-    modelName: 'Orders',
+    modelName: 'Order',
+    tableName: 'orders',
     timestamps: true,
 });
 

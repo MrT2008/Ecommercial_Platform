@@ -2,25 +2,10 @@ const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../configs/dbConfig');
 const bcrypt = require('bcrypt');
 
-class User extends Model {
-  static async login(email, password) {
-  try {
-    const user = await User.findOne({ where: { email } });
-    if (!user) throw new Error("Incorrect email");
-    console.log(`[USER LOGIN] ${user.email}`);
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new Error("Incorrect password");
-
-    return user;
-    } catch (error) {
-      throw error;
-    }
-  };
-}
+class User extends Model {}
 
 User.init({
-  userID: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -63,16 +48,17 @@ User.init({
 },
   imageURL: {
     type: DataTypes.STRING,
-    allowNull: false,
     unique: true,
     validate: {
         isURL: true,
         notEmpty: true
-    }
+    },
+    defaultValue: 'https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png',
   }
 }, {
   sequelize,
-  modelName: 'Users',
+  modelName: 'User',
+  tableName: 'users',
   timestamps: true, // automatically adds createdAt and updatedAt
   hooks: {
     beforeCreate: async (user) => {

@@ -6,7 +6,7 @@ const Product = require('./Product');
 class Cart extends Model {}
 
 Cart.init({
-    cartID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -15,7 +15,7 @@ Cart.init({
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userID',
+            key: 'userId',
         },
         onDelete: 'CASCADE'
     },
@@ -23,11 +23,9 @@ Cart.init({
         type: DataTypes.INTEGER,
         references: {
             model: Product,
-            key: 'productID',
+            key: 'productId',
         },
         onDelete: 'CASCADE'
-        // confusions that whether to use onDelete or not in this case 
-        // if not, like shopee
     },
     quantity: {
         type: DataTypes.INTEGER,
@@ -36,7 +34,8 @@ Cart.init({
     },
 }, {
     sequelize,
-    modelName: 'Carts',
+    modelName: 'Cart',
+    tableName: 'carts',
     timestamps: true,
 });
 

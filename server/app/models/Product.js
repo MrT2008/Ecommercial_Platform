@@ -5,10 +5,17 @@ const Shop = require('./Shop');
 class Product extends Model {}
 
 Product.init({
-    productID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+    },
+    shopID: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: Shop,
+            key: 'shopId',
+        },
     },
     name: {
         type: DataTypes.STRING,
@@ -31,12 +38,10 @@ Product.init({
         allowNull: false,
         defaultValue: 0,
     },
-    shopID: {
+    saled: {
         type: DataTypes.INTEGER,
-        references: {
-            model: Shop,
-            key: 'shopID',
-        },
+        allowNull: false,
+        defaultValue: 0,
     },
     thumbnailURL: {
         type: DataTypes.STRING,
@@ -55,7 +60,8 @@ Product.init({
     }
 }, {
     sequelize,
-    modelName: 'Products',
+    modelName: 'Product',
+    tableName: 'products',
     timestamps: true,
 });
 

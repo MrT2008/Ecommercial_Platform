@@ -3,27 +3,28 @@ const sequelize = require('../configs/dbConfig');
 const Product = require('./Product')
 const Category = require('./Category')
 
-class ProductType extends Model {}
+class ProductCategory extends Model {}
 
-ProductType.init({
-    productID: { 
+ProductCategory.init({
+    id: { 
         type: DataTypes.INTEGER,
         references: {
             model: Product,
-            key: "productID"
+            key: "productId"
         }
     },
     categoryID: {
         type: DataTypes.INTEGER,
         references: {
             model: Category,
-            key: "categoryID"
+            key: "categoryId"
         }
     }
 }, {
     sequelize,
-    modelName: 'ProductTypes',
+    modelName: 'ProductCategory',
+    tableName: 'product_categories',
     timestamps: true,
 })
 
-module.exports = ProductType
+module.exports = ProductCategory

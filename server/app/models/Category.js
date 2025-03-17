@@ -5,17 +5,16 @@ const Shop = require('./Shop')
 class Category extends Model {}
 
 Category.init({
-    categoryID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    //ERD k có nhưng tui thêm vô để có 1-N 
     shopID: {
         type: DataTypes.INTEGER,
         references: {
             model: Shop,
-            key: 'shopID'
+            key: 'shopId'
         }
     },
     name: {
@@ -28,7 +27,8 @@ Category.init({
     }
 }, {
     sequelize,
-    modelName: 'Categories',
+    modelName: 'Category',
+    tableName: 'categories',
     timestamps: true,
 });
 

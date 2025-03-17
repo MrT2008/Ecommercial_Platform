@@ -10,14 +10,14 @@ UserPayment.init({
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: "userID"
+            key: "userId"
         }
     },
     paymentID: {
         type: DataTypes.INTEGER,
         references: {
             model: PaymentMethod,
-            key: "paymentMethodID"
+            key: "paymentMethodId"
         }
     },
     bankAccount: {
@@ -29,7 +29,8 @@ UserPayment.init({
     },
 }, {
     sequelize,
-    modelName: 'UserPayments',
+    modelName: 'UserPayment',
+    tableName: 'user_payments',
     timestamps: true,
 })
 

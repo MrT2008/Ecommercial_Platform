@@ -5,17 +5,16 @@ const Shop = require('./Shop')
 class Promotion extends Model {}
 
 Promotion.init({
-    promotionID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    //ERD k có nhưng tui thêm vô để có 1-N 
     shopID: {
         type: DataTypes.INTEGER,
         references: {
             model: Shop,
-            key: 'shopID'
+            key: 'shopId'
         }
     },
     imageURL: {
@@ -36,7 +35,8 @@ Promotion.init({
     }
 }, {
     sequelize,
-    modelName: 'Promotions',
+    modelName: 'Promotion',
+    tableName: 'promotions',
     timestamps: true,
 });
 

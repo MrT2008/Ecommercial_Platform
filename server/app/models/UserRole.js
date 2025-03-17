@@ -11,7 +11,7 @@ UserRole.init({
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: "userID"
+            key: "userId"
         }
     },
     roleID: {
@@ -23,7 +23,8 @@ UserRole.init({
     },
 }, {
     sequelize,
-    modelName: 'UserRoles',
+    modelName: 'UserRole',
+    tableName: 'user_roles',
     timestamps: true,
 })
 

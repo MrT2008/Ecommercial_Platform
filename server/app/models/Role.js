@@ -3,7 +3,7 @@ const sequelize = require('../configs/dbConfig');
 class Role extends Model {}
 
 Role.init({
-    roleID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -14,7 +14,8 @@ Role.init({
     },
 }, {
     sequelize,
-    modelName: 'Roles',
+    modelName: 'Role',
+    tableName: 'roles',
     timestamps: false,
 });
 

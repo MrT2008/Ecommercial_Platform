@@ -6,7 +6,7 @@ const Product = require('./Product');
 class OrderDetail extends Model {}
 
 OrderDetail.init({
-    orderDetailID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -15,30 +15,31 @@ OrderDetail.init({
         type: DataTypes.INTEGER,
         references: {
             model: Order,
-            key: 'orderID',
+            key: 'orderId',
         },
-        onDelete: 'CASCADE' // If an order is deleted, delete all its order items
+        onDelete: 'CASCADE'
     },
     productID: {
         type: DataTypes.INTEGER,
         references: {
             model: Product,
-            key: 'productID',
+            key: 'productId',
         },
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE' // confusions that whether to use onDelete or not in this case
     },
     quantity: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 1,
     },
-    priceAtPurchase: { // Stores price at the time of order
+    priceAtPurchase: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
     },
 }, {
     sequelize,
-    modelName: 'OrderDetails',
+    modelName: 'OrderDetail',
+    tableName: 'order_details',
     timestamps: true,
 });
 

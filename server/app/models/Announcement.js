@@ -5,18 +5,24 @@ const User = require('./User')
 class Announcement extends Model {}
 
 Announcement.init({
-    announcementID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    //ERD k có nhưng tui thêm vô để có 1-N 
-    userID: {
+    senderID: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userID',
-        },
+            key: 'userId'
+        }
+    },
+    receiverID: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: User,
+            key: 'userId'
+        }
     },
     title: {
         type: DataTypes.STRING,
@@ -35,20 +41,6 @@ Announcement.init({
             notEmpty: true
         }
     },
-    startTime: {
-        type: 'TIMESTAMP',
-        allowNull: false,
-        validate: {
-            notEmpty: true
-        }
-    },
-    endTime: {
-        type: 'TIMESTAMP',
-        allowNull: false,
-        validate: {
-            notEmpty: true
-        }
-    },
     script: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -58,7 +50,8 @@ Announcement.init({
     },
 }, {
     sequelize,
-    modelName: 'Announcements',
+    modelName: 'Announcement',
+    tableName: 'announcements',
     timestamps: true,
 });
 

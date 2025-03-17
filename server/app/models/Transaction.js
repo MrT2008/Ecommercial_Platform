@@ -5,7 +5,7 @@ const Order = require('./Order');
 class Transaction extends Model {}
 
 Transaction.init({
-    transactionID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -14,7 +14,7 @@ Transaction.init({
         type: DataTypes.INTEGER,
         references: {
             model: Order,
-            key: 'orderID',
+            key: 'orderId',
         },
     },
     paymentMethod: {
@@ -27,7 +27,8 @@ Transaction.init({
     },
 }, {
     sequelize,
-    modelName: 'Transactions',
+    modelName: 'Transaction',
+    tableName: 'transactions',
     timestamps: true,
 });
 

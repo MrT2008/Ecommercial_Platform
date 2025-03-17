@@ -6,23 +6,23 @@ const Product = require('./Product');
 class Review extends Model {}
 
 Review.init({
-    reviewID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
-    userID: {
+    buyerId: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userID',
+            key: 'userId',
         },
     },
-    productID: {
+    productId: {
         type: DataTypes.INTEGER,
         references: {  
             model: Product,
-            key: 'productID',
+            key: 'productId',
         },
     },
     rating: {
@@ -38,7 +38,7 @@ Review.init({
         type: DataTypes.TEXT,
         allowNull: true,
     },
-    imageURL: {
+    imageUrl: {
         type: DataTypes.STRING,
         validate: {
             isURL: true
@@ -46,7 +46,8 @@ Review.init({
     },
 }, {
     sequelize,
-    modelName: 'Reviews',
+    modelName: 'Review',
+    tableName: 'reviews',
     timestamps: true,
 });
 

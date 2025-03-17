@@ -6,7 +6,7 @@ const User = require('./User')
 class ShipInfo extends Model {}
 
 ShipInfo.init({
-    shipInfoID: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -21,11 +21,11 @@ ShipInfo.init({
     //     }
     // },
 
-    userID: {
+    userId: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userID',
+            key: 'userId',
         },
     },
     inUsed: {
@@ -53,7 +53,8 @@ ShipInfo.init({
     },
 }, {
     sequelize,
-    modelName: 'ShipInfos',
+    modelName: 'ShipInfo',
+    tableName: 'ship_infos',
     timestamps: true,
 });
 
