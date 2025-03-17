@@ -10,11 +10,11 @@ Order.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    buyerID: {
+    buyerId: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userId',
+            key: 'id',
         },
     },
     status: {

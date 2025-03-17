@@ -15,11 +15,11 @@ Shop.init({
         allowNull: false,
         unique: true
     },
-    ownerID: {
+    ownerId: {
         type: DataTypes.INTEGER,
         references: {
-            model: User,
-            key: 'userId',
+          model: User,
+          key: 'id',
         },
     },
     phone: {

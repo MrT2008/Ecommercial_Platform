@@ -11,15 +11,15 @@ OrderDetail.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    orderID: {
+    orderId: {
         type: DataTypes.INTEGER,
         references: {
             model: Order,
-            key: 'orderId',
+            key: 'id',
         },
         onDelete: 'CASCADE'
     },
-    productID: {
+    productId: {
         type: DataTypes.INTEGER,
         references: {
             model: Product,
@@ -41,6 +41,12 @@ OrderDetail.init({
     modelName: 'OrderDetail',
     tableName: 'order_details',
     timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['orderId', 'productId']
+        }
+    ]
 });
 
 module.exports = OrderDetail;

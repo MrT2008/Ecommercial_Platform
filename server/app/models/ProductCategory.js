@@ -6,18 +6,18 @@ const Category = require('./Category')
 class ProductCategory extends Model {}
 
 ProductCategory.init({
-    id: { 
+    productId: { 
         type: DataTypes.INTEGER,
         references: {
             model: Product,
-            key: "productId"
+            key: "id"
         }
     },
-    categoryID: {
+    categoryId: {
         type: DataTypes.INTEGER,
         references: {
             model: Category,
-            key: "categoryId"
+            key: "id"
         }
     }
 }, {
@@ -25,6 +25,12 @@ ProductCategory.init({
     modelName: 'ProductCategory',
     tableName: 'product_categories',
     timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['productId', 'categoryId']
+        }
+    ]
 })
 
-module.exports = ProductCategory
+module.exports = ProductCategory;

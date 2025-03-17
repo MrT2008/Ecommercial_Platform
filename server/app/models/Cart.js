@@ -11,19 +11,19 @@ Cart.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    userID: {
+    userId: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userId',
+            key: 'id',
         },
         onDelete: 'CASCADE'
     },
-    productID: {
+    productId: {
         type: DataTypes.INTEGER,
         references: {
             model: Product,
-            key: 'productId',
+            key: 'id',
         },
         onDelete: 'CASCADE'
     },
@@ -37,6 +37,12 @@ Cart.init({
     modelName: 'Cart',
     tableName: 'carts',
     timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['userId', 'productId']
+        }
+    ]
 });
 
 module.exports = Cart;

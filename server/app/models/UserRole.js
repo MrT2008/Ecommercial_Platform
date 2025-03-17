@@ -4,21 +4,19 @@ const User = require('./User');
 const Role = require('./Role');
 
 class UserRole extends Model {}
-
-// UserRole (Many-to-Many Relationship)
 UserRole.init({
-    userID: { 
+    userId: { 
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: "userId"
+            key: "id"
         }
     },
-    roleID: {
+    roleId: {
         type: DataTypes.INTEGER,
         references: {
             model: Role,
-            key: "roleID"
+            key: "id"
         }
     },
 }, {
@@ -26,6 +24,12 @@ UserRole.init({
     modelName: 'UserRole',
     tableName: 'user_roles',
     timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['userId', 'roleId']
+        }
+    ]
 })
 
 module.exports = UserRole;

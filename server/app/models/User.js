@@ -20,7 +20,7 @@ User.init({
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: false, // Only for local users
   },
   name: {
     type: DataTypes.STRING,

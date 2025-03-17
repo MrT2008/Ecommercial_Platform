@@ -11,18 +11,18 @@ Review.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    buyerId: {
+    userId: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userId',
+            key: 'id',
         },
     },
     productId: {
         type: DataTypes.INTEGER,
         references: {  
             model: Product,
-            key: 'productId',
+            key: 'id',
         },
     },
     rating: {
@@ -48,7 +48,14 @@ Review.init({
     sequelize,
     modelName: 'Review',
     tableName: 'reviews',
-    timestamps: true,
+    // timestamps: true,
+    // indexes: [
+    //     {
+    //         unique: true,
+    //         fields: ['buyerId', 'productId']
+    //     }
+    // ]
+    // Mua lại sản phẩm này cón thể đánh giá lại?
 });
 
 module.exports = Review;

@@ -20,12 +20,11 @@ ShipInfo.init({
     //         key: 'transactionID'
     //     }
     // },
-
     userId: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userId',
+            key: 'id',
         },
     },
     inUsed: {

@@ -10,11 +10,11 @@ Transaction.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    orderID: {
+    orderId: {
         type: DataTypes.INTEGER,
         references: {
             model: Order,
-            key: 'orderId',
+            key: 'id',
         },
     },
     paymentMethod: {

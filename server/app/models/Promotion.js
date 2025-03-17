@@ -10,11 +10,11 @@ Promotion.init({
         primaryKey: true,
         autoIncrement: true
     },
-    shopID: {
+    shopId: {
         type: DataTypes.INTEGER,
         references: {
             model: Shop,
-            key: 'shopId'
+            key: 'id'
         }
     },
     imageURL: {

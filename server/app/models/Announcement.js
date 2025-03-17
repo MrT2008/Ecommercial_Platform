@@ -10,18 +10,11 @@ Announcement.init({
         primaryKey: true,
         autoIncrement: true
     },
-    senderID: {
+    senderId: {
         type: DataTypes.INTEGER,
         references: {
             model: User,
-            key: 'userId'
-        }
-    },
-    receiverID: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: User,
-            key: 'userId'
+            key: 'id'
         }
     },
     title: {
