@@ -1,11 +1,11 @@
 import { useRef } from "react";
 import CountdownTimer from "./CountdownTimer";
-import FlashSalesCard from "./FlashSalesCard";
+import SalesCard from "./SalesCard";
 import TitleSection from "./TitleSection";
 import SecondaryButton from "./SecondaryButton";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const FlashSalesSection = () => {
+const SalesSection = () => {
   const scrollRef = useRef(null);
   const CARD_WIDTH = 250; // Chiều rộng mỗi card (bao gồm margin)
   const CARDS_PER_VIEW = 4; // Số card hiển thị trong 1 lần
@@ -25,7 +25,7 @@ const FlashSalesSection = () => {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <TitleSection title={"Today's Flash Sales"} />
+      <TitleSection title={"Today's Sales"} />
 
       <div className="flex justify-between items-center w-full">
         {/* Đồng hồ đếm ngược (bên trái) */}
@@ -59,8 +59,8 @@ const FlashSalesSection = () => {
           >
             {[...Array(10)].map((_, index) => (
               <div key={index} className="scrollSnapAlign-start min-w-[250px] w-[250px]">
-                <FlashSalesCard
-                  productName={`Flash Sale Item ${index + 1}`}
+                <SalesCard
+                  productName={`Sale Item ${index + 1}`}
                   salePrice={(Math.random() * 500 + 100).toFixed(0)}
                   originalPrice={(Math.random() * 800 + 500).toFixed(0)}
                   discountPercentage={Math.floor(Math.random() * 50) + 10}
@@ -80,4 +80,4 @@ const FlashSalesSection = () => {
   );
 };
 
-export default FlashSalesSection;
+export default SalesSection;

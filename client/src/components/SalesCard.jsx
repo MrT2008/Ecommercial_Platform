@@ -5,7 +5,7 @@ const FlashSalesCard = ({
     productName = "AK-900 Wired Keyboard",
     salePrice = 960,
     originalPrice = 1160,
-    isNew = false,
+    isNew = true,
     rating = 4,
     reviewCount = 75,
     imageUrl = "/api/placeholder/400/320"
@@ -48,9 +48,9 @@ const FlashSalesCard = ({
             </div>
 
             {/* Add to Cart Button */}
-            <button className="w-full bg-black text-white py-3 text-center font-medium">
+            {/* <button className="w-full bg-black text-white py-3 text-center font-medium">
                 Add To Cart
-            </button>
+            </button> */}
 
             {/* Product Details */}
             <div className="p-4">

@@ -1,12 +1,12 @@
 import Carosel from "../components/Carosel";
-import FlashSalesSection from "../components/FlashSalesSection";
+import SalesSection from "../components/SalesSection";
 import OurProductsSection from "../components/OurProductsSection";
 
 const HomePage = () => {
     return (
       <div className=" mx-auto text-center p-8">
         <Carosel />
-        <FlashSalesSection />
+        <SalesSection />
         <OurProductsSection /> 
        
       </div>

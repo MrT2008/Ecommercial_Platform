@@ -49,9 +49,9 @@ const ProductCard = ({
             </div>
 
             {/* Add to Cart Button */}
-            <button className="w-full bg-black text-white py-3 text-center font-medium">
+            {/* <button className="w-full bg-black text-white py-3 text-center font-medium">
                 Add To Cart
-            </button>
+            </button> */}
 
             {/* Product Details */}
             <div className="p-4">

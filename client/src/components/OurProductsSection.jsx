@@ -14,7 +14,7 @@ const OurProductsSection = () => {
     {products.map((_, index) => (
       <ProductCard
         key={index}
-        productName={`Flash Sale Item ${index + 1}`}
+        productName={`Sale Item ${index + 1}`}
         salePrice={(Math.random() * 500 + 100).toFixed(0)}
         originalPrice={(Math.random() * 800 + 500).toFixed(0)}
         discountPercentage={Math.floor(Math.random() * 50) + 10}
