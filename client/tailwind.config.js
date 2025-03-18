@@ -1,15 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        'main-color': '#000144',
+    content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"], // Định nghĩa file cần Tailwind quét
+    theme: {
+      extend: {
+        colors: {
+          primary: "#ffffff", // Ví dụ đặt màu biến tùy chỉnh
+          secondary: "#00ff00",
+          'main-color': "#000144",
+        },
       },
     },
-  },
-  plugins: [],
-}
-
+    plugins: [],
+  };
+  
