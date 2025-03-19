@@ -10,8 +10,13 @@ Order.init({
         primaryKey: true,
         autoIncrement: true,
     },
+    totalPrice: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+    },
     buyerId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: User,
             key: 'id',

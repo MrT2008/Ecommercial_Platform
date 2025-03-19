@@ -12,6 +12,7 @@ Announcement.init({
     },
     senderId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: User,
             key: 'id'
@@ -20,7 +21,6 @@ Announcement.init({
     title: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
             notEmpty: true
         }
@@ -28,7 +28,6 @@ Announcement.init({
     imageURL: {
         type: DataTypes.STRING, 
         allowNull: false,
-        unique: true,
         validate: {
             isURL: true,
             notEmpty: true

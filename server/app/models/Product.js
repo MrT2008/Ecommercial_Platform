@@ -12,6 +12,7 @@ Product.init({
     },
     shopId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Shop,
             key: 'id',
@@ -57,6 +58,10 @@ Product.init({
         validate: {
             isIn: [['active', 'inactive', 'soldout', 'ban']],
         }
+    },
+    banReason: {
+        type: DataTypes.STRING,
+        allowNull: true,
     }
 }, {
     sequelize,

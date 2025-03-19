@@ -8,6 +8,7 @@ class ProductCategory extends Model {}
 ProductCategory.init({
     productId: { 
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Product,
             key: "id"
@@ -15,11 +16,12 @@ ProductCategory.init({
     },
     categoryId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Category,
             key: "id"
         }
-    }
+    },
 }, {
     sequelize,
     modelName: 'ProductCategory',

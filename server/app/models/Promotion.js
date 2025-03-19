@@ -12,6 +12,7 @@ Promotion.init({
     },
     shopId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Shop,
             key: 'id'
@@ -20,7 +21,6 @@ Promotion.init({
     imageURL: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
             isURL: true,
             notEmpty: true
@@ -32,7 +32,18 @@ Promotion.init({
         validate: {
             notEmpty: true
         }
-    }
+    },
+    status: {
+        type: DataTypes.ENUM('show', 'hide', 'ban'),
+        defaultValue: 'hide',
+        validate: {
+            isIn: [['sold', 'hide', 'ban']],
+        }
+    },
+    banReason: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      }
 }, {
     sequelize,
     modelName: 'Promotion',

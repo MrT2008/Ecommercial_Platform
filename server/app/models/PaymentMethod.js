@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../configs/dbConfig');
+const User = require('./User');
 
 class PaymentMethod extends Model {}
 
@@ -28,6 +29,14 @@ PaymentMethod.init({
     inUsed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        references: {
+          model: User,
+          key: 'id',
+        },
     },
 }, {
     sequelize,

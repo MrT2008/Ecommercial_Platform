@@ -6,13 +6,9 @@ const Product = require('./Product');
 class OrderDetail extends Model {}
 
 OrderDetail.init({
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
     orderId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Order,
             key: 'id',
@@ -21,6 +17,7 @@ OrderDetail.init({
     },
     productId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Product,
             key: 'productId',

@@ -11,17 +11,9 @@ ShipInfo.init({
         primaryKey: true,
         autoIncrement: true
     },
-
-    /*Trên erd có foreign key của transaction nhưng shipinfo vs transaction k có mqh nào hết? */
-    // transactionID: {
-    //     type: DataTypes.INTEGER,
-    //     references: {
-    //         model: 'transactions',
-    //         key: 'transactionID'
-    //     }
-    // },
     userId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: User,
             key: 'id',
@@ -50,6 +42,14 @@ ShipInfo.init({
             len: [2, 999]
         }
     },
+    
+    phone: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+          is: /^[0-9]{10,11}$/,
+        },
+      },
 }, {
     sequelize,
     modelName: 'ShipInfo',

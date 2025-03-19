@@ -8,17 +8,19 @@ Shop.init({
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        unique: true,
         autoIncrement: true,
     },
     name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
     },
     ownerId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
+        unique: true,
         references: {
-          model: User,
+          model: 'users',
           key: 'id',
         },
     },
@@ -50,11 +52,28 @@ Shop.init({
         type: DataTypes.STRING,
         defaultValue: '#FFFFFF',
     },
+    banReason: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+    imageUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isURL: true,
+        }
+    },
 }, {
     sequelize,
     modelName: 'Shop',
     tableName: 'shops',
     timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['ownerId', 'id']
+        }
+    ]
 });
 
 module.exports = Shop;

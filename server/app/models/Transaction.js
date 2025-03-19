@@ -12,6 +12,7 @@ Transaction.init({
     },
     orderId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Order,
             key: 'id',

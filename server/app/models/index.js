@@ -48,18 +48,12 @@ const models = {
 };
 
 // User 1-N Announcement (as Sender)
-User.hasMany(Announcement, {
-  foreignKey: 'senderId',
-  as: 'sentAnnouncements'
-});
-Announcement.belongsTo(User, {
-  foreignKey: 'senderId',
-  as: 'sender'
-});
+User.hasMany(Announcement, { foreignKey: 'senderId', as: 'sentAnnouncements'});
+Announcement.belongsTo(User, { foreignKey: 'senderId', as: 'sender'});
 
 // User 1-1 Shop
-User.hasOne(Shop, { foreignKey: "ownerId", as: 'shop' });
-Shop.belongsTo(User, { foreignKey: "ownerId", as: 'owner' });
+User.hasOne(Shop, { foreignKey: "ownerId", as: 'shop',unique: true, onDelete: 'CASCADE' });
+Shop.hasOne(User, { foreignKey: "ownerId", as: 'owner',unique: true });
 
 // User 1-N PaymentMethod
 User.hasMany(PaymentMethod, { foreignKey: "userId", as: 'paymentMethods' });
@@ -101,31 +95,46 @@ Product.belongsToMany(User, {
   as: "users"
 });
 
+// User 1:N Review
+User.hasMany(Review, { foreignKey: "buyerId", as: 'reviews' });
+Review.belongsTo(User, { foreignKey: "buyerId", as: 'reviewer' });
+
+// Product 1-N Review
+Product.hasMany(Review, { foreignKey: "productId",as: 'reviews' });
+Review.belongsTo(Product, { foreignKey: "productId",as: 'product' });
 // User N-M Product via Review
-User.belongsToMany(Product, { 
-  through: Review, 
-  foreignKey: "userId", // userId as buyer and seller can comment and reply
-  otherKey: "productId",
-  as: "reviewedProducts"
-});
-Product.belongsToMany(User, {
-  through: Review,
-  foreignKey: "productId",
-  otherKey: "userId",
-  as: "reviewers"
-});
+// User.belongsToMany(Product, { 
+//   through: Review, 
+//   foreignKey: "userId", // userId as buyer and seller can comment and reply
+//   otherKey: "productId",
+//   as: "reviewedProducts"
+// });
+// Product.belongsToMany(User, {
+//   through: Review,
+//   foreignKey: "productId",
+//   otherKey: "userId",
+//   as: "reviewers"
+// });
 
 // Shop 1-N Product
-Shop.hasMany(Product, { foreignKey: "shopId", as: 'products' });
-Product.belongsTo(Shop, { foreignKey: "shopId", as: 'shop' });
+Shop.hasMany(Product, { foreignKey: "ownerId", as: 'products' });
+Product.belongsTo(Shop, { foreignKey: "ownerId",as: 'shop' });
 
 // Shop 1-N Category
-Shop.hasMany(Category, { foreignKey: "shopId", as: 'categories' });
-Category.belongsTo(Shop, { foreignKey: "shopId", as: 'shop' });
+Shop.hasMany(Category, { 
+  foreignKey: "shopId",
+  as: 'categories'});
+Category.belongsTo(Shop, { 
+  foreignKey: "shopId",
+  as: 'shop' });
 
 // Shop 1-N Promotion
-Shop.hasMany(Promotion, { foreignKey: "shopId", as: 'promotions' });
-Promotion.belongsTo(Shop, { foreignKey: "shopId", as: 'shop' });
+Shop.hasMany(Promotion, { 
+  foreignKey: "shopId",
+  as: 'promotions' });
+Promotion.belongsTo(Shop, { 
+  foreignKey: "shopId", 
+  as: 'shop' });
 
 // Order N-M Product via OrderDetail
 Order.belongsToMany(Product, { 
@@ -142,12 +151,9 @@ Product.belongsToMany(Order, {
 });
 
 // Order 1-N Transaction
-Order.hasMany(Transaction, { foreignKey: "orderId", as: 'transactions' });
-Transaction.belongsTo(Order, { foreignKey: "orderId", as: 'order' });
+Order.hasMany(Transaction, { foreignKey: "orderId",as: 'transactions' });
+Transaction.belongsTo(Order, { foreignKey: "orderId",as: 'order' });
 
-// Product 1-N Review
-Product.hasMany(Review, { foreignKey: "productId", as: 'reviews' });
-Review.belongsTo(Product, { foreignKey: "productId", as: 'product' });
 
 // Product N-M Category via ProductCategory
 Product.belongsToMany(Category, {

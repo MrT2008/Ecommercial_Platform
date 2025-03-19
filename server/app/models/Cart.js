@@ -6,13 +6,9 @@ const Product = require('./Product');
 class Cart extends Model {}
 
 Cart.init({
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
     userId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: User,
             key: 'id',
@@ -21,6 +17,7 @@ Cart.init({
     },
     productId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Product,
             key: 'id',

@@ -9,6 +9,7 @@ User.init({
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
+    unique: true
   },
   email: {
     type: DataTypes.STRING,
@@ -20,20 +21,14 @@ User.init({
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false, // Only for local users
+    allowNull: true, // Only for local users
   },
   name: {
     type: DataTypes.STRING,
     defaultValue: 'user'+Date.now()+Math.floor(Math.random()*1000),
   },
-  phone: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      is: /^[0-9]{10,11}$/,
-    },
-  },
-  address: {
+
+  banReason: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -48,7 +43,6 @@ User.init({
 },
   imageURL: {
     type: DataTypes.STRING,
-    unique: true,
     validate: {
         isURL: true,
         notEmpty: true

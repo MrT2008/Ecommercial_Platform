@@ -7,6 +7,7 @@ class UserRole extends Model {}
 UserRole.init({
     userId: { 
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: User,
             key: "id"
@@ -14,6 +15,7 @@ UserRole.init({
     },
     roleId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Role,
             key: "id"

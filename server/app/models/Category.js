@@ -12,6 +12,7 @@ Category.init({
     },
     shopId: {
         type: DataTypes.INTEGER,
+        primaryKey: true,
         references: {
             model: Shop,
             key: 'id'
@@ -20,7 +21,6 @@ Category.init({
     name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
             notEmpty: true
         }
