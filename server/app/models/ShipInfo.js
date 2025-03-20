@@ -21,16 +21,12 @@ ShipInfo.init({
     },
     inUsed: {
         type: DataTypes.BOOLEAN,
-        allowNull: false,
-        validate: {
-            notEmpty: true
-        }
+        defaultValue: false
     },
     receiverName: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-            notEmpty: true,
             len: [2, 999]
         }
     },
@@ -38,11 +34,9 @@ ShipInfo.init({
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-            notEmpty: true,
             len: [2, 999]
         }
     },
-    
     phone: {
         type: DataTypes.STRING,
         allowNull: true,

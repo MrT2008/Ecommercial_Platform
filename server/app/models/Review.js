@@ -2,6 +2,7 @@ const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../configs/dbConfig');
 const User = require('./User');
 const Product = require('./Product');
+const OrderDetail = require('./OrderDetail');
 
 class Review extends Model {}
 
@@ -19,22 +20,28 @@ Review.init({
             key: 'id',
         },
     },
+    orderId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        references: {
+            model: OrderDetail,
+            key: 'orderId',
+        },
+    },
     productId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         references: {  
-            model: Product,
-            key: 'id',
+            model: OrderDetail,
+            key: 'productId',
         },
     },
-
     rating: {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
             min: 1,
             max: 5,
-            notEmpty: true
         },
     },
     comment: {
@@ -43,16 +50,18 @@ Review.init({
     },
     imageUrl: {
         type: DataTypes.STRING,
-        validate: {
-            isURL: true
-        }
     },
 }, {
     sequelize,
     modelName: 'Review',
     tableName: 'reviews',
     timestamps: true,
-
+    indexes: [
+        {
+            unique: true,
+            fields: ['orderId', 'productId'],
+        },
+    ],
 });
 
 module.exports = Review;

@@ -10,10 +10,6 @@ Order.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    totalPrice: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-    },
     buyerId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -22,9 +18,19 @@ Order.init({
             key: 'id',
         },
     },
+    totalPrice: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        validate: {
+            min: 0,
+        },
+    },
     status: {
         type: DataTypes.ENUM('pending', 'processing', 'completed', 'cancelled'),
         defaultValue: 'pending',
+        validate: {
+            isIn: [['pending', 'processing', 'completed', 'cancelled']],
+        },
     }
 }, {
     sequelize,

@@ -6,17 +6,45 @@ const { comparePassword, generateAccessToken, generateRefreshToken } = require('
 
 class AuthController {
     postRegister = async (req, res) => {
+        const t = await User.sequelize.transaction();
         try {
-            const { error } = validateLogin(req.body);
+            const { error } = validate(req.body);
             if (error) return res.status(400).json({ error: error.details[0].message });
 
-            const user = await User.findOne({ where: { email: req.body.email } });
+            const { email, password } = req.body;
+            const existingUser = await User.findOne({ where: { email } });
+            if (existingUser) {
+                await t.rollback();
+                return res.status(409).json({ error: 'This email is unavailable!' });
+            }
 
-            if (user) return res.status(409).json({ error: 'Email already exists' });
-            await User.create({ email: req.body.email, password: req.body.password });
+            const newUser = await User.create({ email, password }, { transaction: t });
 
-            res.status(201).json({ message: 'User registered successfully' });
+            const buyerRole = await Role.findOne({ where: { name: 'buyer' } });
+            if (!buyerRole) {
+                await t.rollback();
+                return res.status(500).json({ error: "Default role 'buyer' not found" });
+            }
+            
+            await UserRole.create({
+                userId: newUser.id,
+                roleId: buyerRole.id,
+            }, { transaction: t });
+    
+            await t.commit();
+
+            const userResponse = {
+                id: newUser.id,
+                email: newUser.email,
+                fullName: newUser.fullName,
+                userStatus: newUser.userStatus,
+                imageURL: newUser.imageURL,
+                roles: ['buyer'],
+            };
+    
+            res.status(201).json({ message: 'User registered successfully', user: userResponse });
         } catch (error) {
+            await t.rollback();
             console.error(error);
             res.status(500).json({ message: "Internal Server Error" });
         }
@@ -24,7 +52,7 @@ class AuthController {
     
     postLogin = async (req, res) => {
         try {
-            const { error } = validateLogin(req.body);
+            const { error } = validate(req.body);
             if (error) return res.status(400).json({ error: error.details[0].message });
 
             const user = await User.findOne({ where: { email: req.body.email } });
@@ -46,7 +74,10 @@ class AuthController {
             const userData = user.toJSON();
             delete userData.password;
             
-            res.status(200).json({ data: { user: userData, accessToken, refreshToken }, message: 'Login Successfully' });
+            res.status(200).json({
+                data: { user: userData, accessToken, refreshToken },
+                message: 'Login Successfully'
+            });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: "Internal Server Error" });
@@ -69,7 +100,6 @@ class AuthController {
     };
     
     postLogout = (req, res) => {
-        const refreshToken = req.cookies.jwt;
         res.clearCookie('jwt');
         res.status(200).json({ message: 'Logout Successfully' });
     };
@@ -104,7 +134,7 @@ class AuthController {
     };
 }
 
-const validateLogin = (user) => {
+const validate = (user) => {
     const schema = joi.object({
         email: joi.string().email().max(100).required().label('Email'),
         password: joi.required().label('Password'),

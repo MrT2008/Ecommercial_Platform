@@ -21,21 +21,23 @@ User.init({
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: true, // Only for local users
+    allowNull: true,
+    validate: {
+      len: [6, 999],
+    }
   },
-  name: {
+  fullName: {
     type: DataTypes.STRING,
     defaultValue: 'user'+Date.now()+Math.floor(Math.random()*1000),
   },
-
   banReason: {
     type: DataTypes.STRING,
-    allowNull: true,
+    defaultValue: null,
   },
   googleId: {
     type: DataTypes.STRING,
     unique: true,
-    allowNull: true, // Only for Google users
+    allowNull: true,
   },
   userStatus: {
     type: DataTypes.ENUM('active', 'ban'),
@@ -53,7 +55,7 @@ User.init({
   sequelize,
   modelName: 'User',
   tableName: 'users',
-  timestamps: true, // automatically adds createdAt and updatedAt
+  timestamps: true,
   hooks: {
     beforeCreate: async (user) => {
       const salt = await bcrypt.genSalt();
@@ -61,7 +63,7 @@ User.init({
       console.log(`[USER CREATED] ${user.email}`);
     },
     beforeUpdate: async (user) => {
-      if (user.changed('password')) {  // re-hash if password is modified
+      if (user.changed('password')) {
         const salt = await bcrypt.genSalt();
         user.password = await bcrypt.hash(user.password, salt);
         console.log(`[USER UPDATED] ${user.email}`);

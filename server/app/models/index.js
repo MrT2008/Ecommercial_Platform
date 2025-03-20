@@ -53,7 +53,7 @@ Announcement.belongsTo(User, { foreignKey: 'senderId', as: 'sender'});
 
 // User 1-1 Shop
 User.hasOne(Shop, { foreignKey: "ownerId", as: 'shop',unique: true, onDelete: 'CASCADE' });
-Shop.hasOne(User, { foreignKey: "ownerId", as: 'owner',unique: true });
+Shop.belongsTo(User, { foreignKey: "ownerId", as: 'owner',unique: true });
 
 // User 1-N PaymentMethod
 User.hasMany(PaymentMethod, { foreignKey: "userId", as: 'paymentMethods' });
@@ -99,23 +99,6 @@ Product.belongsToMany(User, {
 User.hasMany(Review, { foreignKey: "buyerId", as: 'reviews' });
 Review.belongsTo(User, { foreignKey: "buyerId", as: 'reviewer' });
 
-// Product 1-N Review
-Product.hasMany(Review, { foreignKey: "productId",as: 'reviews' });
-Review.belongsTo(Product, { foreignKey: "productId",as: 'product' });
-// User N-M Product via Review
-// User.belongsToMany(Product, { 
-//   through: Review, 
-//   foreignKey: "userId", // userId as buyer and seller can comment and reply
-//   otherKey: "productId",
-//   as: "reviewedProducts"
-// });
-// Product.belongsToMany(User, {
-//   through: Review,
-//   foreignKey: "productId",
-//   otherKey: "userId",
-//   as: "reviewers"
-// });
-
 // Shop 1-N Product
 Shop.hasMany(Product, { foreignKey: "ownerId", as: 'products' });
 Product.belongsTo(Shop, { foreignKey: "ownerId",as: 'shop' });
@@ -154,7 +137,6 @@ Product.belongsToMany(Order, {
 Order.hasMany(Transaction, { foreignKey: "orderId",as: 'transactions' });
 Transaction.belongsTo(Order, { foreignKey: "orderId",as: 'order' });
 
-
 // Product N-M Category via ProductCategory
 Product.belongsToMany(Category, {
   through: ProductType,
@@ -167,6 +149,28 @@ Category.belongsToMany(Product, {
   foreignKey: "categoryId",
   otherKey: "productId",
   as: "products"
+});
+
+// Review 1-1 OrderDetail
+OrderDetail.hasOne(Review, {
+  foreignKey: 'orderId',
+  as: 'reviewOrder',
+  constraints: false,
+});
+OrderDetail.hasOne(Review, {
+  foreignKey: 'productId',
+  as: 'reviewProduct',
+  constraints: false,
+});
+Review.belongsTo(OrderDetail, {
+  foreignKey: 'productId',
+  as: 'orderDetailByProduct',
+  constraints: false,
+});
+Review.belongsTo(OrderDetail, {
+  foreignKey: 'orderId',
+  as: 'orderDetailByOrder',
+  constraints: false,
 });
 
 module.exports = { models, syncModels };

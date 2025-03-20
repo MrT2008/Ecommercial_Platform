@@ -27,12 +27,6 @@ ProductCategory.init({
     modelName: 'ProductCategory',
     tableName: 'product_categories',
     timestamps: true,
-    indexes: [
-        {
-            unique: true,
-            fields: ['productId', 'categoryId']
-        }
-    ]
 })
 
 module.exports = ProductCategory;

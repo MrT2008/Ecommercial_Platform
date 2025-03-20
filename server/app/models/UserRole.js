@@ -26,12 +26,6 @@ UserRole.init({
     modelName: 'UserRole',
     tableName: 'user_roles',
     timestamps: true,
-    indexes: [
-        {
-            unique: true,
-            fields: ['userId', 'roleId']
-        }
-    ]
 })
 
 module.exports = UserRole;

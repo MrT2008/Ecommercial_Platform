@@ -11,6 +11,9 @@ Role.init({
     name: {
         type: DataTypes.ENUM('manager', 'moderator', 'buyer', 'seller'),
         allowNull: false,
+        validate: {
+            isIn: [['manager', 'moderator', 'buyer', 'seller']],
+        }
     },
 }, {
     sequelize,

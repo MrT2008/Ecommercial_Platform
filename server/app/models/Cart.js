@@ -13,7 +13,6 @@ Cart.init({
             model: User,
             key: 'id',
         },
-        onDelete: 'CASCADE'
     },
     productId: {
         type: DataTypes.INTEGER,
@@ -22,7 +21,6 @@ Cart.init({
             model: Product,
             key: 'id',
         },
-        onDelete: 'CASCADE'
     },
     quantity: {
         type: DataTypes.INTEGER,
@@ -34,12 +32,6 @@ Cart.init({
     modelName: 'Cart',
     tableName: 'carts',
     timestamps: true,
-    indexes: [
-        {
-            unique: true,
-            fields: ['userId', 'productId']
-        }
-    ]
 });
 
 module.exports = Cart;

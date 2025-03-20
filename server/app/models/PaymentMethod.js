@@ -10,6 +10,14 @@ PaymentMethod.init({
         primaryKey: true,
         autoIncrement: true
     },
+    userId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        references: {
+          model: User,
+          key: 'id',
+        },
+    },
     bankName: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -29,14 +37,6 @@ PaymentMethod.init({
     inUsed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
-    },
-    userId: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        references: {
-          model: User,
-          key: 'id',
-        },
     },
 }, {
     sequelize,

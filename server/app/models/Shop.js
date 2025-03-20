@@ -11,18 +11,18 @@ Shop.init({
         unique: true,
         autoIncrement: true,
     },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     ownerId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         unique: true,
         references: {
-          model: 'users',
+          model: User,
           key: 'id',
         },
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     phone: {
         type: DataTypes.STRING,
@@ -34,17 +34,12 @@ Shop.init({
     address: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-            notEmpty: true,
-            len: [2, 999]
-        }
     },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
         validate: {
-            notEmpty: true,
             isEmail: true,
         }
     },
@@ -59,21 +54,12 @@ Shop.init({
     imageUrl: {
         type: DataTypes.STRING,
         allowNull: true,
-        validate: {
-            isURL: true,
-        }
     },
 }, {
     sequelize,
     modelName: 'Shop',
     tableName: 'shops',
     timestamps: true,
-    indexes: [
-        {
-            unique: true,
-            fields: ['ownerId', 'id']
-        }
-    ]
 });
 
 module.exports = Shop;

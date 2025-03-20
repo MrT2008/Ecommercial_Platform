@@ -4,7 +4,6 @@ const Order = require('./Order');
 const Product = require('./Product');
 
 class OrderDetail extends Model {}
-
 OrderDetail.init({
     orderId: {
         type: DataTypes.INTEGER,
@@ -13,7 +12,6 @@ OrderDetail.init({
             model: Order,
             key: 'id',
         },
-        onDelete: 'CASCADE'
     },
     productId: {
         type: DataTypes.INTEGER,
@@ -22,7 +20,6 @@ OrderDetail.init({
             model: Product,
             key: 'productId',
         },
-        onDelete: 'CASCADE' // confusions that whether to use onDelete or not in this case
     },
     quantity: {
         type: DataTypes.INTEGER,
@@ -32,18 +29,15 @@ OrderDetail.init({
     priceAtPurchase: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
+        validate: {
+            min: 0,
+        },
     },
 }, {
     sequelize,
     modelName: 'OrderDetail',
     tableName: 'order_details',
     timestamps: true,
-    indexes: [
-        {
-            unique: true,
-            fields: ['orderId', 'productId']
-        }
-    ]
 });
 
 module.exports = OrderDetail;

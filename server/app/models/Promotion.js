@@ -21,17 +21,10 @@ Promotion.init({
     imageURL: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-            isURL: true,
-            notEmpty: true
-        }
     },
     isActive: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        validate: {
-            notEmpty: true
-        }
     },
     status: {
         type: DataTypes.ENUM('show', 'hide', 'ban'),
