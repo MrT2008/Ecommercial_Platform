@@ -12,6 +12,7 @@ class AuthController {
             if (error) return res.status(400).json({ error: error.details[0].message });
 
             const { email, password } = req.body;
+            
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
                 await t.rollback();
