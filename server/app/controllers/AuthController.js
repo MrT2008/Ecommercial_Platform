@@ -13,7 +13,7 @@ class AuthController {
             const { error } = validate(req.body);
             if (error) return res.status(400).json({ error: error.details[0].message });
 
-            const { email, password } = req.body;
+            const { email, password, fullName } = req.body;
             
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
@@ -21,12 +21,12 @@ class AuthController {
                 return res.status(409).json({ error: 'This email is unavailable!' });
             }
 
-            const newUser = await User.create({ email, password }, { transaction: t });
+            const newUser = await User.create({ email, password, fullName }, { transaction: t });
 
             const buyerRole = await Role.findOne({ where: { name: 'buyer' } });
             if (!buyerRole) {
                 await t.rollback();
-                return res.status(500).json({ error: "Default role 'buyer' not found" });
+                return res.status(500).json({ error: "Internal Server Error" });
             }
             
             await UserRole.create({
