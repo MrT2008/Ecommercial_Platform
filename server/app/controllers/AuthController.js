@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Role = require('../models/Role');
+const UserRole = require('../models/UserRole');
 const passport = require('passport');
 const joi = require('joi');
 const { comparePassword, generateAccessToken, generateRefreshToken } = require('../middlewares/auth');

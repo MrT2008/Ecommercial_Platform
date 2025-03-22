@@ -11,6 +11,7 @@ Role.init({
     name: {
         type: DataTypes.ENUM('manager', 'moderator', 'buyer', 'seller'),
         allowNull: false,
+        unique: true,
         validate: {
             isIn: [['manager', 'moderator', 'buyer', 'seller']],
         }
