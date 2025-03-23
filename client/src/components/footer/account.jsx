@@ -15,9 +15,6 @@ const Account = () => {
         <a href="">
             Cart
         </a>
-        <a href=''>
-            Wishlist
-        </a>
         <a href="">
             Shop
         </a>

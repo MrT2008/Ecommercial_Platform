@@ -1,4 +1,4 @@
-import Button from '../Button';
+import Button from '../shares/Button';
 import React from 'react'
 
 const loginForm = () => {

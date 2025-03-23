@@ -1,6 +1,6 @@
 
-import Logo from '../logo';
-import Button from '../Button';
+import Logo from '../shares/logo';
+import Button from '../shares/Button';
 import React from 'react'
 
 const loginForm = () => {
