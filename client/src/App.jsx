@@ -4,6 +4,8 @@ import './index.css'
 import axios from 'axios';
 import Login from './pages/login';
 import Signup from './pages/signup';
+import MainLayout from './layouts/MainLayout';
+import HomePage from './pages/HomePage';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -24,9 +26,10 @@ function App() {
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Route>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        
       </Routes>
     </Router>
   )

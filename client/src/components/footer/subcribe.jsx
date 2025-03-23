@@ -1,5 +1,5 @@
 import React from "react";
-import Logo from '../logo'
+import Logo from '../shares/logo'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane} from '@fortawesome/free-solid-svg-icons'
 

@@ -1,6 +1,6 @@
 import ProductCard from "./ProductCard";
-import SecondaryButton from "./SecondaryButton";
-import TitleSection from "./TitleSection";
+import SecondaryButton from "../shares/SecondaryButton";
+import TitleSection from "../shares/TitleSection";
 
 const OurProductsSection = () => {
   const products = [...Array(12)]; // 3 hàng, mỗi hàng 4 sản phẩm

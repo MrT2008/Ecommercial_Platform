@@ -1,9 +1,10 @@
 import { useRef } from "react";
-import CountdownTimer from "./CountdownTimer";
+import CountdownTimer from "../CountdownTimer";
 import SalesCard from "./SalesCard";
-import TitleSection from "./TitleSection";
-import SecondaryButton from "./SecondaryButton";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import TitleSection from "../shares/TitleSection";
+import SecondaryButton from "../shares/SecondaryButton";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 
 const SalesSection = () => {
   const scrollRef = useRef(null);
@@ -35,16 +36,16 @@ const SalesSection = () => {
         <div className="flex gap-x-2">
           <button
             onClick={scrollLeft}
-            className="bg-gray-200 p-2 rounded-full"
+            className="bg-gray-200 p-2 px-4 rounded-full"
           >
-            <ChevronLeft size={24} />
+             <FontAwesomeIcon icon={faAngleLeft} size="lg" />
           </button>
 
           <button
             onClick={scrollRight}
-            className="bg-gray-200 p-2 rounded-full"
+            className="bg-gray-200 p-2 px-4 rounded-full"
           >
-            <ChevronRight size={24} />
+            <FontAwesomeIcon icon={faAngleRight} size="lg" />
           </button>
         </div>
       </div>

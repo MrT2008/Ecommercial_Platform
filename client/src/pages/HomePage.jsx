@@ -1,6 +1,6 @@
 import Carosel from "../components/Carosel";
-import SalesSection from "../components/SalesSection";
-import OurProductsSection from "../components/OurProductsSection";
+import SalesSection from "../components/shoppingElements/SalesSection";
+import OurProductsSection from "../components/shoppingElements/OurProductsSection";
 
 const HomePage = () => {
     return (
@@ -8,7 +8,6 @@ const HomePage = () => {
         <Carosel />
         <SalesSection />
         <OurProductsSection /> 
-       
       </div>
     );
   };

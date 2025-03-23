@@ -1,11 +1,14 @@
-import { Heart } from 'lucide-react';
+import "/src/styles/global.css";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+// import { faHeart as regularHeart } from "@fortawesome/free-regular-svg-icons";
+import { faHeart } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from 'prop-types';
 
-const FlashSalesCard = ({
+const ProductCard = ({
     productName = "AK-900 Wired Keyboard",
     salePrice = 960,
     originalPrice = 1160,
-    isNew = true,
+    isNew = false,
     rating = 4,
     reviewCount = 75,
     imageUrl = "/api/placeholder/400/320"
@@ -35,8 +38,8 @@ const FlashSalesCard = ({
                 )}
 
                 {/* Wishlist Button */}
-                <button className="absolute top-4 right-4 bg-white p-1 rounded-full">
-                    <Heart size={20} />
+                <button className="absolute top-4 right-4 bg-white p-1 px-2 rounded-full">
+                    <FontAwesomeIcon icon={faHeart} size="lg" className="text-gray-300" />
                 </button>
 
                 {/* Product Image */}
@@ -74,7 +77,7 @@ const FlashSalesCard = ({
         </div>
     );
 };
-FlashSalesCard.propTypes = {
+ProductCard.propTypes = {
     productName: PropTypes.string,
     salePrice: PropTypes.number,
     originalPrice: PropTypes.number,
@@ -85,4 +88,4 @@ FlashSalesCard.propTypes = {
 };
 
 
-export default FlashSalesCard;
+export default ProductCard;
