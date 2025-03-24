@@ -1,42 +1,24 @@
 const { models } = require('../models');
+const { options } = require('../models/User');
 
-const getAnnouncementBySender = async (senderId) => {
-    const announcements = await models.Announcement.findAll({
-        where: { senderId },
-        include: { model: models.User, as: 'sender' },
-    });
-
-    return announcements;
+const getAllUserByRole = async (role) => {
+    return await models.User.findAll({ where: { role } });
 }
 
-const getAllAnnouncements = async () => {
-    const announcements = await models.Announcement.findAll({
-        include: { model: models.User, as: 'sender' },
-    });
-
-    return announcements;
-}
-
-const sentAnnouncement = async (senderId, title, imageURL, script) => {
-    const t = await models.Announcement.sequelize.transaction();
+const banUserById = async (id) => {
     try {
-        const user = await models.User.findByPk(senderId);
+        const user = await models.User.findByPk(id, options);
         if (!user) {
-            await t.rollback();
             return { error: 'User not found' };
         }
 
-        const newAnnouncement = await models.Announcement.create({ title, imageURL, script, senderId }, { transaction: t });
-
-        await t.commit();
-
-        return { message: 'Announcement sent successfully', announcement: newAnnouncement };
+        const updatedUser = await user.update({ isBanned: true }, options);
+        return updatedUser;
     } catch (error) {
-        await t.rollback();
         console.error(error);
         return { error: 'Internal Server Error' };
     }
-};
+}
 
 const updateUserPassword = async (id, newPassword) => {
     const user = await models.User.findByPk(id);
@@ -49,45 +31,56 @@ const updateUserPassword = async (id, newPassword) => {
     return { message: 'Password updated successfully' };
 }
 
+// const refreshUserPassworkById = async (id) => {
+//     try {
+//         const user = await models.User.findByPk(id);
+//         if (!user) {
+//             return { error: 'User not found' };
+//         }
+        
+//         // new password is a random string
 
-const refreshUserPasswork = async (id, newPassword) => {
-    const user = await models.User.findByPk(id);
-    if (!user) {
-        return { error: 'User not found' };
-    }
+//         const updatedUser = await user.update({ password: newPassword });
+    
+//         return { message: 'Password updated successfully', updatedUser };
+//     } catch (error) {
+//         console.error(error);
+//         return { error: 'Internal Server Error' };
+//     }
+// }
 
-    await user.update({ password: newPassword });
-
-    return { message: 'Password updated successfully' };
-}
-
-const getAllUserByRole = async (role) => {
+const sentAnnouncement = async (senderId, title, imageURL, script) => {
     try {
-        const users = await models.User.findAll({ where: { role } });
-        return users;
+        const announcement = await models.Announcement.create({
+            senderId, title, imageURL, script,
+        }, options);
+
+        return announcement;
     }
     catch (error) {
         console.error(error);
         return { error: 'Internal Server Error' };
     }
-}
+};
 
-const banUser = async (user) => {
-    try {
-        await user.update({ banned: true });
-        return user;
-    } catch (error) {
-        console.error(error);
-        return { error: 'Internal Server Error' };
-    }
-}
+const getAllAnnouncements = async () => {
+    return await models.Announcement.findAll({
+        include: { model: models.User, as: 'sender' },
+    });
+};
+
+const getAnnouncementsBySenderId = async (senderId) => {
+    return await models.Announcement.findAll({
+        where: { senderId },
+        include: { model: models.User, as: 'sender' },
+    });
+};
 
 module.exports = {
-    getAnnouncementBySender,
-    getAllAnnouncements,
-    sentAnnouncement,
-    updateUserPassword,
-    refreshUserPasswork,
     getAllUserByRole,
-    banUser
+    banUserById,
+    updateUserPassword,
+    sentAnnouncement,
+    getAllAnnouncements,
+    getAnnouncementsBySenderId,
 }

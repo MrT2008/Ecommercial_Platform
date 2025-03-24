@@ -1,5 +1,5 @@
 const { models } = require('../models');
-const { createAnnouncement, banUser } = require('../reuse/reuse');
+const reuse = require('../reuse/reuse');
 
 class ManagerController {
     createModerator = async (req, res) => {
@@ -46,11 +46,12 @@ class ManagerController {
         }
     };
 
-    getModerators = async (req, res) => {
+    getAllModerators = async (req, res) => {
         try {
-            const moderators = await getAllUserByRole('moderator');
-            if (!moderators) {
-                return res.status(404).json({ error: 'Moderators not found' });
+            const moderators = await reuse.getAllUserByRole('moderator');
+
+            if (moderators.length === 0) {
+                return res.status(404).json({ error: 'No moderators found' });
             }
 
             res.status(200).json({ message: 'Moderators retrieved successfully', moderators });
@@ -60,46 +61,22 @@ class ManagerController {
         }
     }
 
-    updateModerator = async (req, res) => {
-        const t = await models.User.sequelize.transaction();
-        try {
-            const { id } = req.params;
-            const { email, fullName } = req.body;
-
-            const moderator = await models.User.findByPk(id);
-            if (!moderator) {
-                await t.rollback();
-                return res.status(404).json({ error: 'Moderator not found' });
-            }
-
-            const updatedModerator = await moderator.update({ email, fullName }, { transaction: t });
-
-            await t.commit();
-
-            res.status(200).json({ message: 'Moderator updated successfully', moderator: updatedModerator });
-        } catch (error) {
-            await t.rollback();
-            console.error(error);
-            res.status(500).json({ message: 'Internal Server Error' });
-        }
-    }
-
-    banUserById = async (req, res) => {
+    banModeratorById = async (req, res) => {
         const t = await models.User.sequelize.transaction();
         try {
             const { id } = req.params;
 
-            const user = await models.User.findByPk(id);
-            if (!user) {
-                await t.rollback();
-                return res.status(404).json({ error: 'User not found' });
-            }
+            const bannedModerator = await reuse.banUserById(id, { transaction: t });
 
-            const bannedUser = await banUser(user, { transaction: t });
+            if (bannedModerator.error) {
+                await t.rollback();
+                const statusCode = bannedModerator.error === 'User not found' ? 404 : 400;
+                return res.status(statusCode).json({ error: bannedModerator.error });
+            }
 
             await t.commit();
 
-            res.status(200).json({ message: 'User banned successfully', bannedUser });
+            res.status(200).json({ message: 'User banned successfully', bannedModerator });
         } catch (error) {
             await t.rollback();
             console.error(error);
@@ -113,17 +90,15 @@ class ManagerController {
             const { title, imageURL, script } = req.body;
             const senderId = req.user.id;
 
-            const user = await models.User.findByPk(senderId);
-            if (!user) {
+            const announcement = await reuse.sentAnnouncement(senderId, title, imageURL, script, { transaction: t });
+            if (announcement.error) {
                 await t.rollback();
-                return res.status(404).json({ error: 'User not found' });
+                return res.status(404).json({ error: announcement.error });
             }
-
-            const newAnnouncement = await createAnnouncement(title, imageURL, script, senderId, { transaction: t });
 
             await t.commit();
 
-            res.status(201).json({ message: 'Announcement sent successfully', announcement: newAnnouncement });
+            res.status(201).json({ message: 'Announcement sent successfully', announcement });
         } catch (error) {
             await t.rollback();
             console.error(error);
@@ -131,19 +106,31 @@ class ManagerController {
         }
     };
     
-    // Admin sent announcements
-    getAnnouncements = async (req, res) => {
+    getAllAnnouncements = async (req, res) => {
         try {
-            const user = await models.User.findByPk(req.user.id);
-            if (!user) {
-                return res.status(404).json({ error: 'User not found' });
-            }
+            const announcements = await reuse.getAllAnnouncements();
+            res.status(200).json({ message: 'Announcements retrieved successfully', announcements });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };    
 
-            const announcements = await models.Announcement.findAll({
-                where: { senderId: req.user.id },
-                include: [{ model: models.User, as: 'sender', attributes: ['id', 'fullName', 'imageURL'] }]
-            });
+    getAllAnnouncementsByManager = async (req, res) => {
+        try {
+            const announcements = await reuse.getAnnouncementsBySenderId(req.user.id);
+            res.status(200).json({ message: 'Announcements retrieved successfully', announcements });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
 
+    getAnnouncementsBySenderId = async (req, res) => {
+        try {
+            const { senderId } = req.params;
+    
+            const announcements = await reuse.getAnnouncementsBySenderId(senderId);
             res.status(200).json({ message: 'Announcements retrieved successfully', announcements });
         } catch (error) {
             console.error(error);
