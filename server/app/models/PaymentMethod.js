@@ -43,6 +43,12 @@ PaymentMethod.init({
     modelName: 'PaymentMethod',
     tableName: 'payment_methods',
     timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['bankName', 'bankAccountNumber'],
+        },
+    ],
 });
 
 module.exports = PaymentMethod;
