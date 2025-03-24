@@ -47,11 +47,22 @@ Shop.init({
         type: DataTypes.STRING,
         defaultValue: '#FFFFFF',
     },
-    banReason: {
+    avatarUrl: {
         type: DataTypes.STRING,
         allowNull: true,
-      },
-    imageUrl: {
+        defaultValue: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.iconfinder.com%2Ficons%2F6169232%2Favatar_owner_profile_seller_shop_store_user_icon&psig=AOvVaw0uojWZayepUMT25TbhYG6g&ust=1742881035319000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCKCm7Pn_oYwDFQAAAAAdAAAAABAE',
+    },
+    backgroundUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Ffree-backgrounds-photos%2Fshopping&psig=AOvVaw1ol3BQfDqiiWgizAjmdpI3&ust=1742881069840000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCNDsxoqAoowDFQAAAAAdAAAAABAI'
+    },
+    status: {
+        type: DataTypes.ENUM('active', 'inactive', 'banned'),
+        defaultValue: 'inactive',
+        allowNull: false,
+    },
+    banReason: {
         type: DataTypes.STRING,
         allowNull: true,
     },
