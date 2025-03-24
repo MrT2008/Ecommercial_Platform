@@ -4,6 +4,7 @@ import './index.css'
 import axios from 'axios';
 import Login from './pages/login';
 import Signup from './pages/signup';
+import PendingShops from './pages/pendingShop';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -24,6 +25,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/pending-shops" element={<PendingShops />} />
       </Routes>
     </Router>
   )
