@@ -1,39 +1,39 @@
 const sequelize = require('../configs/dbConfig');
 
-const User = require('./User');
-const Role = require('./Role');
-const UserRole = require('./UserRole');
-const Shop = require('./Shop');
-const Product = require('./Product');
+const Announcement = require('./Announcement');
+const Cart = require('./Cart');
+const Category = require('./Category');
 const Order = require('./Order');
 const OrderDetail = require('./OrderDetail');
-const Cart = require('./Cart');
-const Review = require('./Review');
-const Transaction = require('./Transaction');
-const Announcement = require('./Announcement');
-const Category = require('./Category');
 const PaymentMethod = require('./PaymentMethod');
+const Product = require('./Product');
+const ProductCategory = require('./ProductCategory')
 const Promotion = require('./Promotion');
+const Review = require('./Review');
+const Role = require('./Role');
 const ShipInfo = require('./ShipInfo');
-const ProductType = require('./ProductCategory')
+const Shop = require('./Shop');
+const Transaction = require('./Transaction');
+const User = require('./User');
+const UserRole = require('./UserRole');
 
 const models = {
-  User,
-  Role,
-  UserRole,
-  Shop,
-  Product,
+  Announcement,
+  Cart,
+  Category,
   Order,
   OrderDetail,
-  Cart,
-  Review,
-  Transaction,
-  Announcement,
-  Category,
   PaymentMethod,
+  Product,
+  ProductCategory,
   Promotion,
+  Review,
+  Role,
   ShipInfo,
-  ProductType,
+  Shop,
+  Transaction,
+  User,
+  UserRole,
 };
 
 // User 1-N Announcement (as Sender)
@@ -128,13 +128,13 @@ Transaction.belongsTo(Order, { foreignKey: "orderId",as: 'order' });
 
 // Product N-M Category via ProductCategory
 Product.belongsToMany(Category, {
-  through: ProductType,
+  through: ProductCategory,
   foreignKey: "productId",
   otherKey: "categoryId",
   as: "categories"
 });
 Category.belongsToMany(Product, {
-  through: ProductType,
+  through: ProductCategory,
   foreignKey: "categoryId",
   otherKey: "productId",
   as: "products"
