@@ -2,63 +2,6 @@ const crypto = require('crypto');
 const { models } = require('../models');
 const sendGmailToUser = require('../utilities/sendGmail');
 
-// USER MANAGEMENT
-const getAllUserByRole = async (role) => {
-    return await models.User.findAll({ where: { role } });
-}
-
-const banUserById = async (id, options = {}) => {
-    try {
-        const user = await models.User.findByPk(id, options);
-        if (!user) {
-            return { error: 'User not found' };
-        }
-
-        const updatedUser = await user.update({ isBanned: true }, options);
-
-        return updatedUser;
-    } catch (error) {
-        console.error(error);
-        return { error: 'Internal Server Error' };
-    }
-};
-
-
-const updateUserPassword = async (id, newPassword) => {
-    const user = await models.User.findByPk(id);
-    if (!user) {
-        return { error: 'User not found' };
-    }
-
-    await user.update({ password: newPassword });
-
-    return user;
-}
-
-const refreshUserPassworkById = async (id) => {
-    try {
-        const user = await models.User.findByPk(id);
-        if (!user) {
-            return { error: 'User not found' };
-        }
-        
-        const newPassword = crypto.randomBytes(6).toString('base64');
-
-        const updatedUser = await user.update({ password: newPassword });
-
-        await sendGmailToUser(
-            user.email,
-            'Your Password Has Been Reset',
-            `Hello ${user.username},\n\nYour password has been reset. Your new password is: ${newPassword}\n\nPlease change it after logging in for security reasons.`
-        );
-    
-        return updatedUser;
-    } catch (error) {
-        console.error(error);
-        return { error: 'Internal Server Error' };
-    }
-}
-
 // FEATURES MANAGEMENT
 const sentAnnouncement = async (senderId, title, imageURL, script, options = {}) => {
     try {
@@ -80,12 +23,21 @@ const getAllAnnouncements = async () => {
     });
 };
 
-const getAnnouncementsBySenderId = async (senderId) => {
-    return await models.Announcement.findAll({
-        where: { senderId },
-        include: { model: models.User, as: 'sender' },
-    });
-};
+const editAnnouncementById = async (id, title, imageURL, script) => {
+    try {
+        const announcement = await models.Announcement.findByPk(id);
+        if (!announcement) {
+            return { error: 'Announcement not found' };
+        }
+
+        await announcement.update({ title, imageURL, script });
+
+        return announcement;
+    } catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+}
 
 const deleteAnnouncementById = async (id) => {
     try {
@@ -101,9 +53,63 @@ const deleteAnnouncementById = async (id) => {
         console.error(error);
         return { error: 'Internal Server Error' };
     }
-}
+};
+
+const getAnnouncementsBySenderId = async (senderId) => {
+    return await models.Announcement.findAll({
+        where: { senderId },
+        include: { model: models.User, as: 'sender' },
+    });
+};
 
 // SHOP MANAGEMENT
+const getAllShops = async () => {
+    return await models.Shop.findAll();
+}
+
+const getShopById = async (id) => {
+    return await models.Shop.findByPk(id);
+}
+
+const getAllActiveShops = async () => {
+    const activeShops = await models.Shop.findAll({ where: { status: 'active' } });
+    const inactiveShops = await models.Shop.findAll({ where: { status: 'inactive' } });
+
+    const shops = activeShops.concat(inactiveShops); // show shops which is not banned or pending status first
+    shops.sort((a, b) => a.id - b.id);
+    return shops;
+}
+
+const getAllPendingShops = async () => {
+    return await models.Shop.findAll({ where: { status: 'pending' } });
+}
+
+const getAllBannedShops = async () => {
+    return await models.Shop.findAll({ where: { status: 'banned' } });
+}
+
+const approveShopById = async (id, options = {}) => {
+    try {
+        const shop = await models.Shop.findByPk(id);
+        if (!shop) {
+            return { error: 'Shop not found' };
+        }
+
+        if (shop.status === 'active') {
+            return { message: 'Shop is already active', shop };
+        }
+
+        const updatedShop = await shop.update({
+            status: 'active'
+        }, options);
+
+        return updatedShop;
+    } catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+}
+
 const banShopById = async (id, reason, options = {}) => {
     try {
         const shop = await models.Shop.findByPk(id);
@@ -205,19 +211,82 @@ const unbanProductById = async (id, options = {}) => {
     }
 }
 
+// USER MANAGEMENT
+const getAllUserByRole = async (role) => {
+    return await models.User.findAll({ where: { role } });
+}
+
+const banUserById = async (id, options = {}) => {
+    try {
+        const user = await models.User.findByPk(id, options);
+        if (!user) {
+            return { error: 'User not found' };
+        }
+
+        const updatedUser = await user.update({ isBanned: true }, options);
+
+        return updatedUser;
+    } catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+};
+
+
+const updateUserPassword = async (id, newPassword) => {
+    const user = await models.User.findByPk(id);
+    if (!user) {
+        return { error: 'User not found' };
+    }
+
+    await user.update({ password: newPassword });
+
+    return user;
+}
+
+const refreshUserPassworkById = async (id) => {
+    try {
+        const user = await models.User.findByPk(id);
+        if (!user) {
+            return { error: 'User not found' };
+        }
+        
+        const newPassword = crypto.randomBytes(6).toString('base64');
+
+        const updatedUser = await user.update({ password: newPassword });
+
+        await sendGmailToUser(
+            user.email,
+            'Your Password Has Been Reset',
+            `Hello ${user.username},\n\nYour password has been reset. Your new password is: ${newPassword}\n\nPlease change it after logging in for security reasons.`
+        );
+    
+        return updatedUser;
+    } catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+}
+
 module.exports = {
-    getAllUserByRole,
-    banUserById,
-    updateUserPassword,
-    refreshUserPassworkById,
     sentAnnouncement,
     getAllAnnouncements,
     getAnnouncementsBySenderId,
+    editAnnouncementById,
     deleteAnnouncementById,
+    getAllShops,
+    getAllActiveShops,
+    getAllPendingShops,
+    getAllBannedShops,
+    getShopById,
     banShopById,
     unbanShopById,
     getAllProducts,
     getProductById,
     banProductById,
     unbanProductById,
+    getAllUserByRole,
+    banUserById,
+    updateUserPassword,
+    refreshUserPassworkById,
 }

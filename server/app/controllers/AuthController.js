@@ -137,7 +137,7 @@ class AuthController {
 
 const validate = (user) => {
     const schema = joi.object({
-        email: joi.string().email().max(100).required().label('Email'),
+        email: joi.string().email().max(100).required().lowercase().label('Email'),
         password: joi.required().label('Password'),
     });
     return schema.validate(user);

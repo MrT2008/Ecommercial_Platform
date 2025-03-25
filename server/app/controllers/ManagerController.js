@@ -1,89 +1,6 @@
 const { models } = require('../models');
 const reuse = require('../reuse/reuse');
 class ManagerController {
-    // USER MANAGEMENT
-    createModerator = async (req, res) => {
-        const t = await models.User.sequelize.transaction();
-        try {
-            const { email, fullName } = req.body;
-            const password = process.env.MODERATOR_DEFAULT_PASSWORD;
-
-            const existingUser = await models.User.findOne({ where: { email } });
-            if (existingUser) {
-                await t.rollback();
-                return res.status(409).json({ error: 'This email is unavailable!' });
-            }
-
-            const newUser = await models.User.create({ email, password, fullName }, { transaction: t });
-
-            const moderatorRole = await models.Role.findOne({ where: { name: 'moderator' } });
-            if (!moderatorRole) {
-                await t.rollback();
-                return res.status(500).json({ error: "Internal Server Error" });
-            }
-            
-            await models.UserRole.create({
-                userId: newUser.id,
-                roleId: moderatorRole.id,
-            }, { transaction: t });
-    
-            await t.commit();
-
-            const userResponse = {
-                id: newUser.id,
-                email: newUser.email,
-                fullName: newUser.fullName,
-                userStatus: newUser.userStatus,
-                imageURL: newUser.imageURL,
-                roles: ['moderator'],
-            };
-    
-            res.status(201).json({ message: 'Moderator created successfully', user: userResponse });
-        } catch (error) {
-            await t.rollback();
-            console.error(error);
-            res.status(500).json({ message: "Internal Server Error" });
-        }
-    };
-
-    getAllModerators = async (req, res) => {
-        try {
-            const moderators = await reuse.getAllUserByRole('moderator');
-
-            if (moderators.length === 0) {
-                return res.status(404).json({ error: 'No moderators found' });
-            }
-
-            res.status(200).json({ message: 'Moderators retrieved successfully', moderators });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Internal Server Error' });
-        }
-    }
-
-    banModeratorById = async (req, res) => {
-        const t = await models.User.sequelize.transaction();
-        try {
-            const { id } = req.params;
-
-            const bannedModerator = await reuse.banUserById(id, { transaction: t });
-
-            if (bannedModerator.error) {
-                await t.rollback();
-                const statusCode = bannedModerator.error === 'User not found' ? 404 : 400;
-                return res.status(statusCode).json({ error: bannedModerator.error });
-            }
-
-            await t.commit();
-
-            res.status(200).json({ message: 'User banned successfully', bannedModerator });
-        } catch (error) {
-            await t.rollback();
-            console.error(error);
-            res.status(500).json({ message: 'Internal Server Error' });
-        }
-    }
-
     // Featured Announcement Management
     sendAnnouncement = async (req, res) => {
         const t = await models.Announcement.sequelize.transaction();
@@ -115,7 +32,40 @@ class ManagerController {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
         }
-    };    
+    };
+
+    editAnnouncementById = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { title, imageURL, script } = req.body;
+    
+            const editedAnnouncement = await reuse.editAnnouncementById(id, title, imageURL, script);
+            if (editedAnnouncement.error) {
+                return res.status(404).json({ error: editedAnnouncement.error });
+            }
+    
+            res.status(200).json({ message: 'Announcement edited successfully', editedAnnouncement });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    
+    deleteAnnouncementById = async (req, res) => {
+        try {
+            const { id } = req.params;
+    
+            const deletedAnnouncement = await reuse.deleteAnnouncementById(id);
+            if (deletedAnnouncement.error) {
+                return res.status(404).json({ error: deletedAnnouncement.error });
+            }
+    
+            res.status(200).json({ message: 'Announcement deleted successfully' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
 
     getAllAnnouncementsByManager = async (req, res) => {
         try {
@@ -143,24 +93,86 @@ class ManagerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     };
-    
-    deleteAnnouncementById = async (req, res) => {
+
+    // SHOP MANAGEMENT
+    getAllShops = async (req, res) => {
         try {
-            const { id } = req.params;
-    
-            const deletedAnnouncement = await reuse.deleteAnnouncementById(id);
-            if (deletedAnnouncement.error) {
-                return res.status(404).json({ error: deletedAnnouncement.error });
-            }
-    
-            res.status(200).json({ message: 'Announcement deleted successfully' });
+            const shops = await reuse.getAllShops();
+            res.status(200).json({ message: 'Shops retrieved successfully', shops });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
 
-    // SHOP MANAGEMENT
+    getAllActiveShops = async (req, res) => {
+        try {
+            const activeShops = await reuse.getAllActiveShops();
+            res.status(200).json({ message: 'Active shops retrieved successfully', activeShops });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    getAllPendingShops = async (req, res) => {
+        try {
+            const pendingShops = await reuse.getAllPendingShops();
+            res.status(200).json({ message: 'Pending shops retrieved successfully', pendingShops });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    getAllBannedShops = async (req, res) => {
+        try {
+            const bannedShops = await reuse.getAllBannedShops();
+            res.status(200).json({ message: 'Banned shops retrieved successfully', bannedShops });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    getShopById = async (req, res) => {
+        try {
+            const { id } = req.params;
+    
+            const shop = await reuse.getShopById(id);
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+    
+            res.status(200).json({ message: 'Shop retrieved successfully', shop });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    approveShopById = async (req, res) => {
+        const t = await models.Shop.sequelize.transaction();
+        try {
+            const { id } = req.params;
+    
+            const approvedShop = await reuse.approveShopById(id, { transaction: t });
+            if (approvedShop.error) {
+                await t.rollback();
+                const statusCode = approvedShop.error === 'Shop not found' ? 404 : 400;
+                return res.status(statusCode).json({ error: approvedShop.error });
+            }
+    
+            await t.commit();
+    
+            res.status(200).json({ message: 'Shop approved successfully', approvedShop });
+        } catch (error) {
+            await t.rollback();
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
     banShopById = async (req, res) => {
         const t = await models.Shop.sequelize.transaction();
         try {
@@ -271,6 +283,112 @@ class ManagerController {
             await t.commit();
     
             res.status(200).json({ message: 'Product unbanned successfully', unbannedProduct });
+        } catch (error) {
+            await t.rollback();
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    // USER MANAGEMENT
+    createModerator = async (req, res) => {
+        const t = await models.User.sequelize.transaction();
+        try {
+            const { email, fullName } = req.body;
+            const password = process.env.MODERATOR_DEFAULT_PASSWORD;
+
+            const existingUser = await models.User.findOne({ where: { email } });
+            if (existingUser) {
+                await t.rollback();
+                return res.status(409).json({ error: 'This email is unavailable!' });
+            }
+
+            const newUser = await models.User.create({ email, password, fullName }, { transaction: t });
+
+            const moderatorRole = await models.Role.findOne({ where: { name: 'moderator' } });
+            if (!moderatorRole) {
+                await t.rollback();
+                return res.status(500).json({ error: "Internal Server Error" });
+            }
+            
+            await models.UserRole.create({
+                userId: newUser.id,
+                roleId: moderatorRole.id,
+            }, { transaction: t });
+    
+            await t.commit();
+
+            const userResponse = {
+                id: newUser.id,
+                email: newUser.email,
+                fullName: newUser.fullName,
+                userStatus: newUser.userStatus,
+                imageURL: newUser.imageURL,
+                roles: ['moderator'],
+            };
+    
+            res.status(201).json({ message: 'Moderator created successfully', user: userResponse });
+        } catch (error) {
+            await t.rollback();
+            console.error(error);
+            res.status(500).json({ message: "Internal Server Error" });
+        }
+    };
+
+    getAllModerators = async (req, res) => {
+        try {
+            const moderators = await reuse.getAllUserByRole('moderator');
+
+            if (moderators.length === 0) {
+                return res.status(404).json({ error: 'No moderators found' });
+            }
+
+            res.status(200).json({ message: 'Moderators retrieved successfully', moderators });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    banModeratorById = async (req, res) => {
+        const t = await models.User.sequelize.transaction();
+        try {
+            const { id } = req.params;
+
+            const bannedModerator = await reuse.banUserById(id, { transaction: t });
+
+            if (bannedModerator.error) {
+                await t.rollback();
+                const statusCode = bannedModerator.error === 'User not found' ? 404 : 400;
+                return res.status(statusCode).json({ error: bannedModerator.error });
+            }
+
+            await t.commit();
+
+            res.status(200).json({ message: 'User banned successfully', bannedModerator });
+        } catch (error) {
+            await t.rollback();
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    banUserById = async (req, res) => {
+        const t = await models.User.sequelize.transaction();
+        try {
+            const { id } = req.params;
+
+            const bannedUser = await reuse.banUserById(id, { transaction: t });
+
+            if (bannedUser.error) {
+                await t.rollback();
+                const statusCode = bannedUser.error === 'User not found' ? 404 : 400;
+                return res.status(statusCode).json({ error: bannedUser.error });
+            }
+
+            await t.commit();
+
+            res.status(200).json({ message: 'User banned successfully', bannedUser });
         } catch (error) {
             await t.rollback();
             console.error(error);
