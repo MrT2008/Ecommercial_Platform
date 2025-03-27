@@ -43,6 +43,14 @@ Shop.init({
             isEmail: true,
         }
     },
+    bankName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    bankAccount: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     theme: {
         type: DataTypes.STRING,
         defaultValue: '#FFFFFF',
@@ -59,7 +67,7 @@ Shop.init({
     },
     status: {
         type: DataTypes.ENUM('active', 'inactive', 'banned', 'pending'),
-        defaultValue: 'inactive',
+        defaultValue: 'pending',
         allowNull: false,
     },
     banReason: {

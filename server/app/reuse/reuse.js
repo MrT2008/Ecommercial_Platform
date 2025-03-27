@@ -88,6 +88,20 @@ const getAllBannedShops = async () => {
     return await models.Shop.findAll({ where: { status: 'banned' } });
 }
 
+const registerShop = async (userId, name, description, address, phone, email, bankName, bankAccount, options = {}) => {
+    try {
+        const shop = await models.Shop.create({
+            userId, name, description, address, phone, email, bankName, bankAccount
+        }, options);
+
+        return shop;
+    }
+    catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+}
+
 const approveShopById = async (id, options = {}) => {
     try {
         const shop = await models.Shop.findByPk(id);
@@ -104,6 +118,26 @@ const approveShopById = async (id, options = {}) => {
         }, options);
 
         return updatedShop;
+    } catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+}
+
+const rejectShopById = async (id, options = {}) => {
+    try {
+        const shop = await models.Shop.findByPk(id);
+        if (!shop) {
+            return { error: 'Shop not found' };
+        }
+
+        if (shop.status === 'inactive') {
+            return { message: 'Shop is already inactive', shop };
+        }
+
+        await shop.destroy(shop, options);
+
+        return { message: 'Shop rejected successfully' };
     } catch (error) {
         console.error(error);
         return { error: 'Internal Server Error' };
@@ -155,6 +189,69 @@ const unbanShopById = async (id, options = {}) => {
         return { error: 'Internal Server Error' };
     }
 }
+
+const getAverageRatingsByShopId = async (shopId) => {
+    try {
+        const reviews = await models.Review.findOne({
+            attributes: [
+                [Sequelize.fn('AVG', Sequelize.col('rating')), 'averageRating']
+            ],
+            include: [
+                {
+                    model: Product,
+                    attributes: [],
+                    where: { shopId }, // Filter by shop ID
+                }
+            ],
+            raw: true
+        });
+
+        return reviews.averageRating ? parseFloat(reviews.averageRating).toFixed(2) : 0;
+    } catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+}
+
+const getTotalEvaluationsByShopId = async (shopId) => {
+    try {
+        const result = await models.Review.findOne({
+            attributes: [
+                [Sequelize.fn('COUNT', Sequelize.col('Review.id')), 'totalEvaluations']
+            ],
+            include: [
+                {
+                    model: Product,
+                    attributes: [], // We only need filtering, not product details
+                    where: { shopId }
+                }
+            ],
+            raw: true
+        });
+
+        return result.totalEvaluations || 0;
+    } catch (error) {
+        console.error('Error fetching total evaluations:', error);
+        return 0;
+    }
+};
+
+const getTotalProductsByShopId = async (shopId) => {
+    try {
+        const result = await Product.findOne({
+            attributes: [
+                [Sequelize.fn('COUNT', Sequelize.col('id')), 'totalProducts']
+            ],
+            where: { shopId },
+            raw: true
+        });
+
+        return result.totalProducts || 0;
+    } catch (error) {
+        console.error('Error fetching total products:', error);
+        return 0;
+    }
+};
 
 // PRODUCT MANAGEMENT
 const getAllProducts = async () => {
@@ -268,17 +365,63 @@ const refreshUserPassworkById = async (id) => {
     }
 }
 
+const getUserById = async (id) => {
+    return await models.User.findByPk(id);
+}
+
+// PROMOTION MANAGEMENT
+const getAllPromotions = async () => {
+    return await models.Promotion.findAll();
+}
+
+const getPromotionById = async (id) => {
+    return await models.Promotion.findByPk(id);
+}
+
+const createPromotion = async (shopId, title, imageURL, script, options = {}) => {
+    try {
+        const promotion = await models.Promotion.create({
+            shopId, title, imageURL, script,
+        }, options);
+
+        return promotion;
+    }
+    catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+};
+
+const deletePromotionById = async (id) => {
+    try {
+        const promotion = await models.Promotion.findByPk(id);
+        if (!promotion) {
+            return { error: 'Promotion not found' };
+        }
+
+        await promotion.destroy();
+
+        return { message: 'Promotion deleted successfully' };
+    } catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
+};
+
 module.exports = {
     sentAnnouncement,
     getAllAnnouncements,
-    getAnnouncementsBySenderId,
     editAnnouncementById,
     deleteAnnouncementById,
+    getAnnouncementsBySenderId,
     getAllShops,
+    getShopById,
     getAllActiveShops,
     getAllPendingShops,
     getAllBannedShops,
-    getShopById,
+    registerShop,
+    approveShopById,
+    rejectShopById,
     banShopById,
     unbanShopById,
     getAllProducts,
@@ -289,4 +432,9 @@ module.exports = {
     banUserById,
     updateUserPassword,
     refreshUserPassworkById,
+    getUserById,
+    getAllPromotions,
+    getPromotionById,
+    createPromotion,
+    deletePromotionById,
 }
