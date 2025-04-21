@@ -43,15 +43,33 @@ Shop.init({
             isEmail: true,
         }
     },
+    bankName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    bankAccount: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     theme: {
         type: DataTypes.STRING,
         defaultValue: '#FFFFFF',
     },
-    banReason: {
+    avatarUrl: {
         type: DataTypes.STRING,
         allowNull: true,
-      },
-    imageUrl: {
+    },
+    backgroundUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Ffree-backgrounds-photos%2Fshopping&psig=AOvVaw1ol3BQfDqiiWgizAjmdpI3&ust=1742881069840000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCNDsxoqAoowDFQAAAAAdAAAAABAI'
+    },
+    status: {
+        type: DataTypes.ENUM('active', 'inactive', 'banned', 'pending'),
+        defaultValue: 'pending',
+        allowNull: false,
+    },
+    banReason: {
         type: DataTypes.STRING,
         allowNull: true,
     },

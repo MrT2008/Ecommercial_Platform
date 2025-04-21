@@ -40,6 +40,10 @@ Announcement.init({
             notEmpty: true
         }
     },
+    isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
 }, {
     sequelize,
     modelName: 'Announcement',

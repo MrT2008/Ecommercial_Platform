@@ -1,0 +1,36 @@
+const express = require('express');
+const router = express.Router();
+
+const ManagerController = require('../app/controllers/ManagerController');
+
+router.post('/announcements/new', ManagerController.sendAnnouncement);
+router.put('/announcements/edit/:id', ManagerController.editAnnouncementById);
+router.put('/announcements/delete/:id', ManagerController.deleteAnnouncementById);
+router.get('/announcements', ManagerController.getAllAnnouncements);
+
+router.get('/shops/:id', ManagerController.getShopById);
+router.put('/shops/ban/:id', ManagerController.banShopById);
+router.get('/shops/pendings/', ManagerController.getAllPendingShops);
+router.put('/shops/approve/:id', ManagerController.approveShopById);
+router.put('/shops/reject/:id', ManagerController.rejectShopById);
+router.get('/shops/banned/', ManagerController.getAllBannedShops);
+router.put('/shops/unban/:id', ManagerController.unbanShopById);
+router.get('/shops/', ManagerController.getAllActiveShops);
+
+router.put('/promotions/edit/:id', ManagerController.deletePromotionById);
+router.get('/promotions', ManagerController.getAllPromotions);
+
+router.post('/moderators/new', ManagerController.createModerator);
+router.put('/moderators/delete/:id', ManagerController.banModeratorById);
+router.get('/moderators/', ManagerController.getAllModerators);
+
+router.get('/users/:id', ManagerController.getUserById);
+
+router.get('/', function (req, res) {
+    res.json({
+        status: 'API Its Working',
+        message: 'Welcome to RESTHub crafted with love!',
+    });
+});
+
+module.exports = router;

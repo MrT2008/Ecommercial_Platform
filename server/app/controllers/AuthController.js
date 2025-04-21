@@ -1,35 +1,33 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const Role = require('../models/Role');
-const UserRole = require('../models/UserRole');
+const { models } = require('../models');
 const passport = require('passport');
 const joi = require('joi');
-const { comparePassword, generateAccessToken, generateRefreshToken } = require('../middlewares/auth');
+const { comparePassword, generateAccessToken, generateRefreshToken } = require('../middlewares/authenticate ');
 
 class AuthController {
     postRegister = async (req, res) => {
-        const t = await User.sequelize.transaction();
+        const t = await models.User.sequelize.transaction();
         try {
-            const { error } = validate(req.body);
+            const { error } = validateRegister(req.body);
             if (error) return res.status(400).json({ error: error.details[0].message });
 
-            const { email, password, fullName } = req.body;
+            const { email, password, fullName} = req.body;
             
-            const existingUser = await User.findOne({ where: { email } });
+            const existingUser = await models.User.findOne({ where: { email } });
             if (existingUser) {
                 await t.rollback();
                 return res.status(409).json({ error: 'This email is unavailable!' });
             }
 
-            const newUser = await User.create({ email, password, fullName }, { transaction: t });
+            const newUser = await models.User.create({ email, password, fullName }, { transaction: t });
 
-            const buyerRole = await Role.findOne({ where: { name: 'buyer' } });
+            const buyerRole = await models.Role.findOne({ where: { name: 'buyer' } });
             if (!buyerRole) {
                 await t.rollback();
                 return res.status(500).json({ error: "Internal Server Error" });
             }
             
-            await UserRole.create({
+            await models.UserRole.create({
                 userId: newUser.id,
                 roleId: buyerRole.id,
             }, { transaction: t });
@@ -55,10 +53,10 @@ class AuthController {
     
     postLogin = async (req, res) => {
         try {
-            const { error } = validate(req.body);
+            const { error } = validateLogin(req.body);
             if (error) return res.status(400).json({ error: error.details[0].message });
 
-            const user = await User.findOne({ where: { email: req.body.email } });
+            const user = await models.User.findOne({ where: { email: req.body.email } });
             if (!user) return res.status(404).json({ error: 'Invalid Email or Password' });
 
             const validPassword = await comparePassword(req.body.password, user.password);
@@ -94,7 +92,7 @@ class AuthController {
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
             if (err) return res.sendStatus(403);
 
-            const user = await User.findByPk(decoded.id);
+            const user = await models.User.findByPk(decoded.id);
             if (!user) return res.sendStatus(404);
             
             const accessToken = generateAccessToken(user);
@@ -137,9 +135,18 @@ class AuthController {
     };
 }
 
-const validate = (user) => {
+const validateRegister = (user) => {
     const schema = joi.object({
-        email: joi.string().email().max(100).required().label('Email'),
+        email: joi.string().email().max(100).required().lowercase().label('Email'),
+        password: joi.required().label('Password'),
+        fullName: joi.string().max(100).required().label('Full Name'),
+    });
+    return schema.validate(user);
+};
+
+const validateLogin = (user) => {
+    const schema = joi.object({
+        email: joi.string().email().max(100).required().lowercase().label('Email'),
         password: joi.required().label('Password'),
     });
     return schema.validate(user);

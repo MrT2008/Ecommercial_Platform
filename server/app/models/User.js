@@ -32,17 +32,17 @@ User.init({
   },
   banReason: {
     type: DataTypes.STRING,
-    defaultValue: null,
+    allowNull: true,
   },
   googleId: {
     type: DataTypes.STRING,
     unique: true,
     allowNull: true,
   },
-  userStatus: {
-    type: DataTypes.ENUM('active', 'ban'),
-    defaultValue: 'active',
-},
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
   imageURL: {
     type: DataTypes.STRING,
     validate: {
