@@ -58,7 +58,6 @@ Shop.init({
     avatarUrl: {
         type: DataTypes.STRING,
         allowNull: true,
-        defaultValue: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.iconfinder.com%2Ficons%2F6169232%2Favatar_owner_profile_seller_shop_store_user_icon&psig=AOvVaw0uojWZayepUMT25TbhYG6g&ust=1742881035319000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCKCm7Pn_oYwDFQAAAAAdAAAAABAE',
     },
     backgroundUrl: {
         type: DataTypes.STRING,

@@ -8,10 +8,10 @@ class AuthController {
     postRegister = async (req, res) => {
         const t = await models.User.sequelize.transaction();
         try {
-            const { error } = validate(req.body);
+            const { error } = validateRegister(req.body);
             if (error) return res.status(400).json({ error: error.details[0].message });
 
-            const { email, password, fullName } = req.body;
+            const { email, password, fullName} = req.body;
             
             const existingUser = await models.User.findOne({ where: { email } });
             if (existingUser) {
@@ -53,7 +53,7 @@ class AuthController {
     
     postLogin = async (req, res) => {
         try {
-            const { error } = validate(req.body);
+            const { error } = validateLogin(req.body);
             if (error) return res.status(400).json({ error: error.details[0].message });
 
             const user = await models.User.findOne({ where: { email: req.body.email } });
@@ -135,7 +135,16 @@ class AuthController {
     };
 }
 
-const validate = (user) => {
+const validateRegister = (user) => {
+    const schema = joi.object({
+        email: joi.string().email().max(100).required().lowercase().label('Email'),
+        password: joi.required().label('Password'),
+        fullName: joi.string().max(100).required().label('Full Name'),
+    });
+    return schema.validate(user);
+};
+
+const validateLogin = (user) => {
     const schema = joi.object({
         email: joi.string().email().max(100).required().lowercase().label('Email'),
         password: joi.required().label('Password'),

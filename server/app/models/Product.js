@@ -32,7 +32,7 @@ Product.init({
     },
     salePrice: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
+        defaultValue: 0,
     },
     stock: {
         type: DataTypes.INTEGER,
@@ -47,10 +47,6 @@ Product.init({
     thumbnailURL: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-            isURL: true,
-            notEmpty: true
-        }
     },
     status: {
         type: DataTypes.ENUM('active', 'inactive', 'soldout', 'ban'),
