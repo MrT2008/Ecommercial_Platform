@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { models } = require('../models');
+const { deletePromotionById } = require('./ManagerController');
 
 class SellerController {
     //Shop
@@ -93,15 +94,23 @@ class SellerController {
                 status: status || 'active',
                 stock
             });
-            const category = await models.Category.findOne({ where: { id: categoryId }});
-
+            categoryId.forEach(async (categoryId) => {
+                const category = await models.Category.findOne({ where: { id: categoryId }});
+                if (!category) {
+                    return res.status(404).json({ error: 'Category not found' });
+                }
+                await models.ProductCategory.create({
+                    productId: newProduct.id,
+                    categoryId: categoryId
+                });
+            });
             return res.status(201).json({ product: newProduct });
         } catch (error) {
             console.error('Error creating product:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-    getProduct = async (req, res) => {
+    getProducts = async (req, res) => {
         try {
             const { id } = req.params;
             const products = await models.Product.findAll({ where: { shopId: id }});
@@ -174,11 +183,29 @@ class SellerController {
                 price,
                 description,
                 thumbnailURL,
-                ownerId: shop.ownerId,
                 salePrice: salePrice || 0,
                 status: status || 'active',
                 stock
             });
+            await models.ProductCategory.destroy({ where: { productId: productId }});
+
+            if (categoryId.length > 1) {
+                categoryId.forEach(async (categoryId) => {
+                    const category = await models.Category.findOne({ where: { id: categoryId }});
+                    if (!category) {
+                        return res.status(404).json({ error: 'Category not found' });
+                    }
+                    await models.ProductCategory.create({
+                        productId: product.id,
+                        categoryId: categoryId
+                    });
+                });
+            } else{
+                await models.ProductCategory.create({
+                    productId: product.id,
+                    categoryId: categoryId[0]
+                });
+            }
 
             return res.status(200).json({ product });
         } catch (error) {
@@ -186,6 +213,62 @@ class SellerController {
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+    deleteProduct = async (req, res) => {
+        try {
+            const { id, productId } = req.params;
+            const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
+            if (!product) {
+                return res.status(404).json({ error: 'Product not found' });
+            }
+
+            await product.update({
+                status: 'isdeleted'
+            });
+            return res.status(200).json({ message: 'Product deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    //Order
+    getOrders = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const orders = await models.Order.findAll({ where: { shopId: id }});
+            if (!orders) {
+                return res.status(404).json({ error: 'Orders not found' });
+            }
+            const orderDetails = await models.OrderDetail.findAll({ where: { shopId: id }})
+            return res.status(200).json({ orders, orderDetails });
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    updateOrder = async (req, res) => {
+        try {
+            const { id, orderId } = req.params;
+            const { status } = req.body;
+            if (!status) {
+                return res.status(400).json({ error: 'Status is required' });
+            }
+
+            const order = await models.Order.findOne({ where: { id: orderId, shopId: id }});
+            if (!order) {
+                return res.status(404).json({ error: 'Order not found' });
+            }
+
+            await order.update({
+                status
+            });
+            return res.status(200).json({ order });
+        } catch (error) {
+            console.error('Error updating order:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
 
 }
 

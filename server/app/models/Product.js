@@ -49,10 +49,10 @@ Product.init({
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('active', 'inactive', 'soldout', 'ban'),
+        type: DataTypes.ENUM('active', 'inactive', 'soldout', 'ban','isdeleted'),
         defaultValue: 'active',
         validate: {
-            isIn: [['active', 'inactive', 'soldout', 'ban']],
+            isIn: [['active', 'inactive', 'soldout', 'ban','isdeleted']],
         }
     },
     banReason: {
