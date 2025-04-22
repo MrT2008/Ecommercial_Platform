@@ -16,7 +16,7 @@ class AuthController {
             const existingUser = await models.User.findOne({ where: { email } });
             if (existingUser) {
                 await t.rollback();
-                return res.status(409).json({ error: 'This email is unavailable!' });
+                return res.status(409).json({ error: 'This email is available!' });
             }
 
             const newUser = await models.User.create({ email, password, fullName }, { transaction: t });
