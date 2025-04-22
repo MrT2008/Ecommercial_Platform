@@ -1,16 +1,19 @@
 import React from 'react'
 import Subscribe from './subcribe'
 import Support from './support'
-import QuickLink from './quickLink'
 import Account from './account'
-
+import QuickLink from './quickLink'
 const Footer = () => {
   return (
-    <div className='w-full h-fit pt-8 pb-14 footer flex mt-10 justify-center'>
-      <Subscribe />
-      <Support />
-      <Account />
-      <QuickLink />
+    <div className='w-full bg-blue-950 pt-8 pb-14 px-4 md:px-8'>
+      <div className='max-w-7xl mx-auto'>
+        <div className='flex flex-wrap justify-between'>
+          <Subscribe />
+          <Support />
+          <Account />
+          <QuickLink />
+        </div>
+      </div>
     </div>
   )
 }

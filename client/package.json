@@ -13,8 +13,12 @@
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-oauth/google": "^0.12.1",
     "@tailwindcss/vite": "^4.0.11",
     "axios": "^1.7.9",
+    "esbuild": "^0.25.0",
+    "jwt-decode": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0"

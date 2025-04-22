@@ -39,12 +39,12 @@ select#language{
     color: var(--white);
 }
 
-.button#signin, .button.login{
+.button#signin, .button.login, .button#login{
     background-color: var(--secondary-color);
     color: var(--main-color);
 
 }
-.button#signup{
+.button#signup, .button#loginGG{
     background-color: var(--white);
     color: var(--main-color);
     border: solid 0.1rem var(--main-color);
