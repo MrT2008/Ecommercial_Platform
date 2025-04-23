@@ -58,8 +58,10 @@ User.init({
   timestamps: true,
   hooks: {
     beforeCreate: async (user) => {
-      const salt = await bcrypt.genSalt();
-      user.password = await bcrypt.hash(user.password, salt);
+      if (user.password) {
+        const salt = await bcrypt.genSalt();
+        user.password = await bcrypt.hash(user.password, salt);        
+      }
       console.log(`[USER CREATED] ${user.email}`);
     },
     beforeUpdate: async (user) => {

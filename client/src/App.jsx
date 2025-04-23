@@ -13,8 +13,8 @@ function App() {
 
   const fecthAPI = async () => {
     const response = await axios.get('http://localhost:8080/api');
-    setArray(response.data.characters);
-    console.log(response.data.characters);
+    setArray(response.data);
+    console.log(response.data);
   }
 
   useEffect(() => {
@@ -29,7 +29,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Route>
-        
       </Routes>
     </Router>
   )
