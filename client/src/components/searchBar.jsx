@@ -3,7 +3,7 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
 const SearchBar = ({ search }) => {
   return (
-    <div className=" flex w-1/2">
+    <div className=" flex w-full mx-auto relative">
         <FontAwesomeIcon icon={faSearch} className=" w-1/12 p-2.5 rounded-2xl rounded-r-none bg-gray-200" />
         <form
         className="w-full"

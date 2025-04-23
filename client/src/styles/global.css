@@ -1,6 +1,8 @@
 :root{
     --main-color: #000144;
+    --main-color-light: #00014480;
     --secondary-color: #FFBD4B;
+    --secondary-color-light: #df981eee;
     --white: #ffffff;
     --black: #000000;
     --gray: #f5f5f5;
@@ -39,15 +41,23 @@ select#language{
     color: var(--white);
 }
 
-.button#signin, .button.login, .button#login{
+.button.yellow{
     background-color: var(--secondary-color);
     color: var(--main-color);
-
 }
-.button#signup, .button#loginGG{
+.button.yellow:hover{
+    background-color: var(--secondary-color-light);
+    color: var(--black);
+}
+.button.blue{
     background-color: var(--white);
     color: var(--main-color);
     border: solid 0.1rem var(--main-color);
+}
+.button.blue:hover{
+    background-color: var(--white);
+    color: var(--main-color-light);
+    border: solid 0.1rem var(--main-color-light);
 }
 
 .footer{

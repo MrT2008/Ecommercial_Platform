@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {jwtDecode} from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
 
 
 
@@ -13,7 +12,7 @@ type AuthContextType = {
   logout: () => Promise<void>;
   loginWithGoogle: (credential: string ,refreshToken: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
-  loading: boolean;
+  user : any;
   session: boolean;
   error: string;
 };
@@ -68,10 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
-
-      if (!response.status) {
-        throw new Error('Login failed');
-      }
+      
 
       const data =  response.data;
       const token = data.data.accessToken;
@@ -83,7 +79,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await AsyncStorage.setItem('user', JSON.stringify(userData));
       setSession(true)
     } catch (error) {
-      console.error('Login error', error);
+      if (axios.isAxiosError(error)) {
+        console.log('Error response:', error.response?.data);
+        setError(error.response?.data.error);
+      }
     } finally {
       setLoading(false);
     }
@@ -143,10 +142,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setToken(null);
     await AsyncStorage.removeItem('user');
+    await AsyncStorage.removeItem('token');
   };
 
   return (
-    <AuthContext.Provider value={{ login, loginWithGoogle ,logout, signUp, loading, session, error: error , }}>
+    <AuthContext.Provider value={{ login, loginWithGoogle ,logout, signUp, user, session, error: error , }}>
       {children}
     </AuthContext.Provider>
   );

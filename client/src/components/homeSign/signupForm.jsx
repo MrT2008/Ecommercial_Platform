@@ -16,7 +16,7 @@ const SignUpForm = () => {
     const [fullName, setFullName] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [agree, setAgree] = useState(false);
-    const { signUp, login, loginWithGoogle, session, error } = useAuth();
+    const { signUp, login, loginWithGoogle, session, error, user } = useAuth();
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -40,31 +40,35 @@ const SignUpForm = () => {
         try {
             await signUp(userEmail, password, fullName);
             
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 500));
             
-            const success = await login(userEmail, password);
-            
-            if (!success) {
-                setErrorMessage('Success Register but Login failed. Please try again.');
-            } else {
+            try {
+                await login(userEmail, password);
                 setErrorMessage('');
-                navigate('/');
+            } catch (error) {
+                setErrorMessage('Login failed. Please try again.');
             }
         } catch (error) {
-            if (error.response?.status === 409) {
-                setErrorMessage('Email already registered. Please use a different email.');
-            } else {
-                setErrorMessage('Registration failed. Please try again.');
-            }
+            console.log('error is: ',error);
         }
     }
 
     useEffect(() => {
         if (session) {
-            navigate('/');
+            if (user?.roles.includes('manager')) {
+                navigate('/manager'); // just an example, we don't have the admin page yet
+            } else if (user?.roles.includes('buyer')) {
+                navigate('/');
+            } else if (user?.roles.length === 0) {
+               setErrorMessage('');
+            } else {
+                setErrorMessage('Invalid role. Please contact support.');
+            }
+        } else if (error) {
+            setErrorMessage(error);
         }
-    } 
-    , [session, navigate]);
+    }
+    , [session, user, error, navigate]);
 
     
     
@@ -140,7 +144,7 @@ const SignUpForm = () => {
         <div
          className='flex flex-col justify-center items-center w-full py-2'
         >
-            <Button type='submit' text='Sign Up' id='signup' otherClassName='button text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2' />
+            <Button type='submit' text='Create Account'  otherClassName='yellow text-sm w-full rounded-lg py-4' />
             <div className="relative flex items-center justify-center w-full my-4">
                 <div className="flex-grow border-t border-gray-300"></div>
                 <span className="mx-4 text-sm text-gray-500">OR</span>
@@ -162,6 +166,13 @@ const SignUpForm = () => {
             </div>
         </div>
       </form>
+      <div className="flex justify-center items-center w-full py-2">
+        <p className='text-md md:text-base'>Already have an account? 
+            <a href="/login" className='text-blue-900 underline text-md pl-1 hover:text-blue-700'>
+                Log in
+            </a>
+        </p>
+        </div>
     </div>
   )
 }

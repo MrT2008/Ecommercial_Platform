@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import {useAuth } from '../../hooks/useAuth';
@@ -14,37 +14,37 @@ const loginForm = () => {
     const [userEmail, setUserEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const { login, loginWithGoogle, session, error } = useAuth();
-    const navigate = useNavigate();
+    const { login, loginWithGoogle, session, error, user } = useAuth();
     const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
-
-
     const handleLogin = async (e) => {
         e.preventDefault();
         if (!userEmail || !password) {
             setErrorMessage('Please enter both email and password.');
             return;
         }
-        const success = await login(userEmail, password);
-        if (success) {
-            setErrorMessage('');
-            navigate('/');
-        } else {
-            setErrorMessage('Invalid email or password. Please try again.');
-        }
+            await login(userEmail, password);
     }
-
     useEffect(() => {
         if (session) {
-            navigate('/');
+            if (user?.roles?.includes('manager')) {
+                navigate('/admin/dashboard'); // just an example, we don't have the admin page yet
+            } else if (user?.roles?.includes('buyer')) {
+                navigate('/');
+            } else if (user?.roles?.length === undefined) { //handle case when user has no role
+                setErrorMessage('');
+            } 
+            else {
+                setErrorMessage('Invalid role. Please contact support.');
+            }
+        } else if (error) {
+            setErrorMessage(error);
         }
-    }
-    , [session, navigate]);
-
+    }, [session, user, error, navigate]);
   return (
     <div className="flex flex-col justify-center w-full md:w-3/4 lg:w-1/2 mx-auto px-4">
         <div className="flex justify-center pb-6 md:pb-10 flex-wrap">
@@ -55,7 +55,7 @@ const loginForm = () => {
         onSubmit={handleLogin}
         >
             <label className="w-full">Enter your details below</label>
-            {errorMessage && <p className="text-red-500 w-full">{errorMessage}</p>}
+            {(errorMessage || error ) && <p className="text-red-500 w-full">{error}</p>}
             <input 
             type="text"
             placeholder='Email' 
@@ -99,7 +99,7 @@ const loginForm = () => {
             </div>
 
             <div className="flex flex-col justify-center items-center w-full py-2">
-                <Button type='submit' text='Log in' otherClassName='w-full h-10 my-2' id='signin'/>
+                <Button type='submit' text='Log in' otherClassName='yellow text-sm w-full rounded-lg py-4'/>
                 <div className="flex items-center justify-center w-full h-10 my-2">
                     Or sign in with
                 </div>
@@ -119,6 +119,10 @@ const loginForm = () => {
                 </div>
             </div>
         </form>
+        <div className="w-full flex justify-center items-center py-2">
+            <p className='text-md'>Don't have an account? </p>
+            <a href="/signup" className='text-blue-900 pl-1 underline text-md'>Create an account</a>
+        </div>
     </div>
   )
 }

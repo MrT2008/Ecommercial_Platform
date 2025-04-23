@@ -1,47 +1,25 @@
-import React from 'react';
 
-type ButtonProps = {
-  text?: string;
-  color?: string;
-  id?: string;
-  otherClassName?: string;
-  type?: 'submit' | 'reset' | 'button';
-  href?: string;
-  onClick?: () => void;
-};
+import React from 'react'
 
-const Button: React.FC<ButtonProps> = ({
-  text = 'Button',
-  color = 'text-black',
-  id = '',
-  otherClassName = '',
-  type = 'button',
-  href = '',
+const Button = ({text="Button", 
+  color="text-black", 
+  otherClassName="", 
+  type="" as "submit" | "reset" | "button" | undefined,
+  href="",
   onClick = () => {}
-}) => {
-  // Common button styles
-  const baseClasses = 'px-4 py-2 rounded-3xl cursor-pointer font-medium';
-  
-  // Render as link if href is provided
-  if (href) {
-    return (
-      <a href={href} className={`${baseClasses} ${color} ${otherClassName}`} id={id}>
-        {text}
-      </a>
-    );
-  }
+  }) => {
+    const ButtonElement = () => {
+      return (
+        <button 
+        className={`button px-4 py-2 rounded-3xl cursor-pointer font-medium ${color} ${otherClassName}`}
+        type={type}
+        onClick={onClick}
+        >
+            {text}
+        </button>
+      )
+    }
+  return href ? <a href={href} title={text}><ButtonElement /></a> : <ButtonElement />
+}
 
-  // Default button
-  return (
-    <button
-      className={`${baseClasses} ${color} ${otherClassName}`}
-      id={id}
-      type={type}
-      onClick={onClick}
-    >
-      {text}
-    </button>
-  );
-};
-
-export default Button;
+export default Button
