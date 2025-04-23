@@ -26,7 +26,12 @@ router.put('/:id/updateOrder/:orderId', sellerController.updateOrder);
 router.post('/:id/postPromotion', sellerController.postPromotion);
 router.get('/:id/getPromotion', sellerController.getPromotion);
 router.put('/:id/deletePromotion/:promotionId', sellerController.deletePromotion);
-// //Transaction
+// //dashboard
+router.get('/:id/getDashboard', sellerController.getDashboard);
+
+// //Information
+router.get('/:id/getInformation', sellerController.getInformation);
+router.put('/:id/updateInformation', sellerController.updateInformation);
 
 // //Review
 // router.post('/:id/postReview', sellerController.postReview);
