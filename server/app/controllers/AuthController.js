@@ -59,6 +59,13 @@ class AuthController {
             const user = await models.User.findOne({ where: { email: req.body.email } });
             if (!user) return res.status(404).json({ error: 'Invalid Email or Password' });
 
+            const userRoles = await models.UserRole.findAll({ where: { userId: user.id }});
+            const roles = userRoles.map(async (userRole) => {
+                await models.Role.findByPk(userRole.roleId)
+                    .then(role => role.name)
+                    .catch(err => console.error(err));
+            });
+
             const validPassword = await comparePassword(req.body.password, user.password);
             if (!validPassword) return res.status(400).json({ error: 'Invalid password' });
 
@@ -76,7 +83,12 @@ class AuthController {
             delete userData.password;
             
             res.status(200).json({
-                data: { user: userData, accessToken, refreshToken },
+                data: { user: {
+                    ...userData,
+                    roles,
+                }, 
+                accessToken, 
+                refreshToken },
                 message: 'Login Successfully'
             });
         } catch (error) {
@@ -117,7 +129,14 @@ class AuthController {
     
     googleAuthSuccess = async (req, res) => {
         if (!req.user) return res.status(400).json({ message: "Google Authentication Failed" });
-      
+        
+        const userRoles = await models.UserRole.findAll({ where: { userId: user.id }});
+        const roles = userRoles.map(async (userRole) => {
+            await models.Role.findByPk(userRole.roleId)
+                .then(role => role.name)
+                .catch(err => console.error(err));
+        });
+
         const accessToken = generateAccessToken(req.user);
         const refreshToken = generateRefreshToken(req.user);
 
@@ -131,8 +150,18 @@ class AuthController {
         const userData = req.user.toJSON();
         delete userData.password;
 
-        res.status(200).json({ user: userData, accessToken, refreshToken, message: 'Login Successfully' });
+        res.status(200).json({
+            data: { user: {
+                ...userData,
+                roles,
+            }, 
+            accessToken, 
+            refreshToken },
+            message: 'Login Successfully'
+        });
     };
+
+    
 }
 
 const validateRegister = (user) => {
