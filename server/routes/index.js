@@ -12,7 +12,7 @@ function route (app) {
   // Protected routes
   app.use('/manager', authenticateToken, manager);
   app.use('/seller', seller)
-  app.use('/buyer/:buyerId', buyer);
+  app.use('/buyer', buyer);
   app.use('/guest', guest)
   app.use('/', authenticateToken, sites);
 

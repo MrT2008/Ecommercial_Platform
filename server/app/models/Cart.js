@@ -27,6 +27,10 @@ Cart.init({
         allowNull: false,
         defaultValue: 1,
     },
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
 }, {
     sequelize,
     modelName: 'Cart',
