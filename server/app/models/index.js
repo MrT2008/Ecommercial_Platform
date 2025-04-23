@@ -166,7 +166,7 @@ const syncModels = async () => {
   try {
     await sequelize.authenticate();
     console.log('Database connected!');
-    await sequelize.sync(); 
+    await sequelize.sync({force: false}); // Set to true to drop and recreate tables
     console.log('Database synced!');
   } catch (err) {
     console.error('Database connection or sync failed:', err);

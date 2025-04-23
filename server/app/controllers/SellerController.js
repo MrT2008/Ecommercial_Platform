@@ -160,21 +160,37 @@ class SellerController {
         try {
             const { id } = req.params;
             const products = await models.Product.findAll({ where: { shopId: id }});
-            if (!products) {
+        
+            if (!products.length) {
                 return res.status(404).json({ error: 'Products not found' });
             }
-            allProducts = products.map(product => product.toJSON());
-            products.forEach(product => {
+        
+            const allProducts = [];
+        
+            for (const product of products) {
                 if (product.thumbnailURL) {
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
-                const categories = models.ProductCategory.findAll({ where: { productId: product.id }});
-                product.categories = categories.map(category => category.categoryId);
-            });
-
-            return res.status(200).json({ products });
+        
+                const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
+        
+                const categoryNames = [];
+                for (const category of categories) {
+                    const categoryData = await models.Category.findOne({ where: { id: category.categoryId } });
+                    if (categoryData) {
+                        categoryNames.push(categoryData.name);
+                    }
+                }
+        
+                allProducts.push({
+                    ...product.toJSON(),
+                    categories: categoryNames
+                });
+            }
+        
+            return res.json(allProducts);
         } catch (error) {
-            console.error('Error fetching products:', error);
+            console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
