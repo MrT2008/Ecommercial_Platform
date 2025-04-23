@@ -417,10 +417,8 @@ class SellerController {
             const completedOrders = await models.Order.findAll({ where: { shopId: id, status: 'completed' }});
             const orderDetails = await models.OrderDetail.findAll({ where: { orderId: completedOrders.map(order => order.id) }});
             const totalSales = orderDetails.reduce((total, detail) => total + (detail.priceAtPurchase * detail.quantity), 0);
-
             const totalProducts = await models.Product.count({ where: { shopId: id }});
             const totalOrders = await models.Order.count({ where: { shopId: id }});
-            
             const totalCategories = await models.Category.count({ where: { shopId: id }});
 
             return res.status(200).json({
@@ -461,7 +459,6 @@ class SellerController {
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
-
 
             await shop.update({
                 name : name || shop.name,
