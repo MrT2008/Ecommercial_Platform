@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { models } = require('../models');
-const { deletePromotionById } = require('./ManagerController');
+const { all } = require('../../routes/seller');
 
 class SellerController {
     //Shop
@@ -37,6 +37,13 @@ class SellerController {
         return res.status(200).json(allShop);
 
     };
+    getPendingShop = async (req, res) => {
+        const pendingShop = await models.Shop.findAll({ where: { status: 'pending'}});
+        if (!pendingShop) {
+            return res.status(404).json({ error: 'Pending shop not found' });
+        }
+        return res.status(200).json(pendingShop);
+    }
 
     //Category
     postCategory = async (req, res) => {
@@ -64,6 +71,43 @@ class SellerController {
             return res.status(200).json({ categories });
         } catch (error) {
             console.error('Error fetching categories:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    updateCategory = async (req, res) => {
+        try {
+            const { id, categoryId } = req.params;
+            const { name } = req.body;
+            if (!name) {
+                return res.status(400).json({ error: 'All fields are required' });
+            }
+            const category = await models.Category.findOne({ where: { id: categoryId, shopId: id }});
+            if (!category) {
+                return res.status(404).json({ error: 'Category not found' });
+            }
+            await category.update({
+                name
+            });
+            return res.status(200).json({ category });
+        } catch (error) {
+            console.error('Error updating category:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    deleteCategory = async (req, res) => {
+        try {
+            const { id, categoryId } = req.params;
+            const category = await models.Category.findOne({ where: { id: categoryId, shopId: id }});
+            if (!category) {
+                return res.status(404).json({ error: 'Category not found' });
+            }
+            await category.update({
+                isActive: false
+            });
+
+            return res.status(200).json({ message: 'Category deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting category:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
@@ -235,12 +279,39 @@ class SellerController {
     getOrders = async (req, res) => {
         try {
             const { id } = req.params;
-            const orders = await models.Order.findAll({ where: { shopId: id }});
-            if (!orders) {
+    
+            const orders = await models.Order.findAll({ where: { shopId: id } });
+            if (!orders || orders.length === 0) {
                 return res.status(404).json({ error: 'Orders not found' });
             }
-            const orderDetails = await models.OrderDetail.findAll({ where: { shopId: id }})
-            return res.status(200).json({ orders, orderDetails });
+    
+            const allOrders = [];
+    
+            for (const order of orders) {
+                const buyer = await models.User.findOne({ where: { id: order.buyerId } });
+                const orderDetails = await models.OrderDetail.findAll({ where: { orderId: order.id } });
+    
+                const allProducts = [];
+    
+                for (const detail of orderDetails) {
+                    const product = await models.Product.findOne({ where: { id: detail.productId } });
+                    if (product) {
+                        allProducts.push({
+                            name: product.name,
+                            thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`
+                        });
+                    }
+                }
+    
+                allOrders.push({
+                    ...order.toJSON(),
+                    buyerName:buyer.fullName,
+                    products: allProducts
+                });
+            }
+    
+            return res.status(200).json({ data: { allOrders } });
+    
         } catch (error) {
             console.error('Error fetching orders:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -268,6 +339,68 @@ class SellerController {
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+
+    //Promotion
+    postPromotion = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { imageURL } = req.body;
+            if (!imageURL) {
+                return res.status(400).json({ error: 'All fields are required' });
+            }
+            const shop = await models.Shop.findOne({ where: { id } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+            const newPromotion = await models.Promotion.create({
+                shopId: id,
+                imageURL,
+                status: 'show',
+                banReason: null
+            });
+
+            return res.status(201).json({ promotion: newPromotion });
+        } catch (error) {
+            console.error('Error creating promotion:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    getPromotion = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const promotions = await models.Promotion.findAll({ where: { shopId: id }});
+            if (!promotions) {
+                return res.status(404).json({ error: 'Promotions not found' });
+            }
+            promotions.forEach(promotion => {
+                if (promotion.imageURL) {
+                    promotion.imageURL = `${req.protocol}://${req.get('host')}/${promotion.imageURL}`;
+                }
+            });
+
+            return res.status(200).json({ promotions });
+        } catch (error) {
+            console.error('Error fetching promotions:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    deletePromotion = async (req, res) => {
+        try {
+            const { id, promotionId } = req.params;
+            const promotion = await models.Promotion.findOne({ where: { id: promotionId, shopId: id }});
+            if (!promotion) {
+                return res.status(404).json({ error: 'Promotion not found' });
+            }
+            await promotion.update({
+                status: 'isDeleted'
+            });
+            return res.status(200).json({ message: 'Promotion deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting promotion:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    //Review
 
 
 }
