@@ -297,41 +297,46 @@ class SellerController {
     getOrders = async (req, res) => {
         try {
             const { id } = req.params;
-    
-            const orders = await models.Order.findAll({ where: { shopId: id } });
-            if (!orders || orders.length === 0) {
-                return res.status(404).json({ error: 'Orders not found' });
-            }
-    
+            const ordersDetails = await models.OrderDetail.findAll({ where: { shopId: id }});
+
             const allOrders = [];
             const allProducts = [];
-    
-            for (const order of orders) {
-                const buyer = await models.User.findOne({ where: { id: order.buyerId } });
-                const orderDetails = await models.OrderDetail.findAll({ where: { orderId: order.id } });
-                const transaction = await models.Transaction.findOne({ where: { orderId: order.id } });
-    
+            const seenOrderIds = new Set();
 
-    
-                for (const detail of orderDetails) {
-                    const product = await models.Product.findOne({ where: { id: detail.productId } });
-                    if (product) {
-                        allProducts.push({
-                            name: product.name,
-                            thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`,
-                            buyerId: order.buyerId,
-                        });
-                    }
+            for (const orderDetail of ordersDetails) {
+                
+                const orders = await models.Order.findAll({ where: { id: orderDetail.orderId } });
+                if (!orders || orders.length === 0) {
+                    return res.status(404).json({ error: 'Orders not found' });
+
                 }
-    
-                allOrders.push({
-                    ...order.toJSON(),
-                    buyerName:buyer.fullName,
-                    paymentMethod : transaction.paymentMethod,
-                });
+                for (const order of orders) {
+                    if(seenOrderIds.has(order.id)){
+                        continue;
+                    }
+                    const transaction = await models.Transaction.findOne({ where: { orderId: order.id } });
+                    const buyer = await models.User.findOne({ where: { id: order.buyerId }});
+                    
+                    seenOrderIds.add(order.id);
+                    allOrders.push({
+                        ...order.toJSON(),
+                        buyerName:buyer.fullName,
+                        paymentMethod : transaction.paymentMethod,
+                    });
+                    
+                }
+                const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
+                if (product) {
+                    allProducts.push({
+                        name: product.name,
+                        thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`,
+                        orderId: orderDetail.orderId,
+                    });
+                }
+                            
             }
     
-            return res.status(200).json({ allOrders,allProducts  });
+            return res.status(200).json({ allOrders, allProducts });
     
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -346,11 +351,10 @@ class SellerController {
                 return res.status(400).json({ error: 'Status is required' });
             }
 
-            const order = await models.Order.findOne({ where: { id: orderId, shopId: id }});
+            const order = await models.Order.findOne({ where: { id: orderId }});
             if (!order) {
                 return res.status(404).json({ error: 'Order not found' });
             }
-
             await order.update({
                 status
             });
