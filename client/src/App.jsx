@@ -4,6 +4,8 @@ import './index.css'
 import axios from 'axios';
 import Login from './pages/login';
 import Signup from './pages/signup';
+import PendingShops from './pages/pendingShop';
+import ListAllShops from './pages/listAllShop';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 
@@ -28,8 +30,13 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          
         </Route>
-        
+        <Route path="/admin" element={<MainLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="/pending-shops" element={<PendingShops />} />
+          <Route path="/list-all-shops" element={<ListAllShops />} />
+        </Route>
       </Routes>
     </Router>
   )
