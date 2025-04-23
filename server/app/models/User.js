@@ -14,7 +14,7 @@ User.init({
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
+
     validate: {
       isEmail: true,
     },
@@ -36,7 +36,7 @@ User.init({
   },
   googleId: {
     type: DataTypes.STRING,
-    unique: true,
+
     allowNull: true,
   },
   isActive: {

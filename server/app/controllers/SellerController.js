@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { models } = require('../models');
 const { all } = require('../../routes/seller');
+const PaymentMethod = require('../models/PaymentMethod');
 
 class SellerController {
     //Shop
@@ -161,10 +162,13 @@ class SellerController {
             if (!products) {
                 return res.status(404).json({ error: 'Products not found' });
             }
+            allProducts = products.map(product => product.toJSON());
             products.forEach(product => {
                 if (product.thumbnailURL) {
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
+                const categories = models.ProductCategory.findAll({ where: { productId: product.id }});
+                product.categories = categories.map(category => category.categoryId);
             });
 
             return res.status(200).json({ products });
@@ -286,19 +290,22 @@ class SellerController {
             }
     
             const allOrders = [];
+            const allProducts = [];
     
             for (const order of orders) {
                 const buyer = await models.User.findOne({ where: { id: order.buyerId } });
                 const orderDetails = await models.OrderDetail.findAll({ where: { orderId: order.id } });
+                const transaction = await models.Transaction.findOne({ where: { orderId: order.id } });
     
-                const allProducts = [];
+
     
                 for (const detail of orderDetails) {
                     const product = await models.Product.findOne({ where: { id: detail.productId } });
                     if (product) {
                         allProducts.push({
                             name: product.name,
-                            thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`
+                            thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`,
+                            buyerId: order.buyerId,
                         });
                     }
                 }
@@ -306,11 +313,11 @@ class SellerController {
                 allOrders.push({
                     ...order.toJSON(),
                     buyerName:buyer.fullName,
-                    products: allProducts
+                    paymentMethod : transaction.paymentMethod,
                 });
             }
     
-            return res.status(200).json({ data: { allOrders } });
+            return res.status(200).json({ allOrders,allProducts  });
     
         } catch (error) {
             console.error('Error fetching orders:', error);
