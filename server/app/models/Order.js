@@ -40,6 +40,13 @@ Order.init({
         validate: {
             isIn: [['pending', 'processing', 'completed', 'cancelled']],
         },
+    },
+    paymentMethod: {
+        type: DataTypes.ENUM('COD', 'bank'),
+        defaultValue: 'COD',
+        validate: {
+            isIn: [['COD', 'bank']],
+        },
     }
 }, {
     sequelize,
