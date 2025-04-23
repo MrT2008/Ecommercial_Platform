@@ -87,7 +87,7 @@ class AuthController {
             res.status(200).json({
                  data: { user: {
                     ...userData,
-                    roles: role,
+                    roles: roleNames,
                 }, 
                 accessToken, 
                 refreshToken },
