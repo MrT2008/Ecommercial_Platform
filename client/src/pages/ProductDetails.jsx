@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faStarHalfAlt } from '@fortawesome/free-solid-svg-icons';
 import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
@@ -65,13 +65,13 @@ const ProductDetail = () => {
   const avgRating = 4.0;
 
   // Rating counts
-  const ratingCounts = {
-    5: 120,
-    4: 20,
-    3: 5,
-    2: 3,
-    1: 2
-  };
+//   const ratingCounts = {
+//     5: 120,
+//     4: 20,
+//     3: 5,
+//     2: 3,
+//     1: 2
+//   };
 
   // Function to render stars
   const renderStars = (rating) => {
