@@ -8,6 +8,7 @@ import PendingShops from './pages/pendingShop';
 import ListAllShops from './pages/listAllShop';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
+import Cart from './pages/Cart'
 
 function App() {
   const [count, setCount] = useState(0);
@@ -26,15 +27,20 @@ function App() {
   return (
     <Router>
       <Routes>
+
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          
+          <Route path="/signup" element={<Signup />} />       
         </Route>
+
         <Route path="/admin" element={<MainLayout />}>
           <Route path="pending-shops" element={<PendingShops />} />
           <Route path="list-all-shops" element={<ListAllShops />} />
+        </Route>
+        
+        <Route path="/user" element={<MainLayout />}>
+          <Route path="cart" element={<Cart />} />
         </Route>
         
       </Routes>
