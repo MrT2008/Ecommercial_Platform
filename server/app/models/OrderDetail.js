@@ -21,6 +21,14 @@ OrderDetail.init({
             key: 'productId',
         },
     },
+    shopId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        references: {
+            model: Product,
+            key: 'shopId',
+        },
+    },
     quantity: {
         type: DataTypes.INTEGER,
         allowNull: false,

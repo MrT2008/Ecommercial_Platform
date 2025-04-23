@@ -9,6 +9,19 @@ import { AuthProvider } from './hooks/useAuth';
 import PrivateRoute from './routes/privateRoute';
 
 function App() {
+  // const [count, setCount] = useState(0);
+  // const [array, setArray] = useState([]);
+
+  // const fecthAPI = async () => {
+  //   const response = await axios.get('http://localhost:8080/api');
+  //   setArray(response.data.characters);
+  //   console.log(response.data.characters);
+  // }
+
+  // useEffect(() => {
+  //   fecthAPI();
+  // }, []);
+
   return (
     <AuthProvider>
       <Router>
