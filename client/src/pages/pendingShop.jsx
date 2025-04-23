@@ -1,49 +1,7 @@
 import Heading from '../components/header/heading';
 import HeadingBar from '../components/header/main';
 import Footer from '../components/footer/main';
-
-// Reusable Navigation Sidebar Component
-const Sidebar = () => {
-  return (
-    <div className="w-1/5 h-screen p-12">
-      <h2 className="text-lg font-bold mb-4">Announcements</h2>
-      <ul className="mb-6">
-        <li className="mb-2">
-          <a href="#" className="text-gray-700 hover:text-[#FFA50B] px-4">
-            List Announcements
-          </a>
-        </li>
-      </ul>
-      <h2 className="text-lg font-bold mb-4">Shops Management</h2>
-      <ul className="mb-6">
-        <li className="mb-2">
-          <a href="#" className="text-gray-700 hover:text-[#FFA50B] px-4">
-            List Shops
-          </a>
-        </li>
-        <li className="mb-2">
-          <a href="#" className="text-[#FFA50B] font-bold px-4">
-            Pending Shops
-          </a>
-        </li>
-        <li className="mb-2">
-          <a href="#" className="text-gray-700 hover:text-[#FFA50B] px-4">
-            Banned Shops
-          </a>
-        </li>
-      </ul>
-      <h2 className="text-lg font-bold mb-4">Banners Management</h2>
-      <ul>
-        <li className="mb-2">
-          <a href="#" className="text-gray-700 hover:text-[#FFA50B] px-4">
-            List Banners
-          </a>
-        </li>
-      </ul>
-    </div>
-  );
-};
-
+import Sidebar from '../components/admin/adminSidebar';
 // Main Pending Shops Page
 const PendingShops = () => {
 <link

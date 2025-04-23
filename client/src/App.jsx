@@ -5,6 +5,7 @@ import axios from 'axios';
 import Login from './pages/login';
 import Signup from './pages/signup';
 import PendingShops from './pages/pendingShop';
+import ListAllShops from './pages/listAllShop';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -26,6 +27,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pending-shops" element={<PendingShops />} />
+        <Route path="/list-all-shops" element={<ListAllShops />} />
       </Routes>
     </Router>
   )
