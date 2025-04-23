@@ -1,6 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../configs/dbConfig');
 const User = require('./User');
+const OrderDetail = require('./OrderDetail');
 
 class Order extends Model {}
 
@@ -16,6 +17,14 @@ Order.init({
         references: {
             model: User,
             key: 'id',
+        },
+    },
+    shopId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        references: {
+            model: OrderDetail,
+            key: 'shopId',
         },
     },
     totalPrice: {
