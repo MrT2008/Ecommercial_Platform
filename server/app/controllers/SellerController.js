@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { models } = require('../models');
 const { all } = require('../../routes/seller');
 const PaymentMethod = require('../models/PaymentMethod');
+const { or } = require('sequelize');
 
 class SellerController {
     //Shop
@@ -217,9 +218,6 @@ class SellerController {
         try {
             const { id, productId } = req.params;
             const { name, price, description, thumbnailURL, stock, categoryId,salePrice,status} = req.body;
-            if (!name || !price || !description || !thumbnailURL || !stock) {
-                return res.status(400).json({ error: 'All fields are required' });
-            }
 
             const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
             if (!product) {
@@ -227,13 +225,13 @@ class SellerController {
             }
 
             await product.update({
-                name,
-                price,
-                description,
-                thumbnailURL,
-                salePrice: salePrice || 0,
-                status: status || 'active',
-                stock
+                name: name || product.name,
+                price: price || product.price,
+                description: description || product.description,
+                thumbnailURL: thumbnailURL || product.thumbnailURL,
+                salePrice: salePrice || product.salePrice,
+                status: status ||  product.status,
+                stock: stock || product.stock
             });
             await models.ProductCategory.destroy({ where: { productId: productId }});
 
@@ -407,7 +405,80 @@ class SellerController {
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-    //Review
+    //Dashboard
+    getDashboard = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const shop = await models.Shop.findOne({ where: { id } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+
+            const completedOrders = await models.Order.findAll({ where: { shopId: id, status: 'completed' }});
+            const orderDetails = await models.OrderDetail.findAll({ where: { orderId: completedOrders.map(order => order.id) }});
+            const totalSales = orderDetails.reduce((total, detail) => total + (detail.priceAtPurchase * detail.quantity), 0);
+
+            const totalProducts = await models.Product.count({ where: { shopId: id }});
+            const totalOrders = await models.Order.count({ where: { shopId: id }});
+            
+            const totalCategories = await models.Category.count({ where: { shopId: id }});
+
+            return res.status(200).json({
+                totalProducts,
+                totalOrders,
+                totalSales,
+                totalCategories
+            });
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    //Information
+    getInformation = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const shop = await models.Shop.findOne({ where: { id } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+            if (shop.imageUrl) {
+                shop.imageUrl = `${req.protocol}://${req.get('host')}/${shop.imageUrl}`;
+            }
+
+            return res.status(200).json({ shop });
+        } catch (error) {
+            console.error('Error fetching information:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    updateInformation = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { name, imageUrl, address, phoneNumber, email, bankAccount, bankName} = req.body;
+            const shop = await models.Shop.findOne({ where: { id } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+
+
+            await shop.update({
+                name : name || shop.name,
+                imageUrl : imageUrl || shop.imageUrl,
+                address : address || shop.address,
+                phoneNumber : phoneNumber || shop.phoneNumber,
+                email : email || shop.email,
+                bankAccount : bankAccount || shop.bankAccount,
+                bankName : bankName || shop.bankName,
+            });
+
+            return res.status(200).json({ shop });
+        } catch (error) {
+            console.error('Error updating information:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
 
 
 }
