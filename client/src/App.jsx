@@ -33,11 +33,15 @@ function App() {
           
         </Route>
         <Route path="/admin" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="/pending-shops" element={<PendingShops />} />
-          <Route path="/list-all-shops" element={<ListAllShops />} />
+          <Route path="pending-shops" element={<PendingShops />} />
+          <Route path="list-all-shops" element={<ListAllShops />} />
         </Route>
+        
       </Routes>
+
+
+
+      
     </Router>
   )
 }

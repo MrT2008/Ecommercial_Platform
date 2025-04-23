@@ -1,6 +1,3 @@
-import Heading from '../components/header/heading';
-import HeadingBar from '../components/header/main';
-import Footer from '../components/footer/main';
 import Sidebar from '../components/admin/adminSidebar';
 // Main Pending Shops Page
 const PendingShops = () => {
@@ -39,8 +36,7 @@ const PendingShops = () => {
 
   return (
     <div>
-      <Heading />
-      <HeadingBar />
+
       <div className="flex">
         {/* Sidebar */}
         <Sidebar />
@@ -120,7 +116,7 @@ const PendingShops = () => {
           </table>
         </div>
       </div>
-      <Footer />
+   
     </div>
   );
 };
