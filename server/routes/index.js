@@ -4,6 +4,8 @@ const manager = require('./manager');
 const { authenticateToken } = require('../app/middlewares/authenticate ');
 
 const seller = require('./seller');
+const buyer = require('./buyer')
+const guest = require('./guest')
 function route (app) {
   app.use('/api/auth', auth);
 
@@ -11,6 +13,8 @@ function route (app) {
   // app.use('/manager', authenticateToken, manager);
   app.use('/manager', manager);
   app.use('/seller', seller)
+  app.use('/buyer', buyer);
+  app.use('/guest', guest)
   app.use('/', authenticateToken, sites);
 
 }

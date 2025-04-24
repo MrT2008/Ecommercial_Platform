@@ -14,7 +14,7 @@ User.init({
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
+
     validate: {
       isEmail: true,
     },
@@ -36,7 +36,7 @@ User.init({
   },
   googleId: {
     type: DataTypes.STRING,
-    unique: true,
+
     allowNull: true,
   },
   isActive: {
@@ -46,7 +46,6 @@ User.init({
   imageURL: {
     type: DataTypes.STRING,
     validate: {
-        isURL: true,
         notEmpty: true
     },
     defaultValue: 'https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png',

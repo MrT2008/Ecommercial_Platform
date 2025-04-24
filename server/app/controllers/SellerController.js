@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { models } = require('../models');
-const { deletePromotionById } = require('./ManagerController');
+const { all } = require('../../routes/seller');
+const PaymentMethod = require('../models/PaymentMethod');
+const { or } = require('sequelize');
 
 class SellerController {
     //Shop
@@ -37,6 +39,13 @@ class SellerController {
         return res.status(200).json(allShop);
 
     };
+    getPendingShop = async (req, res) => {
+        const pendingShop = await models.Shop.findAll({ where: { status: 'pending'}});
+        if (!pendingShop) {
+            return res.status(404).json({ error: 'Pending shop not found' });
+        }
+        return res.status(200).json(pendingShop);
+    }
 
     //Category
     postCategory = async (req, res) => {
@@ -64,6 +73,43 @@ class SellerController {
             return res.status(200).json({ categories });
         } catch (error) {
             console.error('Error fetching categories:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    updateCategory = async (req, res) => {
+        try {
+            const { id, categoryId } = req.params;
+            const { name } = req.body;
+            if (!name) {
+                return res.status(400).json({ error: 'All fields are required' });
+            }
+            const category = await models.Category.findOne({ where: { id: categoryId, shopId: id }});
+            if (!category) {
+                return res.status(404).json({ error: 'Category not found' });
+            }
+            await category.update({
+                name
+            });
+            return res.status(200).json({ category });
+        } catch (error) {
+            console.error('Error updating category:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    deleteCategory = async (req, res) => {
+        try {
+            const { id, categoryId } = req.params;
+            const category = await models.Category.findOne({ where: { id: categoryId, shopId: id }});
+            if (!category) {
+                return res.status(404).json({ error: 'Category not found' });
+            }
+            await category.update({
+                isActive: false
+            });
+
+            return res.status(200).json({ message: 'Category deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting category:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
@@ -114,18 +160,37 @@ class SellerController {
         try {
             const { id } = req.params;
             const products = await models.Product.findAll({ where: { shopId: id }});
-            if (!products) {
+        
+            if (!products.length) {
                 return res.status(404).json({ error: 'Products not found' });
             }
-            products.forEach(product => {
+        
+            const allProducts = [];
+        
+            for (const product of products) {
                 if (product.thumbnailURL) {
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
-            });
-
-            return res.status(200).json({ products });
+        
+                const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
+        
+                const categoryNames = [];
+                for (const category of categories) {
+                    const categoryData = await models.Category.findOne({ where: { id: category.categoryId } });
+                    if (categoryData) {
+                        categoryNames.push(categoryData.name);
+                    }
+                }
+        
+                allProducts.push({
+                    ...product.toJSON(),
+                    categories: categoryNames
+                });
+            }
+        
+            return res.json(allProducts);
         } catch (error) {
-            console.error('Error fetching products:', error);
+            console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
@@ -169,9 +234,6 @@ class SellerController {
         try {
             const { id, productId } = req.params;
             const { name, price, description, thumbnailURL, stock, categoryId,salePrice,status} = req.body;
-            if (!name || !price || !description || !thumbnailURL || !stock) {
-                return res.status(400).json({ error: 'All fields are required' });
-            }
 
             const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
             if (!product) {
@@ -179,13 +241,13 @@ class SellerController {
             }
 
             await product.update({
-                name,
-                price,
-                description,
-                thumbnailURL,
-                salePrice: salePrice || 0,
-                status: status || 'active',
-                stock
+                name: name || product.name,
+                price: price || product.price,
+                description: description || product.description,
+                thumbnailURL: thumbnailURL || product.thumbnailURL,
+                salePrice: salePrice || product.salePrice,
+                status: status ||  product.status,
+                stock: stock || product.stock
             });
             await models.ProductCategory.destroy({ where: { productId: productId }});
 
@@ -235,12 +297,47 @@ class SellerController {
     getOrders = async (req, res) => {
         try {
             const { id } = req.params;
-            const orders = await models.Order.findAll({ where: { shopId: id }});
-            if (!orders) {
-                return res.status(404).json({ error: 'Orders not found' });
+            const ordersDetails = await models.OrderDetail.findAll({ where: { shopId: id }});
+
+            const allOrders = [];
+            const allProducts = [];
+            const seenOrderIds = new Set();
+
+            for (const orderDetail of ordersDetails) {
+                
+                const orders = await models.Order.findAll({ where: { id: orderDetail.orderId } });
+                if (!orders || orders.length === 0) {
+                    return res.status(404).json({ error: 'Orders not found' });
+
+                }
+                for (const order of orders) {
+                    if(seenOrderIds.has(order.id)){
+                        continue;
+                    }
+                    const transaction = await models.Transaction.findOne({ where: { orderId: order.id } });
+                    const buyer = await models.User.findOne({ where: { id: order.buyerId }});
+                    
+                    seenOrderIds.add(order.id);
+                    allOrders.push({
+                        ...order.toJSON(),
+                        buyerName:buyer.fullName,
+                        paymentMethod : transaction.paymentMethod,
+                    });
+                    
+                }
+                const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
+                if (product) {
+                    allProducts.push({
+                        name: product.name,
+                        thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`,
+                        orderId: orderDetail.orderId,
+                    });
+                }
+                            
             }
-            const orderDetails = await models.OrderDetail.findAll({ where: { shopId: id }})
-            return res.status(200).json({ orders, orderDetails });
+    
+            return res.status(200).json({ allOrders, allProducts });
+    
         } catch (error) {
             console.error('Error fetching orders:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -254,17 +351,148 @@ class SellerController {
                 return res.status(400).json({ error: 'Status is required' });
             }
 
-            const order = await models.Order.findOne({ where: { id: orderId, shopId: id }});
+            const order = await models.Order.findOne({ where: { id: orderId }});
             if (!order) {
                 return res.status(404).json({ error: 'Order not found' });
             }
-
             await order.update({
                 status
             });
             return res.status(200).json({ order });
         } catch (error) {
             console.error('Error updating order:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    //Promotion
+    postPromotion = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { imageURL } = req.body;
+            if (!imageURL) {
+                return res.status(400).json({ error: 'All fields are required' });
+            }
+            const shop = await models.Shop.findOne({ where: { id } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+            const newPromotion = await models.Promotion.create({
+                shopId: id,
+                imageURL,
+                status: 'show',
+                banReason: null
+            });
+
+            return res.status(201).json({ promotion: newPromotion });
+        } catch (error) {
+            console.error('Error creating promotion:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    getPromotion = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const promotions = await models.Promotion.findAll({ where: { shopId: id }});
+            if (!promotions) {
+                return res.status(404).json({ error: 'Promotions not found' });
+            }
+            promotions.forEach(promotion => {
+                if (promotion.imageURL) {
+                    promotion.imageURL = `${req.protocol}://${req.get('host')}/${promotion.imageURL}`;
+                }
+            });
+
+            return res.status(200).json({ promotions });
+        } catch (error) {
+            console.error('Error fetching promotions:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    deletePromotion = async (req, res) => {
+        try {
+            const { id, promotionId } = req.params;
+            const promotion = await models.Promotion.findOne({ where: { id: promotionId, shopId: id }});
+            if (!promotion) {
+                return res.status(404).json({ error: 'Promotion not found' });
+            }
+            await promotion.update({
+                status: 'isDeleted'
+            });
+            return res.status(200).json({ message: 'Promotion deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting promotion:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    //Dashboard
+    getDashboard = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const shop = await models.Shop.findOne({ where: { id } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+
+            const completedOrders = await models.Order.findAll({ where: { shopId: id, status: 'completed' }});
+            const orderDetails = await models.OrderDetail.findAll({ where: { orderId: completedOrders.map(order => order.id) }});
+            const totalSales = orderDetails.reduce((total, detail) => total + (detail.priceAtPurchase * detail.quantity), 0);
+            const totalProducts = await models.Product.count({ where: { shopId: id }});
+            const totalOrders = await models.Order.count({ where: { shopId: id }});
+            const totalCategories = await models.Category.count({ where: { shopId: id }});
+
+            return res.status(200).json({
+                totalProducts,
+                totalOrders,
+                totalSales,
+                totalCategories
+            });
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+
+    //Information
+    getInformation = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const shop = await models.Shop.findOne({ where: { id } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+            if (shop.imageUrl) {
+                shop.imageUrl = `${req.protocol}://${req.get('host')}/${shop.imageUrl}`;
+            }
+
+            return res.status(200).json({ shop });
+        } catch (error) {
+            console.error('Error fetching information:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    updateInformation = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { name, imageUrl, address, phoneNumber, email, bankAccount, bankName} = req.body;
+            const shop = await models.Shop.findOne({ where: { id } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+
+            await shop.update({
+                name : name || shop.name,
+                imageUrl : imageUrl || shop.imageUrl,
+                address : address || shop.address,
+                phoneNumber : phoneNumber || shop.phoneNumber,
+                email : email || shop.email,
+                bankAccount : bankAccount || shop.bankAccount,
+                bankName : bankName || shop.bankName,
+            });
+
+            return res.status(200).json({ shop });
+        } catch (error) {
+            console.error('Error updating information:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }

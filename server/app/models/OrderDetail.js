@@ -46,6 +46,12 @@ OrderDetail.init({
     modelName: 'OrderDetail',
     tableName: 'order_details',
     timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['productId', 'shopId', 'orderId'],
+        },
+    ],
 });
 
 module.exports = OrderDetail;
