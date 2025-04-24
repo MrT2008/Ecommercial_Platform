@@ -10,6 +10,7 @@ import Login from "./pages/login";
 import PendingShops from "./pages/admin/pendingShop";
 import Signup from "./pages/signup";
 import BannedShops from "./pages/admin/bannedShop";
+import AnnouncementsPage from "./pages/admin/announcementPage";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -34,10 +35,13 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/account" element={<AccountProfile />} />
         </Route>
+        
         <Route path="/admin" element={<MainLayout />}>
           <Route path="pending-shops" element={<PendingShops />} />
           <Route path="list-all-shops" element={<ListAllShops />} />
           <Route path="banned-shops" element={<BannedShops />} />
+          <Route path="announcements" element={<AnnouncementsPage />} />
+
         </Route>
       </Routes>
     </Router>
