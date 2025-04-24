@@ -1,5 +1,6 @@
 const { models } = require('../models');
 const reuse = require('../reuse/reuse');
+const { Sequelize } = require('sequelize');
 
 class ManagerController {
     // Featured Announcement Management
@@ -116,34 +117,26 @@ class ManagerController {
                     shops: []
                 });
             }
-
-            const shopIds = activeShops.map(shop => shop.id);
+            
+            const shopsWithDetails = await Promise.all(activeShops.map(async (shop) => {
+                const averageRating = await reuse.getAverageRatingsByShopId(shop.id);
+                const totalEvaluations = await reuse.getTotalEvaluationsByShopId(shop.id);
+                const totalProducts = await reuse.getTotalProductsByShopId(shop.id);
     
-            // Fetch all data in parallel
-            const [ratings, evaluations, products] = await Promise.all([
-                reuse.getShopsRatings(shopIds),
-                reuse.getShopsEvaluations(shopIds),
-                reuse.getShopsProducts(shopIds)
-            ]);
-    
-            // Convert fetched data into maps for quick lookups
-            const ratingMap = Object.fromEntries(ratings.map(r => [r.shopId, r.rating]));
-            const evaluationMap = Object.fromEntries(evaluations.map(e => [e.shopId, e.evaluations]));
-            const productMap = Object.fromEntries(products.map(p => [p.shopId, p.products]));
-    
-            // Merge data into shop objects
-            const shopData = activeShops.map(shop => ({
-                ...shop,
-                rating: ratingMap[shop.id] || 0,
-                evaluations: evaluationMap[shop.id] || 0,
-                products: productMap[shop.id] || 0
+                return {
+                    ...shop.toJSON(),
+                    averageRating,
+                    totalEvaluations,
+                    totalProducts
+                };
             }));
     
             res.status(200).json({
                 message: 'Active shops retrieved successfully',
-                shops: shopData
+                shops: shopsWithDetails
             });
         } catch (error) {
+            console.error('Error fetching active shops:', error);
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
         }
@@ -153,7 +146,6 @@ class ManagerController {
     getAllPendingShops = async (req, res) => {
         try {
             const pendingShops = await reuse.getAllPendingShops();
-    
             if (!pendingShops.length) {
                 return res.status(200).json({
                     message: 'No pending shops found',
@@ -161,31 +153,9 @@ class ManagerController {
                 });
             }
     
-            const shopIds = pendingShops.map(shop => shop.id);
-    
-            // Fetch additional data in parallel
-            const [ratings, evaluations, products] = await Promise.all([
-                reuse.getShopsRatings(shopIds),
-                reuse.getShopsEvaluations(shopIds),
-                reuse.getShopsProducts(shopIds)
-            ]);
-    
-            // Create lookup maps for quick access
-            const ratingMap = Object.fromEntries(ratings.map(r => [r.shopId, r.rating]));
-            const evaluationMap = Object.fromEntries(evaluations.map(e => [e.shopId, e.evaluations]));
-            const productMap = Object.fromEntries(products.map(p => [p.shopId, p.products]));
-    
-            // Merge shop data
-            const shopData = pendingShops.map(shop => ({
-                ...shop,
-                rating: ratingMap[shop.id] || 0,
-                evaluations: evaluationMap[shop.id] || 0,
-                products: productMap[shop.id] || 0
-            }));
-    
             res.status(200).json({
                 message: 'Pending shops retrieved successfully',
-                shops: shopData
+                shops: pendingShops
             });
         } catch (error) {
             console.error('Error fetching pending shops:', error);
@@ -198,46 +168,29 @@ class ManagerController {
         try {
             // Fetch all banned shops, including banReason
             const bannedShops = await reuse.getAllBannedShops();
-    
             if (!bannedShops.length) {
                 return res.status(200).json({
                     message: 'No banned shops found',
                     shops: []
                 });
             }
+            
+            const shopsWithDetails = await Promise.all(bannedShops.map(async (shop) => {
+                const averageRating = await reuse.getAverageRatingsByShopId(shop.id);
+                const totalEvaluations = await reuse.getTotalEvaluationsByShopId(shop.id);
+                const totalProducts = await reuse.getTotalProductsByShopId(shop.id);
     
-            // Extract shop IDs
-            const shopIds = bannedShops.map(shop => shop.id);
-    
-            // Fetch additional data in parallel
-            const [ratings, evaluations, products] = await Promise.all([
-                reuse.getShopsRatings(shopIds),
-                reuse.getShopsEvaluations(shopIds),
-                reuse.getShopsProducts(shopIds)
-            ]);
-    
-            // Convert data to lookup maps for fast access
-            const ratingMap = Object.fromEntries(ratings.map(r => [r.shopId, r.rating]));
-            const evaluationMap = Object.fromEntries(evaluations.map(e => [e.shopId, e.evaluations]));
-            const productMap = Object.fromEntries(products.map(p => [p.shopId, p.products]));
-    
-            // Merge shop data
-            const shopData = bannedShops.map(shop => ({
-                id: shop.id,
-                name: shop.name,
-                phone: shop.phone,
-                address: shop.address,
-                email: shop.email,
-                status: shop.status,
-                banReason: shop.banReason || 'Unknown',
-                rating: ratingMap[shop.id] || 0,
-                evaluations: evaluationMap[shop.id] || 0,
-                products: productMap[shop.id] || 0,
+                return {
+                    ...shop.toJSON(),
+                    averageRating,
+                    totalEvaluations,
+                    totalProducts
+                };
             }));
     
             res.status(200).json({
-                message: 'Banned shops retrieved successfully',
-                shops: shopData
+                message: 'Active shops retrieved successfully',
+                shops: shopsWithDetails
             });
         } catch (error) {
             console.error('Error fetching banned shops:', error);
@@ -255,9 +208,22 @@ class ManagerController {
                 return res.status(404).json({ error: 'Shop not found' });
             }
 
-            // waiting for product, promotion, comments, categories,...
+            const averageRating = await reuse.getAverageRatingsByShopId(shop.id);
+            const totalEvaluations = await reuse.getTotalEvaluationsByShopId(shop.id);
+            const totalProducts = await reuse.getTotalProductsByShopId(shop.id);
+            // const products
     
-            res.status(200).json({ message: 'Shop retrieved successfully', shop });
+            // waiting for product, promotion, comments, categories,...
+
+            res.status(200).json({
+                message: 'Active shops retrieved successfully',
+                shops: {
+                    ...shop.toJSON(),
+                    averageRating,
+                    totalEvaluations,
+                    totalProducts
+                }
+            });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
@@ -455,8 +421,9 @@ class ManagerController {
     deletePromotionById = async (req, res) => {
         try {
             const { id } = req.params;
+            const { reason } = req.body;
 
-            const deletedPromotion = await reuse.deletePromotionById(id);
+            const deletedPromotion = await reuse.deletePromotionById(id, reason);
             if (deletedPromotion.error) {
                 return res.status(404).json({ error: deletedPromotion.error });
             }
@@ -520,17 +487,8 @@ class ManagerController {
             if (moderators.length === 0) {
                 return res.status(404).json({ error: 'No moderators found' });
             }
-            
-            const moderatorsResponse = moderators.map(moderator => ({
-                id: moderator.id,
-                email: moderator.email,
-                fullName: moderator.fullName,
-                userStatus: moderator.userStatus,
-                imageURL: moderator.imageURL,
-                roles: ['moderator'],
-            }));
 
-            res.status(200).json({ message: 'Moderators retrieved successfully', moderatorsResponse });
+            res.status(200).json({ message: 'Moderators retrieved successfully', moderators });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
@@ -541,8 +499,9 @@ class ManagerController {
         const t = await models.User.sequelize.transaction();
         try {
             const { id } = req.params;
+            const { reason } = req.body;
 
-            const bannedModerator = await reuse.banUserById(id, { transaction: t });
+            const bannedModerator = await reuse.banUserById(id, reason, { transaction: t });
 
             if (bannedModerator.error) {
                 await t.rollback();
@@ -550,18 +509,9 @@ class ManagerController {
                 return res.status(statusCode).json({ error: bannedModerator.error });
             }
 
-            const bannedModeratorResponse = {
-                id: bannedModerator.id,
-                email: bannedModerator.email,
-                fullName: bannedModerator.fullName,
-                userStatus: bannedModerator.userStatus,
-                imageURL: bannedModerator.imageURL,
-                roles: ['moderator'],
-            };
-
             await t.commit();
 
-            res.status(200).json({ message: 'User banned successfully', bannedModeratorResponse });
+            res.status(200).json({ message: 'User banned successfully', bannedModerator });
         } catch (error) {
             await t.rollback();
             console.error(error);

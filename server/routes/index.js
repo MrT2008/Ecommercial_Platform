@@ -8,7 +8,8 @@ function route (app) {
   app.use('/api/auth', auth);
 
   // Protected routes
-  app.use('/manager', authenticateToken, manager);
+  // app.use('/manager', authenticateToken, manager);
+  app.use('/manager', manager);
   app.use('/seller', seller)
   app.use('/', authenticateToken, sites);
 
