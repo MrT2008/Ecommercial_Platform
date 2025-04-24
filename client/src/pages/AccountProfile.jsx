@@ -74,10 +74,6 @@ const AccountProfile = () => {
                   <span className="text-gray-500 w-40">Email</span>
                   <span className="text-black">{profile.email}</span>
                 </div>
-                <div className="flex items-center mb-6">
-                  <span className="text-gray-500 w-40">Phone Number</span>
-                  <span className="text-black">{profile.phone}</span>
-                </div>
                 <div className="flex justify-end">
                   <a
                     href="#"
