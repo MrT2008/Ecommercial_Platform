@@ -19,7 +19,7 @@ const AccountProfile = () => {
   const [profile, setProfile] = useState({
     username: "ntpt12345",
     email: "ntpt123456789@gmail.com",
-    phone: "02343256789",
+    // phone: "02343256789",
     image:
       "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474187SoY/anh-avatar-chu-meo-dang-yeu_051724941.jpg", // Replace with actual image path
   });
