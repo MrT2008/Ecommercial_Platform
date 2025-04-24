@@ -1,25 +1,27 @@
-const User = require('../models/User');
-const Role = require('../models/Role');
-const UserRole = require('../models/UserRole');
-const sequelize = require('./dbConfig'); 
+const User = require("../models/User");
+const Role = require("../models/Role");
+const UserRole = require("../models/UserRole");
+const sequelize = require("../../configs/dbConfig");
 
 const createUser = async () => {
   const t = await sequelize.transaction();
   try {
-    const user = await User.create({
-        email: 'manager@gmail.com',
-        password: 'manager',
+    const user = await User.create(
+      {
+        email: "manager@gmail.com",
+        password: "manager",
         googleId: null,
-      }, 
+      },
       { transaction: t }
     );
 
-    const managerRole = await Role.findOne({ where: { name: 'manager' } });
+    const managerRole = await Role.findOne({ where: { name: "manager" } });
     if (!managerRole) {
       throw new Error("Default role 'manager' not found");
     }
 
-    await UserRole.create({
+    await UserRole.create(
+      {
         userId: user.id,
         roleId: managerRole.id,
       },
@@ -27,10 +29,10 @@ const createUser = async () => {
     );
 
     await t.commit();
-    console.log('User created:', user.toJSON());
+    console.log("User created:", user.toJSON());
   } catch (error) {
     await t.rollback();
-    console.error('Error creating user:', error);
+    console.error("Error creating user:", error);
   } finally {
     await sequelize.close();
   }

@@ -1,54 +1,57 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../configs/dbConfig');
-const User = require('./User')
+const { Model, DataTypes } = require("sequelize");
+const sequelize = require("../configs/dbConfig");
+const User = require("./User");
 
 class Announcement extends Model {}
 
-Announcement.init({
+Announcement.init(
+  {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
     senderId: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        references: {
-            model: User,
-            key: 'id'
-        }
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      references: {
+        model: User,
+        key: "id",
+      },
     },
     title: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: true
-        }
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: true,
       },
+    },
     imageURL: {
-        type: DataTypes.STRING, 
-        allowNull: false,
-        validate: {
-            isURL: true,
-            notEmpty: true
-        }
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isURL: true,
+        notEmpty: true,
+      },
     },
     script: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: true
-        }
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+      },
     },
     isActive: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
-    }
-}, {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+  },
+  {
     sequelize,
-    modelName: 'Announcement',
-    tableName: 'announcements',
+    modelName: "Announcement",
+    tableName: "announcements",
     timestamps: true,
-});
+  }
+);
 
 module.exports = Announcement;
