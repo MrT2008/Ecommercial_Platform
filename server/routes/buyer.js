@@ -26,5 +26,7 @@ router.get('/:buyerId/shippingInfo', BuyerController.getAllShippingInfo) //.
 router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippingInformation) //.
 router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
 
+router.post('/:buyerId/shop/create', BuyerController.createNewShop)
+
 
 module.exports = router;

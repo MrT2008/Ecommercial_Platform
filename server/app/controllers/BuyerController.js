@@ -1,4 +1,5 @@
 
+const { where } = require('sequelize');
 const { models } = require('../models');
 const reuse = require('../reuse/reuse');
 
@@ -83,6 +84,17 @@ class BuyerController {
                 return res.status(400).json({ message: 'User not  found' });
             }
 
+            const existingPaymentMethod = await models.PaymentMethod.findOne({
+                where: {
+                    userId: buyerId,
+                    bankName, bankAccountNumber
+                }
+            })
+
+            if (existingPaymentMethod) {
+                return res.status(400).json({ message: 'Duplicated payment method' });
+            }
+
             if (inUsed) {
                 const previousDefaultMethod = await models.PaymentMethod.findOne({
                     where: {
@@ -97,6 +109,7 @@ class BuyerController {
                     })
                 }
             }
+
 
             const newPaymentMethod = await models.PaymentMethod.create({
                 userId: buyerId,
@@ -153,8 +166,10 @@ class BuyerController {
 
             const updatedPaymentMethod = await models.PaymentMethod.findByPk(paymentId)
             if (!updatedPaymentMethod) {
-                return { error: 'Payment method not found' };
+                return res.status(500).json({ error: 'Payment method not found' });
             }
+
+
 
             await updatedPaymentMethod.update({
                 inUsed: true
@@ -181,18 +196,33 @@ class BuyerController {
                 return res.status(405).json({ error: 'Doesnt have enough item to add to cart' });
             }
 
-            const cart = await models.Cart.create({
-                userId: buyerId, 
-                productId, quantity
-            }) 
-            if (!cart) {
-                return res.status(400).json({ error: 'failed to add item to cart' });
+            const existingCart = await models.Cart.findOne({
+                where: {
+                    userId: buyerId,
+                    productId: productId
+                }
+            })
+
+            if (existingCart) {
+                const newQuantity = existingCart.quantity +  quantity
+                existingCart.update({
+                    quantity: newQuantity
+                })
+            } else {
+                const cart = await models.Cart.create({
+                    userId: buyerId, 
+                    productId, quantity
+                }) 
+                if (!cart) {
+                    return res.status(400).json({ error: 'failed to add item to cart' });
+                }
             }
+            
             await product.update({
                 stock: product.stock - quantity
             })
             
-            return res.status(200).json({message: 'Add item to cart sucessfully', cart})
+            return res.status(200).json({message: 'Add item to cart sucessfully'})
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
@@ -326,6 +356,19 @@ class BuyerController {
             const {buyerId} = req.params
             const {receiverName, address, phone, status} = req.body
 
+            const existingInfo  = await models.ShipInfo.findOne({
+                where: {
+                    userId: buyerId,
+                receiverName: receiverName,
+                address: address,
+                phone: phone
+                }
+            })
+
+            if (existingInfo) {
+                return res.status(404).json({ error: 'Duplicate shipping information', existingInfo});
+            }
+
             const newShipInfor = await models.ShipInfo.create({
                 userId: buyerId,
                 receiverName: receiverName,
@@ -335,7 +378,7 @@ class BuyerController {
             })
 
             if (!newShipInfor) {
-                return res.status(404).json({ error: 'Cant create new shipping information'});
+                return res.status(400).json({ error: 'Cant create new shipping information'});
             }
 
             return res.status(200).json({message: "Shipping information successfully created"})
@@ -370,6 +413,7 @@ class BuyerController {
             const {buyerId} = req.params;
             const {id} = req.body;
 
+
             const previousDefaultShippingInformation = await models.ShipInfo.findOne({
                 where: {
                     userId: buyerId,
@@ -383,9 +427,14 @@ class BuyerController {
                 })
             }
 
-            const updatedShippingInformation = await models.ShipInfo.findByPk(id)
+            const updatedShippingInformation = await models.ShipInfo.findOne({
+                where: {
+                    id,
+                    status: !"delete"
+                }
+            })
             if (!updatedShippingInformation) {
-                return { error: 'Shipping Information not found' };
+                return res.status(400).json({ error: 'Shipping Information not found' });
             }
 
             await updatedShippingInformation.update({
@@ -421,6 +470,46 @@ class BuyerController {
     }
 
     //post shop
+    createNewShop = async (req, res) => {
+        try {
+            const {buyerId} = req.params;
+            const {name, phone, address, email, bankName, bankAccount} = req.body
+
+            const user = await models.User.findOne({
+                where:
+                {
+                    id: buyerId,
+                }
+            })
+
+            if (!user) {
+                return res.status(400).json({ message: 'User not  found' });
+            }
+
+            const existingShop = await models.Shop.findOne({
+                where: {
+                    ownerId: buyerId,
+                    name, phone, address, email
+                }
+            })
+            if (existingShop) {
+                return res.status(400).json({ message: 'Duplicated shop' });
+            }
+
+            const newShop = await models.Shop.create({
+                ownerId: buyerId,
+                name, phone, address, email, bankName, bankAccount
+            })
+            if (!newShop) {
+                return res.status(400).json({ message: 'Failed to create new shop' });
+            }
+
+            return res.status(200).json({ message: 'Shop created successfully', newShop });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
 
 }
 

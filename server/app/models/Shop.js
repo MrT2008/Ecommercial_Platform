@@ -14,7 +14,6 @@ Shop.init({
     ownerId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        unique: true,
         references: {
           model: User,
           key: 'id',
@@ -38,7 +37,6 @@ Shop.init({
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
             isEmail: true,
         }
