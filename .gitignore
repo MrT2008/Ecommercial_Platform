@@ -1,3 +1,4 @@
 server/.env
 server/Note.txt
 .env
+server/node_modules
