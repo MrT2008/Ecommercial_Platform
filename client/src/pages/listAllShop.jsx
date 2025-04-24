@@ -46,6 +46,7 @@ const ListAllShops = () => {
         try {
             const response = await axios.get('http://localhost:8080/seller/getAllShop');
             setShops(response.data);
+            console.error('OKKKKKKKKKKKKKKKKKKKKKKK');
         } catch (error) {
             console.error('Error fetching shops:', error);
         }
