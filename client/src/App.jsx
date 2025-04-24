@@ -10,6 +10,9 @@ import Login from "./pages/login";
 import PendingShops from "./pages/pendingShop";
 import Signup from "./pages/signup";
 import ProductDetails from "./pages/ProductDetails";
+import Category from "./pages/seller/Category";
+import AllProduct from "./pages/seller/AllProduct";
+import ShopInformation from "./pages/seller/shopInformation";
 function App() {
   const [count, setCount] = useState(0);
   const [array, setArray] = useState([]);
@@ -39,9 +42,16 @@ function App() {
           <Route path="/product/:id" element={<ProductDetails />} /> 
           {/* http://localhost:5173/product/1 */}
         </Route>
+
         <Route path="/admin" element={<MainLayout />}>
           <Route path="pending-shops" element={<PendingShops />} />
           <Route path="list-all-shops" element={<ListAllShops />} />
+        </Route>
+
+        <Route path="/seller" element={<MainLayout />}>
+          <Route path="category" element={<Category />} />
+          <Route path="all-product" element={<AllProduct />} />
+          <Route path="shop-information" element={<ShopInformation />} />
         </Route>
       </Routes>
     </Router>
