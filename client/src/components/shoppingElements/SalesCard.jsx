@@ -2,8 +2,9 @@ import PropTypes from 'prop-types';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 // import { faHeart as regularHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart } from "@fortawesome/free-solid-svg-icons";
-
+import { useNavigate } from 'react-router-dom';
 const FlashSalesCard = ({
+    id = "1",
     productName = "AK-900 Wired Keyboard",
     salePrice = 960,
     originalPrice = 1160,
@@ -12,6 +13,7 @@ const FlashSalesCard = ({
     reviewCount = 75,
     imageUrl = "/api/placeholder/400/320"
 }) => {
+    const navigate = useNavigate();
     // Calculate stars for rating
     const renderStars = () => {
         const stars = [];
@@ -24,9 +26,21 @@ const FlashSalesCard = ({
         }
         return stars;
     };
+    // Handle card click to navigate to product details
+    const handleCardClick = () => {
+        navigate(`/product/${id}`);
+    };
+
+    // Handle wishlist button click without triggering navigation
+    const handleWishlistClick = (e) => {
+        e.stopPropagation(); // Prevent the card click event
+        // Add wishlist functionality here
+        console.log("Added to wishlist");
+    };
+
 
     return (
-        <div className="max-w-xs bg-gray-50 rounded-lg overflow-hidden shadow">
+        <div className="max-w-xs bg-gray-50 rounded-lg overflow-hidden shadow" onClick={handleCardClick}>
             {/* Product Image Container */}
             <div className="relative p-4 bg-gray-100">
                 {/* New Tag */}
@@ -37,7 +51,7 @@ const FlashSalesCard = ({
                 )}
 
                 {/* Wishlist Button */}
-                <button className="absolute top-4 right-4 bg-white p-1 px-2 rounded-full">
+                <button className="absolute top-4 right-4 bg-white p-1 px-2 rounded-full" onClick={handleWishlistClick}>
                     <FontAwesomeIcon icon={faHeart} size="lg" className="text-gray-300" />
                 </button>
 
@@ -77,6 +91,7 @@ const FlashSalesCard = ({
     );
 };
 FlashSalesCard.propTypes = {
+    id: PropTypes.string,
     productName: PropTypes.string,
     salePrice: PropTypes.number,
     originalPrice: PropTypes.number,
