@@ -46,6 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 if (token) {
                     setSession(true);
                     setUser(JSON.parse(user || '{}'));
+                    setError('');
                 } else {
                     setSession(false);
                     setUser(null);
@@ -143,6 +144,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     await AsyncStorage.removeItem('user');
     await AsyncStorage.removeItem('token');
+    setError('');
   };
 
   return (
