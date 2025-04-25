@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const { models } = require('../models');
 const sendGmailToUser = require('../utilities/sendGmail');
+const sequelize = require('sequelize');
+const OrderDetail = require('../models/OrderDetail');
 
 // FEATURES MANAGEMENT
 const sentAnnouncement = async (senderId, title, imageURL, script, options = {}) => {
@@ -135,7 +137,9 @@ const rejectShopById = async (id, options = {}) => {
             return { message: 'Shop is already inactive', shop };
         }
 
-        await shop.destroy(shop, options);
+        await shop.update({
+            status: 'inactive'
+        }, options);
 
         return { message: 'Shop rejected successfully' };
     } catch (error) {
@@ -191,45 +195,48 @@ const unbanShopById = async (id, options = {}) => {
 }
 
 const getAverageRatingsByShopId = async (shopId) => {
-    try {
-        const reviews = await models.Review.findOne({
-            attributes: [
-                [Sequelize.fn('AVG', Sequelize.col('rating')), 'averageRating']
-            ],
-            include: [
-                {
-                    model: Product,
-                    attributes: [],
-                    where: { shopId }, // Filter by shop ID
-                }
-            ],
-            raw: true
-        });
+  try {
+    const shopProductSolds = await models.OrderDetail.findAll({
+      where: { shopId },
+      include: {
+        model: models.Review,
+        as: 'reviewProduct',
+        attributes: ['rating'],
+        required: true,
+      },
+    });
 
-        return reviews.averageRating ? parseFloat(reviews.averageRating).toFixed(2) : 0;
-    } catch (error) {
-        console.error(error);
-        return { error: 'Internal Server Error' };
-    }
-}
+    // If there are no reviews, return null or 0 as appropriate
+    if (shopProductSolds.length === 0) return 0;
+
+    // Calculate average
+    const totalRating = shopProductSolds.reduce((sum, item) => {
+      return sum + item.reviewProduct.rating;
+    }, 0);
+
+    const averageRating = totalRating / shopProductSolds.length;
+
+    return averageRating;
+  } catch (err) {
+    console.error('Failed to get average ratings:', err);
+    throw err;
+  }
+};
+
 
 const getTotalEvaluationsByShopId = async (shopId) => {
     try {
-        const result = await models.Review.findOne({
-            attributes: [
-                [Sequelize.fn('COUNT', Sequelize.col('Review.id')), 'totalEvaluations']
-            ],
-            include: [
-                {
-                    model: Product,
-                    attributes: [], // We only need filtering, not product details
-                    where: { shopId }
-                }
-            ],
-            raw: true
+        const shopProductSolds = await models.OrderDetail.findAll({
+            where: { shopId },
+            include: {
+              model: models.Review,
+              as: 'reviewProduct',
+              attributes: ['rating'],
+              required: true,
+            },
         });
-
-        return result.totalEvaluations || 0;
+        
+        return shopProductSolds.length === 0 ? 0 : shopProductSolds.length;
     } catch (error) {
         console.error('Error fetching total evaluations:', error);
         return 0;
@@ -238,20 +245,17 @@ const getTotalEvaluationsByShopId = async (shopId) => {
 
 const getTotalProductsByShopId = async (shopId) => {
     try {
-        const result = await Product.findOne({
-            attributes: [
-                [Sequelize.fn('COUNT', Sequelize.col('id')), 'totalProducts']
-            ],
+        const count = await models.Product.count({
             where: { shopId },
-            raw: true
         });
 
-        return result.totalProducts || 0;
+        return count;
     } catch (error) {
         console.error('Error fetching total products:', error);
         return 0;
     }
 };
+
 
 // PRODUCT MANAGEMENT
 const getAllProducts = async () => {
@@ -310,17 +314,50 @@ const unbanProductById = async (id, options = {}) => {
 
 // USER MANAGEMENT
 const getAllUserByRole = async (role) => {
-    return await models.User.findAll({ where: { role } });
+    try {
+        const modRoleId = await models.Role.findOne({ where: { name: role } });
+        if (!modRoleId) {
+            return { error: 'Role not found' };
+        }
+
+        const userRoles =  await models.UserRole.findAll({
+            where: { roleId: modRoleId.id }
+        });
+
+        const moderators = await Promise.all(
+            userRoles.map(async (userRole) => {
+              return await models.User.findOne({
+                where: {
+                  id: userRole.userId,
+                  isActive: true,
+                },
+              });
+            })
+          );
+      
+          // Remove any nulls (users not found or not active)
+          const activeModerators = moderators.filter(user => user !== null);
+
+        return activeModerators;
+            
+    } catch (error) {
+        console.error(error);
+        return { error: 'Internal Server Error' };
+    }
 }
 
-const banUserById = async (id, options = {}) => {
+const banUserById = async (id, reason, options = {}) => {
     try {
         const user = await models.User.findByPk(id, options);
         if (!user) {
             return { error: 'User not found' };
         }
 
-        const updatedUser = await user.update({ isBanned: true }, options);
+        if (user.isBanned) {
+            return { message: 'User is already banned', user };
+        }
+
+        const updatedUser = await user.update({ isActive: false, banReason: reason }, options);
 
         return updatedUser;
     } catch (error) {
@@ -392,14 +429,14 @@ const createPromotion = async (shopId, title, imageURL, script, options = {}) =>
     }
 };
 
-const deletePromotionById = async (id) => {
+const deletePromotionById = async (id, reason) => {
     try {
         const promotion = await models.Promotion.findByPk(id);
         if (!promotion) {
             return { error: 'Promotion not found' };
         }
 
-        await promotion.destroy();
+        await promotion.update({ isActive: false, banReason: reason });
 
         return { message: 'Promotion deleted successfully' };
     } catch (error) {
@@ -424,6 +461,9 @@ module.exports = {
     rejectShopById,
     banShopById,
     unbanShopById,
+    getAverageRatingsByShopId,
+    getTotalEvaluationsByShopId,
+    getTotalProductsByShopId,
     getAllProducts,
     getProductById,
     banProductById,

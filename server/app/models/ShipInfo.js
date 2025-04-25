@@ -19,9 +19,12 @@ ShipInfo.init({
             key: 'id',
         },
     },
-    inUsed: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
+    status: {
+        type: DataTypes.ENUM('active', 'inactive', 'delete'),
+        defaultValue: 'inactive',
+        validate: {
+            isIn: [['active', 'inactive', 'delete']],
+        }
     },
     receiverName: {
         type: DataTypes.STRING,
