@@ -90,13 +90,13 @@ function App() {
           {/* Add more protected routes here */}
         </Route>
         {/* Public routes */}
-        <Route path="/" element={<MainLayout/>} >
+        {/* <Route path="/" element={<MainLayout/>} >
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} />
-        </Route>
+        </Route> */}
         
         {/* Protected routes */}
-        <Route element={<MainLayout />}>
+        {/* <Route element={<MainLayout />}>
           <Route 
             index 
             element={
@@ -104,9 +104,9 @@ function App() {
                 <HomePage />
               </PrivateRoute>
             } 
-          />
+          /> */}
           {/* Add more protected routes here */}
-        </Route>
+        {/* </Route> */}
       </Routes>
     </Router>
   );
