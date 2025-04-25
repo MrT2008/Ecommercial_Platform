@@ -2,33 +2,31 @@ const express = require('express');
 const router = express.Router();
 const BuyerController = require('../app/controllers/BuyerController');
 
-//GET
-//related to user information
-router.get('/', BuyerController.viewProfileInformation)
-router.get('/payment', BuyerController.viewAllPaymentMethod)
+//Profile
+router.get('/:buyerId/viewProfile', BuyerController.viewProfileInformation) //.
+router.put('/:buyerId/editProfile', BuyerController.editProfileInformation) //.
 
-//related to shopping function
-router.get('/cart', BuyerController.viewCart)
+//PaymentMethod
+router.post('/:buyerId/payment/', BuyerController.addPaymentMethod) //.
+router.get('/:buyerId/payment/', BuyerController.viewAllPaymentMethod) //.
+router.put('/:buyerId/payment/setdefault', BuyerController.setDefaultPaymentMethod) //.
+router.put('/:buyerId/payment/remove/', BuyerController.removePaymentMethod) //.
 
-//-----------------------------------------------------------------------
+//cart
+router.post('/:buyerId/product/addToCart', BuyerController.addProductToCart) //.
+router.get('/:buyerId/cart', BuyerController.viewCart) //.
+router.put('/:buyerId/cart/remove/', BuyerController.removeProductFromCart) //.
 
-//PUT
-//related to user information
-router.put('/payment/add', BuyerController.addPaymentMethod)
+//Checkout
+router.post('/:buyerId/checkout', BuyerController.proceedWithCheckout) //.
 
-//related to shopping function
-router.put('/product/:productId', BuyerController.addProductToCart)
-router.put('/checkout', BuyerController.proceedWithCheckout)
+//Shipping Information
+router.post('/:buyerId/shippingInfo', BuyerController.addShippingInfo) //. 
+router.get('/:buyerId/shippingInfo', BuyerController.getAllShippingInfo) //.
+router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippingInformation) //.
+router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
 
-//-----------------------------------------------------------------------
+router.post('/:buyerId/shop/create', BuyerController.createNewShop)
 
-//POST
-//related to user information
-router.post('/', BuyerController.editProfileInformation)
-router.post('/payment/remove/:paymentId', BuyerController.removePaymentMethod)
-router.post('/payment/setdefault/:paymentId', BuyerController.setDefaultPaymentMethod)
-
-//related to shopping function
-router.post('/cart/remove/:productId', BuyerController.removeProductFromCart)
 
 module.exports = router;

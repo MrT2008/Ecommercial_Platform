@@ -1,23 +1,37 @@
 
+const { where } = require('sequelize');
 const { models } = require('../models');
 const reuse = require('../reuse/reuse');
 
 class BuyerController {
     viewProfileInformation = async (req, res) => {
         try {
-            const {buyerId} = req.params
-            const user = await models.User.findByPk(buyerId)
-            return res.status(200).json({message: 'User found successfully', user})
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({ message: 'Internal Server Error' });
-        }
+            const { buyerId } = req.params;
+                    console.log(buyerId)
+                    if (!buyerId) {
+                        return res.status(400).json({ error: 'User ID is required' });
+                    }
+                    
+                    const User = await models.User.findOne({ where: { id: buyerId } });
+        
+                    if (!User) {
+                        return res.status(404).json({ error: 'User not found' });
+                    }
+                    const UserData = User.toJSON();
+        
+                    return res.status(200).json({
+                        data: { User: UserData}
+                    });
+            } catch (error) {
+                console.error('Error fetching User:', error);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
     }
 
     editProfileInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
-            const {username, email, phoneNumber, imageURL} = req.body
+            const {fullName, email, phoneNumber, imageURL} = req.body
 
             const user = await models.User.findByPk(buyerId)
             if (!user) {
@@ -25,9 +39,8 @@ class BuyerController {
             }
 
             await user.update({
-                username: username,
+                fullName: fullName,
                 email: email,
-                phone: phoneNumber, //user thieu phone number r 
                 imageURL: imageURL
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
@@ -41,7 +54,7 @@ class BuyerController {
         try {
             const {buyerId} = req.params
 
-            paymentMethodList = await models.PaymentMethod.findAll({
+            const paymentMethodList = await models.PaymentMethod.findAll({
                 where: {
                     userId: buyerId
                 }
@@ -58,15 +71,53 @@ class BuyerController {
     addPaymentMethod = async (req, res) =>{ 
         try {
             const {buyerId} = req.params;
-            const {bankName, bankAccountNumber} = req.body
+            const {bankName, bankAccountNumber, inUsed} = req.body
 
-            const newPaymentMethod = models.PaymentMethod.create({
-                userId: buyerId,
-                bankName: bankName,
-                bankAccountNumber: bankAccountNumber
+            const user = await models.User.findOne({
+                where:
+                {
+                    id: buyerId
+                }
             })
 
-            return res.status(200).json({ message: 'Create payment method sucessfully', newPaymentMethod });
+            if (!user) {
+                return res.status(400).json({ message: 'User not  found' });
+            }
+
+            const existingPaymentMethod = await models.PaymentMethod.findOne({
+                where: {
+                    userId: buyerId,
+                    bankName, bankAccountNumber
+                }
+            })
+
+            if (existingPaymentMethod) {
+                return res.status(400).json({ message: 'Duplicated payment method' });
+            }
+
+            if (inUsed) {
+                const previousDefaultMethod = await models.PaymentMethod.findOne({
+                    where: {
+                        userId: buyerId,
+                        inUsed: true,
+                        isDeleted: false
+                    }
+                })
+                if (previousDefaultMethod) {
+                    await previousDefaultMethod.update({
+                        inUsed: false
+                    })
+                }
+            }
+
+
+            const newPaymentMethod = await models.PaymentMethod.create({
+                userId: buyerId,
+                bankName: bankName,
+                bankAccountNumber: bankAccountNumber,
+                inUsed: inUsed
+            })
+            return res.status(200).json({ message: 'Create payment method sucessfully'});
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
@@ -75,14 +126,18 @@ class BuyerController {
 
     removePaymentMethod = async (req, res) =>{
         try {
-            const {buyerId, paymentId} = req.params;
+            const {buyerId} = req.params;
 
-            const paymentMethodToBeDeleted = await models.PaymentMethod.findByPk(id);
+            const {paymentId} = req.body;
+
+            const paymentMethodToBeDeleted = await models.PaymentMethod.findByPk(paymentId);
             if (!paymentMethodToBeDeleted) {
                 return { error: 'Payment method not found' };
             }
+            await paymentMethodToBeDeleted.update({
+                isDeleted: true
+            })
 
-            await paymentMethodToBeDeleted.destroy()
             return res.status(200).json({ message: 'Payment method removed sucessfully' });
         } catch (error) {
             console.error(error);
@@ -92,21 +147,29 @@ class BuyerController {
 
     setDefaultPaymentMethod = async (req, res) =>{
         try {
-            const {buyerId, paymentId} = req.params;
+            const {buyerId} = req.params;
+            const {paymentId} = req.body;
 
-            await models.PaymentMethod.findOne({
+            const previousDefaultMethod = await models.PaymentMethod.findOne({
                 where: {
                     userId: buyerId,
-                    inUsed: true
+                    inUsed: true,
+                    isDeleted: false
                 }
-            }).update({
-                inUsed: false
             })
 
-            const updatedPaymentMethod = models.PaymentMethod.findByPk(paymentId)
-            if (!paymentMethodToBeDeleted) {
-                return { error: 'Payment method not found' };
+            if (previousDefaultMethod) {
+                await previousDefaultMethod.update({
+                    inUsed: false
+                })
             }
+
+            const updatedPaymentMethod = await models.PaymentMethod.findByPk(paymentId)
+            if (!updatedPaymentMethod) {
+                return res.status(500).json({ error: 'Payment method not found' });
+            }
+
+
 
             await updatedPaymentMethod.update({
                 inUsed: true
@@ -124,7 +187,7 @@ class BuyerController {
             const {buyerId} = req.params;
             const {productId, quantity} = req.body;
 
-            const product = models.Product.findByPk(productId)
+            const product = await models.Product.findByPk(productId)
             if (!product) {
                 return res.status(400).json({ error: 'Found no product with this id' });
             }
@@ -133,15 +196,33 @@ class BuyerController {
                 return res.status(405).json({ error: 'Doesnt have enough item to add to cart' });
             }
 
-            const cart = await models.Cart.create({buyerId, productId, quantity}) 
-            if (!cart) {
-                return res.status(400).json({ error: 'failed to add item to cart' });
+            const existingCart = await models.Cart.findOne({
+                where: {
+                    userId: buyerId,
+                    productId: productId
+                }
+            })
+
+            if (existingCart) {
+                const newQuantity = existingCart.quantity +  quantity
+                existingCart.update({
+                    quantity: newQuantity
+                })
+            } else {
+                const cart = await models.Cart.create({
+                    userId: buyerId, 
+                    productId, quantity
+                }) 
+                if (!cart) {
+                    return res.status(400).json({ error: 'failed to add item to cart' });
+                }
             }
+            
             await product.update({
                 stock: product.stock - quantity
             })
             
-            return res.status(200).json({message: 'Add item to cart sucessfully', cart})
+            return res.status(200).json({message: 'Add item to cart sucessfully'})
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
@@ -150,11 +231,13 @@ class BuyerController {
 
     removeProductFromCart = async (req, res) => {
         try {
-            const {buyerId, productId} = req.params;
+            const {buyerId} = req.params;
+            const {productId} = req.body;
 
             const productToBeRemoved = await models.Cart.findOne({
                 where: {
                     userId: buyerId,
+                    productId: productId
                 }
             })
 
@@ -162,7 +245,9 @@ class BuyerController {
                 return res.status(404).json({ error: 'Product not found in cart' });
             }
 
-            await productToBeRemoved.destroy()
+            await productToBeRemoved.update({
+                isDeleted: true
+            })
 
             const productToBeUpdated = await models.Product.findByPk(productId)
             await productToBeUpdated.update({
@@ -179,13 +264,14 @@ class BuyerController {
     viewCart = async (req, res) => {
         try {
             const {buyerId} = req.params
-            const cartItems = models.Cart.findAll({
+            const cartItems = await models.Cart.findAll({
                 where: {
                     userId: buyerId,
                 }
             })
+            const responseMessage = (!cartItems ? "No item in cart" : "Item in cart found successfully")
 
-            return res.status(200).json({message: 'Item in cart found successfully', cartItems})
+            return res.status(200).json({message: responseMessage , cartItems})
         } catch (error) {
             console.log(error)
             res.status(500).json({ message: 'Internal Server Error' });
@@ -195,50 +281,232 @@ class BuyerController {
     proceedWithCheckout = async (req, res) => {
         try {
             const {buyerId} = req.params
-
-            const cartItems = models.Cart.findAll({
+            const {paymentMethod} = req.body
+            const cartItems = await models.Cart.findAll({
                 where: {
                     userId: buyerId,
+                    isDeleted: false
                 }
             })
+
             if (cartItems.length === 0) {
                 return res.status(404).json({ error: 'No product in cart to proceed' });
             }
             await models.Order.create({
-                buyerId: buyerId
+                buyerId: buyerId,
+                totalPrice: 0
             })
             const orderJustCreated = await models.Order.findOne({
                 where: {
-                    userId: buyerId,
+                    buyerId: buyerId,
                 },
                 order: [ [ 'createdAt', 'DESC' ]]
             })
             let priceTotal = 0
-            const orderItems = await Promise.all(
-                cartItems.map(async (cartItem) => {
-                    priceTotal += cartItem.price
-                    const orderItem = await models.OrderDetail.create({
-                        orderId: orderJustCreated.id,
-                        productId: cartItem.productId,
-                        quantity: cartItem.quantity,
-                        priceAtPurchase: cartItem.price
-                    });
-                    return orderItem
+
+            for (const cartItem of cartItems) {
+                console.log(cartItem.salePrice)
+                
+
+                const productInCart = await models.Product.findByPk(cartItem.productId)
+                
+                if (!productInCart) {
+                    return res.status(404).json({ error: 'Not found product in cart'});
+                }
+
+                const orderItem = await models.OrderDetail.create({
+                    orderId: orderJustCreated.id,
+                    productId: cartItem.productId,
+                    shopId: productInCart.shopId,
+                    quantity: cartItem.quantity,
+                    priceAtPurchase: cartItem.quantity * productInCart.salePrice
                 })
+                priceTotal += orderItem.priceAtPurchase
+            }
+
+            await models.Cart.update(
+                {
+                    isDeleted: true
+                }, {
+                    where: {
+                        userId: buyerId,
+                        // productId: cartItem.productId,
+                        isDeleted: false
+                    }
+                }
             )
 
-            await models.Cart.destroy({
-                where: {
-                    userId: buyerId
-                }
+            const newOrder = await orderJustCreated.update({totalPrice: priceTotal })
+            const newTransaction = await models.Transaction.create({
+                orderId: orderJustCreated.id,
+                paymentMethod: paymentMethod,
             })
-
-            await orderJustCreated.update({totalPrice: priceTotal })
 
             return res.status(200).json({message: 'Successfully place order'})
 
         } catch (error) {
             console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    //lm them ship infor (create, edit, setdefault)
+    addShippingInfo = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            const {receiverName, address, phone, status} = req.body
+
+            const existingInfo  = await models.ShipInfo.findOne({
+                where: {
+                    userId: buyerId,
+                receiverName: receiverName,
+                address: address,
+                phone: phone
+                }
+            })
+
+            if (existingInfo) {
+                return res.status(404).json({ error: 'Duplicate shipping information', existingInfo});
+            }
+
+            const newShipInfor = await models.ShipInfo.create({
+                userId: buyerId,
+                receiverName: receiverName,
+                address: address,
+                phone: phone,
+                status: status
+            })
+
+            if (!newShipInfor) {
+                return res.status(400).json({ error: 'Cant create new shipping information'});
+            }
+
+            return res.status(200).json({message: "Shipping information successfully created"})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    getAllShippingInfo = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+
+            const userShippingInfo = await models.ShipInfo.findAll({
+                where: {
+                    userId: buyerId
+                }
+            })
+
+            const resMessage = (!userShippingInfo ? "User have no shipping information" : "Sucessfully retrieve all user shipping information")
+            
+            return res.status(200).json({message: resMessage, userShippingInfo})
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    setDefaultShippingInformation = async (req, res) =>{
+        try {
+            const {buyerId} = req.params;
+            const {id} = req.body;
+
+
+            const previousDefaultShippingInformation = await models.ShipInfo.findOne({
+                where: {
+                    userId: buyerId,
+                    status: "active"
+                }
+            })
+
+            if (previousDefaultShippingInformation) {
+                await previousDefaultShippingInformation.update({
+                    status: "inactive"
+                })
+            }
+
+            const updatedShippingInformation = await models.ShipInfo.findOne({
+                where: {
+                    id,
+                    status: !"delete"
+                }
+            })
+            if (!updatedShippingInformation) {
+                return res.status(400).json({ error: 'Shipping Information not found' });
+            }
+
+            await updatedShippingInformation.update({
+                status: "active"
+            })
+            return res.status(200).json({ message: 'Sucessfully change default shipping information', updatedShippingInformation });
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    
+    removeShippingInformation = async (req, res) => {
+        try {
+            const {buyerId} = req.params;
+
+            const {id} = req.body;
+
+            const shippingInformationToBeDeleted = await models.ShipInfo.findByPk(id);
+            if (!shippingInformationToBeDeleted) {
+                return { error: 'Shipping information not found' };
+            }
+            await shippingInformationToBeDeleted.update({
+                status: "delete"
+            })
+
+            return res.status(200).json({ message: 'Shipping Information removed sucessfully' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    //post shop
+    createNewShop = async (req, res) => {
+        try {
+            const {buyerId} = req.params;
+            const {name, phone, address, email, bankName, bankAccount} = req.body
+
+            const user = await models.User.findOne({
+                where:
+                {
+                    id: buyerId,
+                }
+            })
+
+            if (!user) {
+                return res.status(400).json({ message: 'User not  found' });
+            }
+
+            const existingShop = await models.Shop.findOne({
+                where: {
+                    ownerId: buyerId,
+                    name, phone, address, email
+                }
+            })
+            if (existingShop) {
+                return res.status(400).json({ message: 'Duplicated shop' });
+            }
+
+            const newShop = await models.Shop.create({
+                ownerId: buyerId,
+                name, phone, address, email, bankName, bankAccount
+            })
+            if (!newShop) {
+                return res.status(400).json({ message: 'Failed to create new shop' });
+            }
+
+            return res.status(200).json({ message: 'Shop created successfully', newShop });
+        } catch (error) {
+            console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
