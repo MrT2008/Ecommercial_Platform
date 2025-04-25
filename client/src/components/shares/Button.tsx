@@ -1,28 +1,25 @@
 
 import React from 'react'
 
-const Button = ({
-  text="Button", 
-  color="text-black", id="", 
+const Button = ({text="Button", 
+  color="text-black", 
   otherClassName="", 
   type="" as "submit" | "reset" | "button" | undefined,
-  href=""
+  href="",
+  onClick = () => {}
   }) => {
-  return (
-    <a href={href}>
+    const ButtonElement = () => {
+      return (
         <button 
         className={`button px-4 py-2 rounded-3xl cursor-pointer font-medium ${color} ${otherClassName}`}
-        id={id}
         type={type}
-        style={{
-          backgroundColor: '#FFBD4B',
-          color: '#000144'
-        }}
+        onClick={onClick}
         >
             {text}
         </button>
-    </a>
-  )
+      )
+    }
+  return href ? <a href={href} title={text}><ButtonElement /></a> : <ButtonElement />
 }
 
 export default Button
