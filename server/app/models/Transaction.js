@@ -25,6 +25,10 @@ Transaction.init({
     paymentStatus: {
         type: DataTypes.ENUM('pending', 'paid', 'failed'),
         allowNull: false,
+        defaultValue: 'pending',
+        validate: {
+            isIn: [['pending', 'paid', 'failed']],
+        }
     },
 }, {
     sequelize,
