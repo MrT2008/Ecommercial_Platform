@@ -1,7 +1,8 @@
-import Sidebar from '../components/admin/adminSidebar';
-import ShopCard from '../components/admin/shopCard';
+import Sidebar from '../../components/admin/adminSidebar';
+import ShopCard from '../../components/admin/shopCard';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import TitlePage from '../../components/shares/TitlePage';
 
 
 const ListAllShops = () => {
@@ -65,7 +66,7 @@ const ListAllShops = () => {
 
                 {/* Main Content */}
                 <div className="w-4/5 p-6">
-                    <h1 className="text-2xl font-bold mb-6 text-[#FFA50B]">List Shops</h1>
+                    <TitlePage title={"List Shops"} />
 
                     <div className="bg-white rounded-lg shadow p-6">
                         {shops.map((shop, index) => (
