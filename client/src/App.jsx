@@ -15,6 +15,8 @@ import ProductDetails from "./pages/ProductDetails";
 import Category from "./pages/seller/Category";
 import AllProduct from "./pages/seller/AllProduct";
 import ShopInformation from "./pages/seller/shopInformation";
+import SellerBanner from "./pages/seller/SellerBanner";
+import SellerDashboard from "./pages/seller/SellerDashboard";
 function App() {
   const [count, setCount] = useState(0);
   const [array, setArray] = useState([]);
@@ -57,13 +59,10 @@ function App() {
           <Route path="category" element={<Category />} />
           <Route path="all-product" element={<AllProduct />} />
           <Route path="shop-information" element={<ShopInformation />} />
+          <Route path="seller-banner" element={<SellerBanner />} />
+          <Route path="seller-dashboard" element={<SellerDashboard />} />
         </Route>
 
-        <Route path="/seller" element={<MainLayout />}>
-          <Route path="category" element={<Category />} />
-          <Route path="all-product" element={<AllProduct />} />
-          <Route path="shop-information" element={<ShopInformation />} />
-        </Route>
       </Routes>
     </Router>
   );

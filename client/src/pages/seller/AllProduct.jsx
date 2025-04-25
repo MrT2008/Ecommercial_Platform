@@ -3,39 +3,43 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import SecondaryButton from "../../components/shares/SecondaryButton";
-
+import AddProductDialog from "../../pages/seller/AddProductDialog";
 
 const AllProduct = () => {
-    const [products] = useState([
-        {
-        id: 1,
-        name: 'Hat',
-        quantity: 1,
-        price: 4.95,
-        discount: '0%',
-        status: 'Active',
-        category: ['Fashion', 'Summer'],
-        },
-        {
-        id: 2,
-        name: 'Another Hat',
-        quantity: 1,
-        price: 4.95,
-        discount: '33%',
-        status: 'Inactive',
-        category: ['Rep11'],
-        },
-        {
-        id: 3,
-        name: 'HatHat Hat',
-        quantity: 1,
-        price: 4.95,
-        discount: '0%',
-        status: 'Active',
-        category: ['Fashion', 'Summer'],
-        },
-    ]);
-    
+  const [products, setProducts] = useState([
+    {
+      id: 1,
+      name: 'Hat',
+      quantity: 1,
+      price: 4.95,
+      discount: '0%',
+      status: 'Active',
+      category: ['Fashion', 'Summer'],
+    },
+    {
+      id: 2,
+      name: 'Another Hat',
+      quantity: 1,
+      price: 4.95,
+      discount: '33%',
+      status: 'Inactive',
+      category: ['Rep11'],
+    },
+  ]);
+
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  const handleSaveProduct = (product) => {
+    if (editingProduct) {
+      setProducts(products.map(p => p.id === editingProduct.id ? { ...product, id: editingProduct.id } : p));
+    } else {
+      setProducts([...products, { ...product, id: products.length + 1 }]);
+    }
+    setEditingProduct(null);
+    setDialogOpen(false);
+  };
+
   return (
     <div className="flex">
       <Sidebar />
@@ -44,7 +48,7 @@ const AllProduct = () => {
         {/* Title and Add Button */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-[#FFA50B]">All Products</h2>
-          <SecondaryButton title ="Add new product"/>
+          <SecondaryButton title="Add new product" onClick={() => setDialogOpen(true)} />
         </div>
 
         {/* Table */}
@@ -65,14 +69,12 @@ const AllProduct = () => {
             {products.map((p, index) => (
               <tr
                 key={p.id}
-                className={`text-center ${
-                  index % 2 === 0 ? 'bg-[#f9f9f9]' : 'bg-white'
-                }`}
+                className={`text-center ${index % 2 === 0 ? 'bg-[#F7F6FF]' : 'bg-white'}`}
               >
                 <td className="p-2">{index + 1}</td>
                 <td className="p-2 flex items-center justify-center gap-2">
                   <img
-                    src="https://via.placeholder.com/32"
+                    src={p.image}
                     alt="product"
                     className="rounded-full w-8 h-8"
                   />
@@ -106,11 +108,22 @@ const AllProduct = () => {
                 </td>
                 <td className="p-2">
                   <div className="flex items-center justify-center gap-2">
-                    <button className="text-[#5F33E1]" title="Edit">
-                        <FontAwesomeIcon icon={faEdit} />
+                  <button
+                      className="text-[#5F33E1]"
+                      title="Edit"
+                      onClick={() => {
+                        setEditingProduct(p);
+                        setDialogOpen(true);
+                      }}>
+                      <FontAwesomeIcon icon={faEdit} />
                     </button>
-                    <button className="text-[#EA4335]" title="Delete">
-                        <FontAwesomeIcon icon={faTrash} />
+                    <button
+                      className="text-[#EA4335]"
+                      title="Delete"
+                      onClick={() => {
+                        setProducts(products.filter(item => item.id !== p.id));
+                      }}>
+                      <FontAwesomeIcon icon={faTrash} />
                     </button>
                   </div>
                 </td>
@@ -118,6 +131,17 @@ const AllProduct = () => {
             ))}
           </tbody>
         </table>
+
+        {/* Add Product Dialog */}
+        <AddProductDialog
+          isOpen={isDialogOpen}
+          onClose={() => {
+            setDialogOpen(false);
+            setEditingProduct(null); 
+          }}
+          onSave={handleSaveProduct}
+          product={editingProduct} 
+        />
       </div>
     </div>
   );

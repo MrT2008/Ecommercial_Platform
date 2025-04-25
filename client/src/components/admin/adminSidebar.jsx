@@ -2,11 +2,11 @@
 const Sidebar = () => {
     return (
       <div className="w-1/5 h-screen p-12">
-        <h2 className="text-lg font-bold mb-4">Announcements</h2>
+        <h2 className="text-lg font-bold mb-4">Management Center</h2>
         <ul className="mb-6">
           <li className="mb-2">
             <a href="/admin/announcements" className="text-gray-700 hover:text-[#FFA50B] px-4">
-              List Announcements
+              Dashboard
             </a>
           </li>
         </ul>
@@ -28,11 +28,16 @@ const Sidebar = () => {
             </a>
           </li>
         </ul>
-        <h2 className="text-lg font-bold mb-4">Banners Management</h2>
+        <h2 className="text-lg font-bold mb-4">Media Management</h2>
         <ul>
           <li className="mb-2">
             <a href="#" className="text-gray-700 hover:text-[#FFA50B] px-4">
-              List Banners
+              Announcements
+            </a>
+          </li>
+          <li className="mb-2">
+            <a href="#" className="text-gray-700 hover:text-[#FFA50B] px-4">
+              Banners
             </a>
           </li>
         </ul>
