@@ -19,14 +19,6 @@ Order.init({
             key: 'id',
         },
     },
-    shopId: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        references: {
-            model: OrderDetail,
-            key: 'shopId',
-        },
-    },
     totalPrice: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,

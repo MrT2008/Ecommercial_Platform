@@ -13,4 +13,5 @@ router.get("/google", AuthController.googleAuth);
 router.get("/google/callback", AuthController.googleAuthFail, AuthController.googleAuthSuccess);
 router.post('/token', AuthController.postToken);
 router.post('/logout', AuthController.postLogout);
+
 module.exports = router;

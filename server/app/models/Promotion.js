@@ -22,15 +22,11 @@ Promotion.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    isActive: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-    },
     status: {
-        type: DataTypes.ENUM('show', 'hide', 'ban'),
-        defaultValue: 'hide',
+        type: DataTypes.ENUM('show', 'hide', 'ban','isDeleted'),
+        defaultValue: 'show',
         validate: {
-            isIn: [['sold', 'hide', 'ban']],
+            isIn: [['show', 'hide', 'ban', 'isDeleted']],
         }
     },
     banReason: {
