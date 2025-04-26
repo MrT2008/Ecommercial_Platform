@@ -1,4 +1,5 @@
-import Sidebar from '../components/admin/adminSidebar';
+import Sidebar from '../../components/admin/adminSidebar';
+import TitlePage from '../../components/shares/TitlePage';
 // Main Pending Shops Page
 const PendingShops = () => {
 <link
@@ -43,7 +44,7 @@ const PendingShops = () => {
 
         {/* Main Content */}
         <div className="w-4/5 p-6">
-          <h1 className="text-2xl font-bold mb-6 text-[#FFA50B]">Pending Shops</h1>
+          <TitlePage title={"Pending Shops"} />
           <table className="w-full text-left">
             <thead>
               <tr className="text-center">
