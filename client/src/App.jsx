@@ -19,22 +19,6 @@ import { useAuth } from './hooks/useAuth';
 import PrivateRoute from './routes/privateRoute';
 
 function App() {
-  // const [count, setCount] = useState(0);
-  // const [array, setArray] = useState([]);
-
-  // const fecthAPI = async () => {
-  //   const response = await axios.get("http://localhost:8080/api");
-  //   setArray(response.data.characters);
-  //   console.log(response.data.characters);
-  // };
-  //   const response = await axios.get('http://localhost:8080/api');
-  //   setArray(response.data);
-  //   console.log(response.data);
-  // }
-
-  // useEffect(() => {
-  //   fecthAPI();
-  // }, []);
   const { user } = useAuth();
   const userRoles = user?.roles || [];
 
@@ -46,8 +30,6 @@ function App() {
         <Route path="/" element={<MainLayout/>} >
           {/* <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} /> */}
-
-          <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
@@ -75,7 +57,6 @@ function App() {
           <Route path="all-product" element={<AllProduct />} />
           <Route path="shop-information" element={<ShopInformation />} />
         </Route>
-        </Route>
         
         {/* Protected routes */}
         <Route element={<MainLayout />}>
@@ -89,24 +70,6 @@ function App() {
           />
           {/* Add more protected routes here */}
         </Route>
-        {/* Public routes */}
-        {/* <Route path="/" element={<MainLayout/>} >
-          <Route path="login" element={<Login />} />
-          <Route path="signup" element={<Signup />} />
-        </Route> */}
-        
-        {/* Protected routes */}
-        {/* <Route element={<MainLayout />}>
-          <Route 
-            index 
-            element={
-              <PrivateRoute isAllowed={userRoles.includes('buyer')}>
-                <HomePage />
-              </PrivateRoute>
-            } 
-          /> */}
-          {/* Add more protected routes here */}
-        {/* </Route> */}
       </Routes>
     </Router>
   );
