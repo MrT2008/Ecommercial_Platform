@@ -6,11 +6,13 @@ import { useAuth } from "../../hooks/useAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell, faUser } from "@fortawesome/free-regular-svg-icons";
 import { faCartShopping, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const HeadingBar = () => {
     const { user, logout } = useAuth();
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
+    const navigate = useNavigate();
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -68,7 +70,7 @@ const HeadingBar = () => {
                             {showMenu && (
                                 <div className="absolute right-0 mt-2 w-48 bg-gray-700  border border-gray-300 rounded-lg shadow-lg z-10">
                                     <a 
-                                        href="/profile/edit" 
+                                        href="/account" 
                                         className="block px-4 py-2 text-white hover:bg-gray-800 hover:rounded-t-lg "
                                         onClick={() => setShowMenu(false)}
                                     >
@@ -89,7 +91,16 @@ const HeadingBar = () => {
                                 </div>
                             )}
                         </div>
-                        <button className="bg-white border-2 font-bold border-blue-950 text-blue-950 px-4 py-1.5 rounded-4xl hover:border-blue-950 transition-colors duration-200">
+                        <button
+                        className="bg-white border-2 font-bold border-blue-950 text-blue-950 px-4 py-1.5 rounded-4xl hover:border-blue-950 transition-colors duration-200"
+                        onClick={() => {
+                            if (user.roles?.includes('seller')) {
+                                navigate('/shop');
+                            } else {
+                                navigate('/become-seller');
+                            }
+                        }}
+                        >
                             {user.roles?.includes('seller') ? 'View Shop' : 'Become Seller'}
                         </button>
                     </>
