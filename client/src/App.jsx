@@ -15,6 +15,8 @@ import ProductDetails from "./pages/ProductDetails";
 import Category from "./pages/seller/Category";
 import AllProduct from "./pages/seller/AllProduct";
 import ShopInformation from "./pages/seller/shopInformation";
+import SellerBanner from "./pages/seller/SellerBanner";
+import SellerDashboard from "./pages/seller/SellerDashboard";
 import { useAuth } from './hooks/useAuth';
 import PrivateRoute from './routes/privateRoute';
 
@@ -50,13 +52,10 @@ function App() {
           <Route path="category" element={<Category />} />
           <Route path="all-product" element={<AllProduct />} />
           <Route path="shop-information" element={<ShopInformation />} />
+          <Route path="seller-banner" element={<SellerBanner />} />
+          <Route path="seller-dashboard" element={<SellerDashboard />} />
         </Route>
 
-        <Route path="/seller" element={<MainLayout />}>
-          <Route path="category" element={<Category />} />
-          <Route path="all-product" element={<AllProduct />} />
-          <Route path="shop-information" element={<ShopInformation />} />
-        </Route>
         
         {/* Protected routes */}
         <Route element={<MainLayout />}>
