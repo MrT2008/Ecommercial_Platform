@@ -15,6 +15,20 @@ const ShopInformation = () => {
         image: "/images/fashion-store-logo.png"
     });
 
+    // ✅ Add image state to dynamically update preview
+    const [image, setImage] = useState(shopInfo.image);
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setImage(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     return (
         <div className="flex">
             <Sidebar />
@@ -63,20 +77,30 @@ const ShopInformation = () => {
                         {/* Right Side: Avatar */}
                         <div className="w-48 flex flex-col items-center">
                             <img
-                                src={shopInfo.image}
+                                src={image}
                                 alt="Shop Logo"
                                 className="w-24 h-24 object-cover rounded-full border mb-4"
                             />
-                            <button className="border rounded px-4 py-2 flex items-center gap-2">
-                                <FontAwesomeIcon icon={faUpload} />
-                                Upload Image
-                            </button>
+                            <label className="border rounded px-4 py-2 flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageUpload}
+                                />
+                                <div className="flex items-center gap-2 justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" />
+                                    </svg>
+                                    Upload Image
+                                </div>
+                            </label>
                         </div>
                     </div>
 
                     {/* Save Button at bottom right */}
                     <div className="flex justify-end mt-6">
-                        <SecondaryButton title ="Save"/>
+                        <SecondaryButton title="Save" />
                     </div>
                 </div>
             </div>

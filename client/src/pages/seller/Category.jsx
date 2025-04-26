@@ -65,7 +65,7 @@ const Category = () => {
                         {categories.map((category, index) => (
                         <tr
                             key={index}
-                            className={`${index % 2 === 0 ? "bg-[#F9F9F9]" : "bg-white"} text-center`}
+                            className={`${index % 2 === 0 ? "bg-[#F7F6FF]" : "bg-white"} text-center`}
                         >
                             <td className="p-2">{index + 1}</td>
                             <td className="p-2">{category}</td>
