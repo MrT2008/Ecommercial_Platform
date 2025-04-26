@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import SecondaryButton from '../../components/shares/SecondaryButton';
-import Sidebar from '../../components/admin/sellerSidebar';
+import Sidebar from '../../components/seller/sellerSidebar';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import AddBannerDialog from "../../pages/seller/AddBannerDialog";

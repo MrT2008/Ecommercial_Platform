@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Footer from "../components/footer/main";
+import Footer from "../../components/footer/main";
 
 const sidebarLinks = [
   { label: "Profile", active: true },

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./index.css";
 import MainLayout from "./layouts/MainLayout";
-import AccountProfile from "./pages/AccountProfile";
+import AccountProfile from "./pages/account/AccountProfile";
 import HomePage from "./pages/HomePage";
 import ListAllShops from "./pages/admin/listAllShop";
 import Login from "./pages/login";
@@ -30,12 +30,9 @@ function App() {
         
         {/* Public routes */}
         <Route path="/" element={<MainLayout/>} >
-          {/* <Route path="login" element={<Login />} />
-          <Route path="signup" element={<Signup />} /> */}
           <Route index element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/account" element={<AccountProfile />} />
           <Route path="/product/:id" element={<ProductDetails />} /> 
           {/* http://localhost:5173/product/1 */}
         </Route>
@@ -56,7 +53,10 @@ function App() {
           <Route path="seller-dashboard" element={<SellerDashboard />} />
         </Route>
 
-        
+        <Route path="/account" element={<MainLayout />}>
+          <Route path="profile" element={<AccountProfile />} />
+        </Route>
+
         {/* Protected routes */}
         <Route element={<MainLayout />}>
           <Route 
