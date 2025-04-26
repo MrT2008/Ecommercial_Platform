@@ -41,6 +41,8 @@ const BecomeSellerForm = () => {
                 accountNumber: "",
                 streetAddress: ""
             });
+            // alert("Successfully create shop.");
+            // navigate(`/shop/${buyerID}/${shopID}`);
         }
         else {
             alert("Failed to create shop. Please try again");

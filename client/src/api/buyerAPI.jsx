@@ -13,7 +13,7 @@ const api = axios.create({
 export const createShop = async (shopData, buyerID) => {
   try {
     const response = await api.post(`/buyer/${buyerID}/shop/create`, shopData)
-    if (response.status === 201) {
+    if ((response.status === 201)||(response.status === 200)) {
       return true;
     }
     return false;
