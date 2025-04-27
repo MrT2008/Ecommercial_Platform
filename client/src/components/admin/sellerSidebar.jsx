@@ -20,7 +20,7 @@ const Sidebar = () => {
         <h2 className="text-lg font-bold mb-4">Product Management</h2>
         <ul className="mb-6">
           <li className="mb-2">
-            <a href="#" className={`px-4 ${isActive('#') ? 'active' : ''}`}>
+            <a href="/seller/all-order" className={`px-4 ${isActive('/seller/all-order') ? 'active' : ''}`}>
               All Orders
             </a>
           </li>

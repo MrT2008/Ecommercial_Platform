@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import SecondaryButton from "../../components/shares/SecondaryButton";
+import EditInfShopDialog from "../seller/EditShopInfDialog"; // Import your dialog component
 
 const ShopInformation = () => {
-    const [shopInfo] = useState({
+    const [shopInfo, setShopInfo] = useState({
         name: "MiuMiu Store",
         email: "ntptmiumiu12345@gmail.com",
         phone: "02343256789",
@@ -15,8 +16,9 @@ const ShopInformation = () => {
         image: "/images/fashion-store-logo.png"
     });
 
-    // ✅ Add image state to dynamically update preview
     const [image, setImage] = useState(shopInfo.image);
+
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State for controlling dialog visibility
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -27,6 +29,11 @@ const ShopInformation = () => {
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handleSaveShopInfo = (updatedShopInfo) => {
+        setShopInfo(updatedShopInfo); // Update the shop info when saved
+        setIsEditDialogOpen(false); // Close the dialog after saving
     };
 
     return (
@@ -40,7 +47,11 @@ const ShopInformation = () => {
                     <div className="flex">
                         {/* Left Side: Shop Info */}
                         <div className="flex-1 pr-6 relative">
-                            <a href="#" className="absolute right-0 top-0 text-blue-700 text-sm">
+                            <a 
+                                href="#"
+                                className="absolute right-0 top-0 text-blue-700 text-sm"
+                                onClick={() => setIsEditDialogOpen(true)} // Open dialog when clicked
+                            >
                                 Edit Information
                             </a>
 
@@ -104,6 +115,14 @@ const ShopInformation = () => {
                     </div>
                 </div>
             </div>
+
+            {/* EditInfShopDialog - Conditional rendering based on dialog state */}
+            <EditInfShopDialog 
+                isOpen={isEditDialogOpen} 
+                onClose={() => setIsEditDialogOpen(false)} 
+                onSave={handleSaveShopInfo} 
+                shop={shopInfo} 
+            />
         </div>
     );
 };
