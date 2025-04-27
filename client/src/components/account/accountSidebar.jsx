@@ -6,45 +6,54 @@ const Sidebar = () => {
 
     return (
       <div className="w-1/5 h-screen p-12">
-        <h2 className="text-lg font-bold mb-4">Sale Analystics</h2>
-        <ul className="mb-6">
-          <li className="mb-2">
-          <a
-            href="/seller/seller-dashboard"
-            className={`px-4 ${isActive('/seller/seller-dashboard') ? 'active' : ''}`}
-          >
-              Dashboard
-            </a>
-          </li>
-        </ul>
         <h2 className="text-lg font-bold mb-4">Product Management</h2>
         <ul className="mb-6">
           <li className="mb-2">
             <a href="#" className={`px-4 ${isActive('#') ? 'active' : ''}`}>
-              All Orders
+              Manage Account
             </a>
           </li>
           <li className="mb-2">
-            <a href="/seller/all-product" className={`px-4 ${isActive('/seller/all-product') ? 'active' : ''}`}>
-              All Products
+            <a href="/account/profile" className={`px-4 ${isActive('/seller/all-product') ? 'active' : ''}`}>
+              Profile
             </a>
           </li>
           <li className="mb-2">
-            <a href="/seller/category" className={`px-4 ${isActive('/seller/category') ? 'active' : ''}`}>
-              Categories
+            <a href="/account/address" className={`px-4 ${isActive('/seller/category') ? 'active' : ''}`}>
+              Address
+            </a>
+          </li>
+          <li className="mb-2">
+            <a href="/account/credit_card" className={`px-4 ${isActive('/seller/category') ? 'active' : ''}`}>
+              Credit Card
+            </a>
+          </li>
+          <li className="mb-2">
+            <a href="/account/changing_password" className={`px-4 ${isActive('/seller/category') ? 'active' : ''}`}>
+              Changing Password
             </a>
           </li>
         </ul>
-        <h2 className="text-lg font-bold mb-4">Shop Management</h2>
+        <h2 className="text-lg font-bold mb-4">Orders Management</h2>
         <ul className="mb-6">
           <li className="mb-2">
-            <a href="/seller/shop-information" className={`px-4 ${isActive('/seller/shop-information') ? 'active' : ''}`}>
-              Shop Information
+            <a href="/account/pending" className={`px-4 ${isActive('/seller/shop-information') ? 'active' : ''}`}>
+              Pending Payment
             </a>
           </li>
           <li className="mb-2">
-            <a href="/seller/seller-banner" className={`px-4 ${isActive('/seller/seller-banner') ? 'active' : ''}`}>
-              Marketing Banner
+            <a href="/account/ongoing" className={`px-4 ${isActive('/seller/seller-banner') ? 'active' : ''}`}>
+              Ongoing Orders
+            </a>
+          </li>
+          <li className="mb-2">
+            <a href="/account/completed" className={`px-4 ${isActive('/seller/category') ? 'active' : ''}`}>
+              Completed Orders
+            </a>
+          </li>
+          <li className="mb-2">
+            <a href="/account/cancellations" className={`px-4 ${isActive('/seller/category') ? 'active' : ''}`}>
+              Cancellations
             </a>
           </li>
         </ul>
