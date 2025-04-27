@@ -9,6 +9,7 @@ import ListAllShops from './pages/listAllShop';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import Cart from './pages/Cart'
+import CheckOut from './pages/CheckOut';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -41,6 +42,7 @@ function App() {
         
         <Route path="/user" element={<MainLayout />}>
           <Route path="cart" element={<Cart />} />
+          <Route path="check-out" element={<CheckOut/>}/>
         </Route>
         
       </Routes>

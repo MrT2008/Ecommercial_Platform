@@ -131,7 +131,7 @@ const Cart = () => {
                 </div>
 
                 {/* Checkout Button */}
-                <Button text="Proceed to checkout"> </Button>
+                <Button text="Proceed to checkout" href="/user/check-out"/> 
             </div>
         </div>
     );
