@@ -3,8 +3,11 @@ import Button from "../shares/Button";
 import { useState } from "react";
 import { createShop } from "../../api/buyerAPI";
 import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const BecomeSellerForm = () => {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         shopName: "",
         email: "",
@@ -43,6 +46,7 @@ const BecomeSellerForm = () => {
             });
             // alert("Successfully create shop.");
             // navigate(`/shop/${buyerID}/${shopID}`);
+            navigate(`/`);
         }
         else {
             alert("Failed to create shop. Please try again");
