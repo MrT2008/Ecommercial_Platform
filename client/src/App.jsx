@@ -19,6 +19,13 @@ import SellerBanner from "./pages/seller/SellerBanner";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import { useAuth } from './hooks/useAuth';
 import PrivateRoute from './routes/privateRoute';
+import AccountAddress from "./pages/account/AccountAddress";
+import AccountCreditCard from "./pages/account/AccountCard";
+import AccountPassword from "./pages/account/AccountPassword";
+import PendingPayment from "./pages/account/PendingPayment";
+import OngoingOrders from "./pages/account/OngoingOrders";
+import CompletedOrders from "./pages/account/CompletedOrders";
+import Cancellations from "./pages/account/Cancellations";
 
 function App() {
   const { user } = useAuth();
@@ -55,6 +62,13 @@ function App() {
 
         <Route path="/account" element={<MainLayout />}>
           <Route path="profile" element={<AccountProfile />} />
+          <Route path="address" element={<AccountAddress />} />
+          <Route path="credit_card" element={<AccountCreditCard />} />
+          <Route path="changing_password" element={<AccountPassword />} />
+          <Route path="pending" element={<PendingPayment />} />
+          <Route path="ongoing" element={<OngoingOrders />} />
+          <Route path="completed" element={<CompletedOrders />} />
+          <Route path="cancellations" element={<Cancellations />} />
         </Route>
 
         {/* Protected routes */}
