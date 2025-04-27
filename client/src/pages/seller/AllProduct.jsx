@@ -27,20 +27,25 @@ const AllProduct = () => {
       console.error('Error fetching products:', error);
     }
   };
+
   const handleSaveProduct = async (product) => {
-    console.log("Product data to send:", product); 
+    console.log("Product data to send:", product);
     try {
       let url = 'http://localhost:8080/seller/1/postProduct';
       let method = 'POST';
 
       const body = {
-        name: product.name,
-        price: product.price,
-        description: product.description,
-        thumbnailURL: product.thumbnailURL,
-        categoryId: product.categoryId,
-        stock: product.stock
+        name: product.name || "", 
+        price: product.price ? Number(product.price) : 0, 
+        description: product.description || "",
+        thumbnailURL: product.thumbnailURL || "https://daihocdaivietsaigon.edu.vn/wp-content/uploads/2023/02/1676242016_111-Hinh-Anh-Avatar-Nu-Dep-Phong-Cach-CHILL-HET.jpg",  // <-- DEFAULT IMAGE
+        categoryId: (product.categoryId && product.categoryId.length > 0) ? product.categoryId : [1],
+        stock: product.stock ? Number(product.stock) : 1,
       };
+      
+
+
+      console.log('Sending body:', JSON.stringify(body, null, 2));
 
       const response = await fetch(url, {
         method,
@@ -57,11 +62,14 @@ const AllProduct = () => {
         setDialogOpen(false);
       } else {
         console.error('Failed to save product');
+        const errorResponse = await response.text();
+        console.error('Error details:', errorResponse);
       }
     } catch (error) {
       console.error('Error saving product:', error);
     }
   };
+
 
 
 

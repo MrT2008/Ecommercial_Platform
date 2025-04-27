@@ -13,23 +13,41 @@ const Category = () => {
             const response = await fetch('http://localhost:8080/seller/1/getCategory');
             const data = await response.json();
             if (data.categories) {
-                const categoryNames = data.categories.map((cat) => cat.name);
-                setCategories(categoryNames);
+                const activeCategories = data.categories.filter(cat => cat.isActive);
+                setCategories(activeCategories);
             }
         } catch (error) {
             console.error('Error fetching categories:', error);
         }
     };
 
+
+
     useEffect(() => {
         fetchCategories();
     }, []);
 
-    const handleDelete = (index) => {
-        const updated = [...categories];
-        updated.splice(index, 1);
-        setCategories(updated);
+    const handleDelete = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:8080/seller/1/delteteCategory/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                console.log('Category deactivated successfully');
+                setCategories(prevCategories => prevCategories.filter(cat => cat.id !== id));
+            } else {
+                console.error('Failed to deactivate category');
+            }
+        } catch (error) {
+            console.error('Error deactivating category:', error);
+        }
     };
+
+
 
     const handleAddCategory = async () => {
         if (newCategory.trim()) {
@@ -46,8 +64,8 @@ const Category = () => {
                 });
 
                 if (response.ok) {
-                    setNewCategory(""); 
-                    await fetchCategories(); 
+                    setNewCategory("");
+                    await fetchCategories();
                 } else {
                     console.error('Failed to add category');
                 }
@@ -90,17 +108,14 @@ const Category = () => {
                             </thead>
                             <tbody>
                                 {categories.map((category, index) => (
-                                    <tr
-                                        key={index}
-                                        className={`${index % 2 === 0 ? "bg-[#F7F6FF]" : "bg-white"} text-center`}
-                                    >
+                                    <tr key={category.id} className={`${index % 2 === 0 ? "bg-[#F7F6FF]" : "bg-white"} text-center`}>
                                         <td className="p-2">{index + 1}</td>
-                                        <td className="p-2">{category}</td>
+                                        <td className="p-2">{category.name}</td>
                                         <td className="p-2">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     className="text-[#EA4335]"
-                                                    onClick={() => handleDelete(index)}
+                                                    onClick={() => handleDelete(category.id)}
                                                     title="Delete"
                                                 >
                                                     <FontAwesomeIcon icon={faTrash} />
