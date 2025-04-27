@@ -18,6 +18,7 @@ import SellerBanner from "./pages/seller/SellerBanner";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import BecomeSeller from "./pages/becomeSeller";
 import PrivateRoute from './routes/privateRoute';
+import ShopPage from "./pages/ShopPage";
 
 function App() {
 
@@ -35,7 +36,8 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<MainLayout/>}>
           <Route index element={<HomePage />} />
-          <Route path="product/:id" element={<ProductDetails />} />
+          <Route path="shop" element={<ShopPage />} />
+          {/* <Route path="shop/:id" element={<ShopPage />} /> */}
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} />
         </Route>
