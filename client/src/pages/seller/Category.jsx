@@ -37,22 +37,22 @@ const Category = () => {
                 <div className="flex flex-row gap-6">
                 {/* Form to Add Category */}
                 <div className="bg-white p-6 shadow rounded-md mb-6 w-full max-w-sm">
-                    <h2 className="text-lg font-semibold mb-2">Add Category</h2>
+                    <h2 className="text-lg font-semibold mb-6">Add Category</h2>
                     <input
                     type="text"
                     placeholder="e.g. Electronics"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full p-2 border rounded mb-4"
+                    className="w-full p-3 border rounded mb-2"
                     />
-                    <div onClick={handleAddCategory}>
-                        <SecondaryButton title ="Save"/>
+                    <div className="flex justify-end" >
+                        <SecondaryButton title ="Save" onClick={handleAddCategory}/>
                     </div>
                 </div>
         
                 {/* Category List */}
                 <div className="flex-grow bg-white p-6 shadow rounded-md">
-                    <h2 className="text-lg font-semibold mb-4">Category</h2>
+                    <h2 className="text-lg font-semibold mb-1">Category</h2>
                     <table className="w-full text-left">
                     <thead>
                         <tr className="text-center">
