@@ -1,24 +1,35 @@
 import Sidebar from '../../components/admin/sellerSidebar';
-import React, { useState } from 'react';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import EditInfShopDialog from "../seller/EditShopInfDialog"; // Import your dialog component
 
 const ShopInformation = () => {
-    const [shopInfo, setShopInfo] = useState({
-        name: "MiuMiu Store",
-        email: "ntptmiumiu12345@gmail.com",
-        phone: "02343256789",
-        address: "Tran Dai Nghia Street, Thu Duc, Linh Xuan Ward, Thu Duc City, Ho Chi Minh City",
-        bankHolder: "Nguyen Kieu Phuong",
-        bank: "Vietcombank: 78******86",
-        image: "/images/fashion-store-logo.png"
-    });
+    const [shopInfo, setShopInfo] = useState(null);
+    const [image, setImage] = useState(null);
 
-    const [image, setImage] = useState(shopInfo.image);
+    useEffect(() => {
+        const fetchShopInfo = async () => {
+            try {
+                const response = await axios.get('http://localhost:8080/seller/1/getInformation');
+                const shopData = response.data.shop;
+                setShopInfo({
+                    name: shopData.name,
+                    email: shopData.email,
+                    phone: shopData.phone,
+                    address: shopData.address,
+                    bankHolder: shopData.bankName,
+                    bank: shopData.bankAccount,
+                    image: shopData.avatarUrl || "/images/fashion-store-logo.png", // Nếu API chưa có avatar thì dùng ảnh mặc định
+                });
+                setImage(shopData.avatarUrl || "/images/fashion-store-logo.png");
+            } catch (error) {
+                console.error('Failed to fetch shop information:', error);
+            }
+        };
 
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State for controlling dialog visibility
+        fetchShopInfo();
+    }, []);
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -30,6 +41,14 @@ const ShopInformation = () => {
             reader.readAsDataURL(file);
         }
     };
+    // if (!shopInfo) {
+    //     return (
+    //         <div className="flex">
+    //             <Sidebar />
+    //             <div className="w-4/5 p-6">Loading...</div>
+    //         </div>
+    //     );
+    // }
 
     const handleSaveShopInfo = (updatedShopInfo) => {
         setShopInfo(updatedShopInfo); // Update the shop info when saved
@@ -45,7 +64,7 @@ const ShopInformation = () => {
 
                 <div className="bg-white p-8 rounded-md shadow flex flex-col justify-between min-h-[400px]">
                     <div className="flex">
-                        {/* Left Side: Shop Info */}
+
                         <div className="flex-1 pr-6 relative">
                             <a 
                                 href="#"
@@ -82,10 +101,8 @@ const ShopInformation = () => {
                             </div>
                         </div>
 
-                        {/* Divider */}
                         <div className="border-l mx-6"></div>
 
-                        {/* Right Side: Avatar */}
                         <div className="w-48 flex flex-col items-center">
                             <img
                                 src={image}
@@ -109,7 +126,6 @@ const ShopInformation = () => {
                         </div>
                     </div>
 
-                    {/* Save Button at bottom right */}
                     <div className="flex justify-end mt-6">
                         <SecondaryButton title="Save" />
                     </div>
