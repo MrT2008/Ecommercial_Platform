@@ -14,6 +14,7 @@ type AuthContextType = {
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   user : any;
   session: boolean;
+  loading: boolean;
   error: string;
 };
 
@@ -47,9 +48,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     setSession(true);
                     setUser(JSON.parse(user || '{}'));
                     setError('');
+                    setLoading(false);
                 } else {
                     setSession(false);
                     setUser(null);
+                    setLoading(false);
                 }
             } catch (error) {
                 console.error("Error checking session: " + error);
@@ -148,7 +151,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ login, loginWithGoogle ,logout, signUp, user, session, error: error , }}>
+    <AuthContext.Provider value={{ login, loginWithGoogle ,logout, signUp, user, session, error: error , loading}}>
       {children}
     </AuthContext.Provider>
   );

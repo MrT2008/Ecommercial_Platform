@@ -1,11 +1,7 @@
-
 import { Navigate } from 'react-router-dom';
 
-const PrivateRoute = ({ isAllowed, children, redirectTo = '/login' }) => {
-  if (!isAllowed) {
-    return <Navigate to={redirectTo} replace />;
-  }
-  return children;
+const PrivateRoute = ({ isAllowed, children, redirectTo = '/' }) => {
+  return isAllowed ? children : <Navigate to={redirectTo} />;
 };
 
 export default PrivateRoute;
