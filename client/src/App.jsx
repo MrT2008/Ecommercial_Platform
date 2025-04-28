@@ -13,11 +13,12 @@ import AnnouncementsPage from "./pages/admin/announcementPage";
 import ProductDetails from "./pages/ProductDetails";
 import Category from "./pages/seller/Category";
 import AllProduct from "./pages/seller/AllProduct";
-import ShopInformation from "./pages/seller/shopInformation";
+import ShopInformation from "./pages/seller/ShopInformation";
 import SellerBanner from "./pages/seller/SellerBanner";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import BecomeSeller from "./pages/becomeSeller";
 import PrivateRoute from './routes/privateRoute';
+import AllOrder from "./pages/seller/AllOrder";
 import ShopPage from "./pages/ShopPage";
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
             <Route path="shop-information" element={<ShopInformation />} />
             <Route path="seller-banner" element={<SellerBanner />} />
             <Route path="seller-dashboard" element={<SellerDashboard />} />
+            <Route path="all-order" element={<AllOrder />} />
           </Route>
           {/* Add seller-specific routes here */}
         </Route>

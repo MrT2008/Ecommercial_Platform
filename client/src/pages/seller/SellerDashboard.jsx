@@ -29,40 +29,43 @@ const SellerDashboard = () => {
   return (
     <div className="flex">
       <Sidebar />
-
+    
       <div className="w-4/5 p-6">
         {/* Top Section */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-[#FFA50B]">Dasboard</h2>
+        </div>
         <div className="grid grid-cols-2 gap-6 mb-8">
           {/* To do list */}
           <div className="bg-white shadow rounded-lg p-10">
-            <h3 className="text-lg font-semibold mb-4 text-[#FFA50B]">To do list</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#020202]">To do list</h3>
             <div className="flex justify-between text-center">
               <div>
                 <p className="text-xl font-bold text-[#000282]">40</p>
-                <p className="text-gray-500 text-sm">Pending goods</p>
+                <p className="text-gray-600 text-sm">Pending goods</p>
               </div>
               <div>
                 <p className="text-xl font-bold text-[#000282]">100</p>
-                <p className="text-gray-500 text-sm">Processed</p>
+                <p className="text-gray-600 text-sm">Processed</p>
               </div>
               <div>
                 <p className="text-xl font-bold text-[#000282]">10</p>
-                <p className="text-gray-500 text-sm">Canceled</p>
+                <p className="text-gray-600 text-sm">Canceled</p>
               </div>
             </div>
           </div>
 
           {/* Sales Analysis */}
           <div className="bg-white shadow rounded-lg p-10">
-            <h3 className="text-lg font-semibold mb-4 text-[#FFA50B]">Sales Analysis</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#020202]">Sales Analysis</h3>
             <div className="flex justify-between text-center">
               <div>
                 <p className="text-xl font-bold text-[#000282]">20,000,000</p>
-                <p className="text-gray-500 text-sm">Total Sales</p>
+                <p className="text-gray-600 text-sm">Total Sales</p>
               </div>
               <div>
                 <p className="text-xl font-bold text-[#000282]">100</p>
-                <p className="text-gray-500 text-sm">Total Orders</p>
+                <p className="text-gray-600 text-sm">Total Orders</p>
               </div>
             </div>
           </div>
@@ -70,11 +73,11 @@ const SellerDashboard = () => {
 
         {/* Sold Products Section */}
         <div>
-          <h3 className="text-xl font-bold text-[#FFA50B] mb-4">Sold Products</h3>
+          <h3 className="text-lg font-semibold mb-4 text-[#020202]">Sold Products</h3>
 
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="text-center text-gray-600 border-b">
+              <tr className="text-center text-[#020202] border-b">
                 <th className="p-2">Product ID</th>
                 <th className="p-2">Products</th>
                 <th className="p-2">Price</th>

@@ -74,7 +74,7 @@ const SellerBanner = () => {
                   className="w-full h-[400px] object-cover rounded"
                 />
                 <button
-                  className="text-[#EA4335] h-[50px] w-[50px] absolute top-3 right-3 bg-red-500 p-2 rounded-full"
+                  className="text-[#EA4335] h-[50px] w-[50px] absolute top-3 right-3 bg-white p-2 rounded-full"
                   title="Delete"
                   onClick={() => handleDelete(banner.id)}
                 >
