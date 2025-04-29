@@ -46,7 +46,7 @@ function App() {
           <Route path="signup" element={<Signup />} />
         </Route>
           
-        <Route path="/user" element={<MainLayout />}>
+        <Route path="/buyer" element={<MainLayout />}>
           <Route path="cart" element={<Cart />} />
           <Route path="check-out" element={<CheckOut/>}/>
         </Route>
