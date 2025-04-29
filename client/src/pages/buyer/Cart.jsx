@@ -1,8 +1,11 @@
-import Button from "../components/shares/Button";
 import { useState } from "react";
-// import SecondaryButton from "../shares/SecondaryButton";
-import "@fortawesome/free-solid-svg-icons";
+import SecondaryButton from "../../components/shares/SecondaryButton";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from 'react-router-dom';
+
 const Cart = () => {
+    const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([
         {
             id: 1,
@@ -103,19 +106,19 @@ const Cart = () => {
     const toggleSelectShop = (shopId) => {
         const shopItems = cartItems.filter(item => item.shopId === shopId);
         const allSelected = shopItems.every(item => selectedItems[item.id]);
-        
+
         // Create new selection state for this shop's items
         const newSelections = { ...selectedItems };
         shopItems.forEach(item => {
             newSelections[item.id] = !allSelected;
         });
-        
+
         setSelectedItems(newSelections);
         setShopSelections(prev => ({
             ...prev,
             [shopId]: !allSelected
         }));
-        
+
         // Check if all items are now selected to update the selectAll state
         updateSelectAllStatus();
     };
@@ -124,17 +127,17 @@ const Cart = () => {
         const newSelectAll = !selectAll;
         const newSelections = {};
         const newShopSelections = {};
-        
+
         // Select or deselect all items
         cartItems.forEach(item => {
             newSelections[item.id] = newSelectAll;
         });
-        
+
         // Update shop selections
         Object.keys(itemsByShop).forEach(shopId => {
             newShopSelections[shopId] = newSelectAll;
         });
-        
+
         setSelectAll(newSelectAll);
         setSelectedItems(newSelections);
         setShopSelections(newShopSelections);
@@ -142,12 +145,12 @@ const Cart = () => {
 
     const updateShopSelections = () => {
         const newShopSelections = {};
-        
+
         Object.keys(itemsByShop).forEach(shopId => {
             const shopItems = cartItems.filter(item => item.shopId === parseInt(shopId));
             newShopSelections[shopId] = shopItems.every(item => selectedItems[item.id]);
         });
-        
+
         setShopSelections(newShopSelections);
     };
 
@@ -161,7 +164,23 @@ const Cart = () => {
             .filter(item => selectedItems[item.id])
             .reduce((acc, item) => acc + item.price * item.quantity, 0);
     };
+    
+    // function to handle checkout
+    const handleCheckout = () => {
+        // const selectedCartItems = getSelectedItems();
+        const selectedCartItems = cartItems.filter(item => selectedItems[item.id]);
 
+        if (selectedCartItems.length === 0) {
+            alert("Please select at least one item to checkout.");
+            return;
+        }
+        
+        // Save selected items to localStorage for the checkout page
+        localStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
+        
+        // Navigate to checkout page
+        navigate('/user/check-out');
+    };
     return (
         <div className="p-8">
             {/* Heading */}
@@ -261,11 +280,11 @@ const Cart = () => {
                                 <div>
                                     <button
                                         onClick={() => removeItem(item.id)}
-                                        className="text-red-500 hover:text-red-700"
+                                        className="text-gray-500 hover:text-gray-700"
                                         title="Remove item"
                                     >
                                         {/* <i className="fas fa-trash"></i> */}
-                                        delete
+                                        <FontAwesomeIcon icon={faTrash} />
                                     </button>
                                 </div>
                             </div>
@@ -294,7 +313,8 @@ const Cart = () => {
                 </div>
 
                 {/* Checkout Button */}
-                <Button text="Proceed to checkout" href="/user/check-out"/> 
+                <SecondaryButton title="Proceed to checkout" onClick={handleCheckout} align="left" />
+                {/* href="/user/check-out" */}
             </div>
         </div>
     );

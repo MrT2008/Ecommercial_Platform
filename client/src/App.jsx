@@ -21,8 +21,8 @@ import PrivateRoute from './routes/privateRoute';
 import AllOrder from "./pages/seller/AllOrder";
 import ShopPage from "./pages/ShopPage";
 import axios from 'axios';
-import Cart from './pages/Cart'
-import CheckOut from './pages/CheckOut';
+import Cart from './pages/buyer/Cart'
+import CheckOut from './pages/buyer/CheckOut';
 
 function App() {
 
