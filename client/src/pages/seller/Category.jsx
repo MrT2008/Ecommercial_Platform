@@ -1,4 +1,4 @@
-import Sidebar from '../../components/admin/sellerSidebar';
+import Sidebar from '../../components/seller/sellerSidebar';
 import React, { useState } from 'react';
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

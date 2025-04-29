@@ -1,4 +1,4 @@
-import Sidebar from '../../components/admin/sellerSidebar';
+import Sidebar from '../../components/seller/sellerSidebar';
 import { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
