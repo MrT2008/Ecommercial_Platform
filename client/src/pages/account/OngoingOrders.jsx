@@ -72,7 +72,8 @@ const OngoingOrders = () => {
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 container mx-auto py-10 px-8 max-w-4xl">
+      <div className="flex-1 container mx-auto py-10 px-8 ">
+        <h2 className="text-2xl font-bold text-[#FFA50B] mb-4">Ongoing Orders</h2>
         {orders
           .filter((order) => order.status === "ONGING ORDER")
           .map((order) => (

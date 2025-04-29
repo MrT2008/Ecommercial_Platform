@@ -1,75 +1,93 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
-import SecondaryButton from "../../components/shares/SecondaryButton";
-import OutlineButton from "../../components/shares/OutlineButton";
+import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
+import SecondaryButton from '../../components/shares/SecondaryButton';
+import OutlineButton from '../../components/shares/OutlineButton';
 
-const AddNewAddressDialog = ({ isOpen, onClose, onSave }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    isDefault: false,
-  });
+const AddNewAddressDialog = ({ isOpen, onClose, onSave, addressData }) => {
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [address, setAddress] = useState('');
+  const [isDefault, setIsDefault] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
+  useEffect(() => {
+    if (addressData) {
+      // Sửa chỗ này để khớp với dữ liệu bên ngoài truyền vào
+      setFullName(addressData.name || '');
+      setPhoneNumber(addressData.phone || '');
+      setAddress(addressData.address || '');
+      setIsDefault(addressData.isDefault || false);
+    } else {
+      // Reset khi thêm mới
+      setFullName('');
+      setPhoneNumber('');
+      setAddress('');
+      setIsDefault(false);
+    }
+  }, [addressData, isOpen]); // Thêm `isOpen` để reset form khi mở lại
 
   const handleSave = () => {
-    onSave(formData);
-    onClose();
+    const newAddress = {
+      fullName,
+      phoneNumber,
+      address,
+      isDefault,
+    };
+    onSave(newAddress);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 bg-opacity-30 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
-        <h2 className="text-xl font-bold mb-4">New Address</h2>
-        <form className="space-y-4">
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg w-full max-w-lg p-6">
+        <h2 className="text-xl font-bold text-[#FFA50B] mb-4">
+          {addressData ? 'Edit Address' : 'Add New Address'}
+        </h2>
+
+        <div className="mb-4">
+          <label className="block mb-1">Full Name</label>
           <input
             type="text"
-            name="name"
-            placeholder="Fullname"
-            value={formData.fullname}
-            onChange={handleChange}
-            className="mt-2 mb-2 py-2 border-b-2 w-full outline-0"
+            className="w-full p-2 bg-gray-100 rounded"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
           />
+        </div>
+
+        <div className="mb-4">
+          <label className="block mb-1">Phone Number</label>
           <input
             type="text"
-            name="phone"
-            placeholder="Phone"
-            value={formData.phone}
-            onChange={handleChange}
-            className="mt-2 mb-2 py-2 border-b-2 w-full outline-0"
+            className="w-full p-2 bg-gray-100 rounded"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
           />
+        </div>
+
+        <div className="mb-4">
+          <label className="block mb-1">Address</label>
           <textarea
-            name="address"
-            placeholder="Specific Address"
-            value={formData.address}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-4 py-2"
+            className="w-full p-2 bg-gray-100 rounded h-24"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
           />
-          <div className="flex items-center gap-2">
+        </div>
+
+        <div className="mb-6">
+          <label className="flex items-center gap-2">
             <input
               type="checkbox"
-              name="isDefault"
-              checked={formData.isDefault}
-              onChange={handleChange}
+              checked={isDefault}
+              onChange={(e) => setIsDefault(e.target.checked)}
               className="w-4 h-4"
             />
-            <label htmlFor="isDefault" className="text-sm">
-              Set as default
-            </label>
-          </div>
-        </form>
-        <div className="flex justify-end gap-4 mt-6">
-          <OutlineButton title="Back" onClick={onClose} />
-          <SecondaryButton title="OK" onClick={handleSave} />
+            Set as default address
+          </label>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <OutlineButton title="Cancel" onClick={onClose} />
+          <SecondaryButton title="Save" onClick={handleSave} />
         </div>
       </div>
     </div>
@@ -80,6 +98,7 @@ AddNewAddressDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  addressData: PropTypes.object,
 };
 
 export default AddNewAddressDialog;

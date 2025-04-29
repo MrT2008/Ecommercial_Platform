@@ -1,127 +1,118 @@
-import { useState } from "react";
-import Footer from "../../components/footer/main";
-
-const sidebarLinks = [
-  { label: "Profile", active: true },
-  { label: "Address" },
-  { label: "Credit Card" },
-  { label: "Change password" },
-];
-
-const bannerLinks = [
-  { label: "Pending Payments" },
-  { label: "Ongoing Orders" },
-  { label: "Completed Orders" },
-  { label: "Cancellations" },
-];
+import React, { useState } from "react"; 
+import Sidebar from "../../components/account/accountSidebar";
+import SecondaryButton from "../../components/shares/SecondaryButton";
+import EditProfileDialog from "../account/EditProfileDialog"; 
 
 const AccountProfile = () => {
-  const [profile, setProfile] = useState({
-    username: "ntpt12345",
-    email: "ntpt123456789@gmail.com",
-    // phone: "02343256789",
-    image:
-      "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474187SoY/anh-avatar-chu-meo-dang-yeu_051724941.jpg", // Replace with actual image path
-  });
+    const [userInfo, setUserInfo] = useState({
+        username: "ntpt12345",
+        email: "ntpt123456789@gmail.com",
+        phone: "02343256789",
+        image: "/images/cat-avatar.jpg", // Đường dẫn mặc định đến ảnh avatar
+    });
 
-  return (
-    <div className="min-h-screen flex flex-col bg-[#fafbfc]">
-      <div className="flex flex-1 container mx-auto py-10">
-        {/* Sidebar */}
-        <div className="w-1/5 pr-8">
-          <div className="mb-8">
-            <h2 className="font-bold text-gray-700 mb-2">Manage Account</h2>
-            <ul>
-              {sidebarLinks.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href="#"
-                    className={`block py-1 px-2 rounded ${
-                      link.active ? "text-[#FFA50B] font-bold" : "text-black hover:text-[#FFA50B]"
-                    }`}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h2 className="font-bold text-gray-700 mb-2">Banners Management</h2>
-            <ul>
-              {bannerLinks.map((link) => (
-                <li key={link.label}>
-                  <a href="#" className="block py-1 px-2 text-black hover:text-[#FFA50B]">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        {/* Main Profile Card */}
-        <div className="flex-1 flex flex-col">
-          <h6 className="text-xl font-semibold text-[#FFA50B] mb-6">Edit Your Profile</h6>
-          <div className="bg-white rounded-lg shadow p-8 flex items-stretch">
-            {/* Profile Info Column */}
-            <div className="flex-1 flex flex-col justify-center">
-              <div className="mb-6">
-                <div className="flex items-center mb-6">
-                  <span className="text-gray-500 w-40">Username</span>
-                  <span className="text-black">{profile.username}</span>
+    const [image, setImage] = useState(userInfo.image);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setImage(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSaveProfile = (updatedInfo) => {
+      setUserInfo((prev) => ({
+          ...prev,
+          ...updatedInfo,
+      }));
+      setIsEditDialogOpen(false); // 👉 Đóng dialog sau khi save
+    };
+
+    return (
+      <div className="min-h-screen flex">
+            <Sidebar />
+
+            <div className="w-4/5 p-6 py-12 px-8">
+                <h2 className="text-2xl font-bold text-[#FFA50B] mb-4">Edit Your Profile</h2>
+
+                <div className=" bg-white p-10 rounded-md shadow flex flex-col justify-between ">
+                    <div className="flex mb-6">
+                        {/* Left Info */}
+                        <div className="flex-1 pr-6 relative">
+                            <a
+                                href="#"
+                                className="absolute right-0 top-0 text-blue-700 text-sm "
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setIsEditDialogOpen(true);
+                              }} // Placeholder
+                            >
+                                Edit Information
+                            </a>
+
+                            <div className="space-y-4 mt-6">
+                                <div className="flex">
+                                    <div className="w-45 text-[#666666] font-medium">Username</div>
+                                    <div>{userInfo.username}</div>
+                                </div>
+                                <div className="flex">
+                                    <div className="w-45 text-[#666666] font-medium">Email</div>
+                                    <div>{userInfo.email}</div>
+                                </div>
+                                <div className="flex">
+                                    <div className="w-45 text-[#666666] font-medium">Phone Number</div>
+                                    <div>{userInfo.phone}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="border-l border-gray-400 mx-6"></div>
+
+                        {/* Avatar Section */}
+                        <div className="w-48 flex flex-col items-center">
+                            <img
+                                src={image}
+                                alt="Avatar"
+                                className="w-24 h-24 object-cover rounded-full border mb-4"
+                            />
+                            <label className="border rounded px-4 py-2 flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageUpload}
+                                />
+                                <div className="flex items-center gap-2 justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12" />
+                                    </svg>
+                                    Upload Image
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Save Button inside box, bottom-left */}
+                    <div className="flex justify-end">
+                        <SecondaryButton title="Save" />
+                    </div>
                 </div>
-                <div className="flex items-center mb-6">
-                  <span className="text-gray-500 w-40">Email</span>
-                  <span className="text-black">{profile.email}</span>
-                </div>
-                <div className="flex justify-end">
-                  <a
-                    href="#"
-                    className="underline underline-offset-2 decoration-2 hover:text-blue-800"
-                    style={{ textDecorationLine: "underline" }}
-                  >
-                    Edit Information
-                  </a>
-                </div>
-              </div>
             </div>
-            {/* Divider */}
-            <div className="w-px bg-gray-200 mx-8" />
-            {/* Avatar & Upload Column */}
-            <div className="flex flex-col items-center justify-start min-w-[220px]">
-              <img
-                src={profile.image}
-                alt="avatar"
-                className="w-24 h-24 rounded-full object-cover mb-6 border"
-              />
-              <button className="border px-4 py-2 rounded mb-6 text-gray-700 flex items-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 8l5-5m0 0l5 5m-5-5v12"
-                  />
-                </svg>
-                Upload Image
-              </button>
-              <div className="flex-1" />
-              <button className="bg-[#FFA50B] text-black px-12 py-2 rounded font-semibold self-end mt-8">
-                Save
-              </button>
-            </div>
-          </div>
+
+            <EditProfileDialog
+                isOpen={isEditDialogOpen}
+                onClose={() => setIsEditDialogOpen(false)}
+                onSave={handleSaveProfile}
+                user={userInfo}
+            />
         </div>
-      </div>
-      <Footer />
-    </div>
-  );
+    );
 };
 
 export default AccountProfile;

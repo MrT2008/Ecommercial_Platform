@@ -31,52 +31,55 @@ const AccountPassword = () => {
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 container mx-auto py-10 px-8 max-w-3xl">
+      <div className="w-4/5 p-6 py-12 px-8">
         <h2 className="text-2xl font-bold text-[#FFA50B] mb-6">Change Password</h2>
-        <form className="space-y-6">
-          <div className="flex items-center gap-4">
-            <label htmlFor="oldPassword" className="w-1/4 text-sm font-medium text-gray-700">
-              Old password
-            </label>
-            <input
-              type="password"
-              id="oldPassword"
-              name="oldPassword"
-              value={formData.oldPassword}
-              onChange={handleChange}
-              className="w-3/4 border border-gray-300 py-2 px-3 focus:outline-none focus:ring-[#FFA50B] focus:border-[#FFA50B]"
-            />
-          </div>
-          <div className="flex items-center gap-4">
-            <label htmlFor="newPassword" className="w-1/4 text-sm font-medium text-gray-700">
-              New password
-            </label>
-            <input
-              type="password"
-              id="newPassword"
-              name="newPassword"
-              value={formData.newPassword}
-              onChange={handleChange}
-              className="w-3/4 border border-gray-300 py-2 px-3 focus:outline-none focus:ring-[#FFA50B] focus:border-[#FFA50B]"
-            />
-          </div>
-          <div className="flex items-center gap-4">
-            <label htmlFor="confirmPassword" className="w-1/4 text-sm font-medium text-gray-700">
-              Confirm password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-3/4 border border-gray-300 py-2 px-3 focus:outline-none focus:ring-[#FFA50B] focus:border-[#FFA50B]"
-            />
-          </div>
-          <div className="flex justify-end">
-            <SecondaryButton title="Save" onClick={handleSave} />
-          </div>
-        </form>
+
+        <div className="bg-white p-8 rounded-md shadow flex flex-col justify-between ">
+          <form className="space-y-6">
+            <div className="flex items-center gap-4">
+              <label htmlFor="oldPassword" className="w-40 text-[#666666] font-medium">
+                Old password
+              </label>
+              <input
+                type="password"
+                id="oldPassword"
+                name="oldPassword"
+                value={formData.oldPassword}
+                onChange={handleChange}
+                className="w-3/4 border border-gray-300 py-2 px-3 focus:outline-none focus:ring-[#FFA50B] focus:border-[#FFA50B]"
+              />
+            </div>
+            <div className="flex items-center gap-4">
+              <label htmlFor="newPassword" className="w-40 text-[#666666] font-medium">
+                New password
+              </label>
+              <input
+                type="password"
+                id="newPassword"
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleChange}
+                className="w-3/4 border border-gray-300 py-2 px-3 focus:outline-none focus:ring-[#FFA50B] focus:border-[#FFA50B]"
+              />
+            </div>
+            <div className="flex items-center gap-4">
+              <label htmlFor="confirmPassword" className="w-40 text-[#666666] font-medium">
+                Confirm password
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-3/4 border border-gray-300 py-2 px-3 focus:outline-none focus:ring-[#FFA50B] focus:border-[#FFA50B]"
+              />
+            </div>
+            <div className="flex justify-end">
+              <SecondaryButton title="Save" onClick={handleSave} />
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

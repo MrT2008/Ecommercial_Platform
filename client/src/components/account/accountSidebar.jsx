@@ -6,13 +6,8 @@ const Sidebar = () => {
 
     return (
       <div className="w-1/5 h-screen p-12">
-        <h2 className="text-lg font-bold mb-4">Product Management</h2>
+        <h2 className="text-lg font-bold mb-4">Manage Account</h2>
         <ul className="mb-6">
-          <li className="mb-2">
-            <a href="#" className={`px-4 ${isActive('#') ? 'active' : ''}`}>
-              Manage Account
-            </a>
-          </li>
           <li className="mb-2">
             <a href="/account/profile" className={`px-4 ${isActive('/seller/all-product') ? 'active' : ''}`}>
               Profile
