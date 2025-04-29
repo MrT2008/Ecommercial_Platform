@@ -20,6 +20,9 @@ import BecomeSeller from "./pages/becomeSeller";
 import PrivateRoute from './routes/privateRoute';
 import AllOrder from "./pages/seller/AllOrder";
 import ShopPage from "./pages/ShopPage";
+import axios from 'axios';
+import Cart from './pages/Cart'
+import CheckOut from './pages/CheckOut';
 
 function App() {
 
@@ -42,8 +45,11 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} />
         </Route>
-
-
+          
+        <Route path="/user" element={<MainLayout />}>
+          <Route path="cart" element={<Cart />} />
+          <Route path="check-out" element={<CheckOut/>}/>
+        </Route>
         
         {/* Private routes for both buyers and sellers */}
         <Route element={<PrivateRoute isAllowed={ isBuyer || isSeller } redirectPath="/login"><MainLayout /></PrivateRoute>}>
