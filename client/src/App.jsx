@@ -41,6 +41,14 @@ function App() {
           {/* <Route path="shop/:id" element={<ShopPage />} /> */}
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} />
+          <Route path="seller">
+            <Route path="category" element={<Category />} />
+            <Route path="all-product" element={<AllProduct />} />
+            <Route path="shop-information" element={<ShopInformation />} />
+            <Route path="seller-banner" element={<SellerBanner />} />
+            <Route path="seller-dashboard" element={<SellerDashboard />} />
+            <Route path="all-order" element={<AllOrder />} />
+          </Route>
         </Route>
 
 
@@ -52,18 +60,18 @@ function App() {
         </Route>
 
         {/* Private routes for sellers */}
-        <Route element={<PrivateRoute isAllowed={isSeller} redirectPath="/login"><MainLayout /></PrivateRoute>}>
-          <Route path="/pending-shops" element={<PendingShops />} />
-          <Route path="/seller">
+        {/* <Route element={<PrivateRoute isAllowed={isSeller} redirectPath="/login"><MainLayout /></PrivateRoute>}>
+          <Route path="/pending-shops" element={<PendingShops />} /> */}
+          {/* <Route path="/seller">
             <Route path="category" element={<Category />} />
             <Route path="all-product" element={<AllProduct />} />
             <Route path="shop-information" element={<ShopInformation />} />
             <Route path="seller-banner" element={<SellerBanner />} />
             <Route path="seller-dashboard" element={<SellerDashboard />} />
             <Route path="all-order" element={<AllOrder />} />
-          </Route>
+          </Route> */}
           {/* Add seller-specific routes here */}
-        </Route>
+        {/* </Route> */}
         {/* Private Route for admin */}
         <Route element={<PrivateRoute isAllowed={isAdmin} redirectPath="/login"><MainLayout /></PrivateRoute>}>
           <Route path="/admin" >

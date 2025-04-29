@@ -115,7 +115,7 @@ const Category = () => {
                             className={`${index % 2 === 0 ? "bg-[#F7F6FF]" : "bg-white"} text-center`}
                         >
                             <td className="p-2">{index + 1}</td>
-                            <td className="p-2">{category}</td>
+                            <td className="p-2">{category.name}</td>
                             <td className="p-2">
                             <div className="flex items-center justify-center gap-2">
                                 <button
