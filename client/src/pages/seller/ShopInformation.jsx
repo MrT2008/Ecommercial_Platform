@@ -2,7 +2,6 @@ import Sidebar from '../../components/admin/sellerSidebar';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import SecondaryButton from "../../components/shares/SecondaryButton";
-import EditInfShopDialog from "../seller/EditShopInfDialog"; // Import your dialog component
 
 const ShopInformation = () => {
     const [shopInfo, setShopInfo] = useState(null);
@@ -41,19 +40,15 @@ const ShopInformation = () => {
             reader.readAsDataURL(file);
         }
     };
-    // if (!shopInfo) {
-    //     return (
-    //         <div className="flex">
-    //             <Sidebar />
-    //             <div className="w-4/5 p-6">Loading...</div>
-    //         </div>
-    //     );
-    // }
 
-    const handleSaveShopInfo = (updatedShopInfo) => {
-        setShopInfo(updatedShopInfo); // Update the shop info when saved
-        setIsEditDialogOpen(false); // Close the dialog after saving
-    };
+    if (!shopInfo) {
+        return (
+            <div className="flex">
+                <Sidebar />
+                <div className="w-4/5 p-6">Loading...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex">
@@ -66,11 +61,7 @@ const ShopInformation = () => {
                     <div className="flex">
 
                         <div className="flex-1 pr-6 relative">
-                            <a 
-                                href="#"
-                                className="absolute right-0 top-0 text-blue-700 text-sm"
-                                onClick={() => setIsEditDialogOpen(true)} // Open dialog when clicked
-                            >
+                            <a href="#" className="absolute right-0 top-0 text-blue-700 text-sm">
                                 Edit Information
                             </a>
 
@@ -131,14 +122,6 @@ const ShopInformation = () => {
                     </div>
                 </div>
             </div>
-
-            {/* EditInfShopDialog - Conditional rendering based on dialog state */}
-            <EditInfShopDialog 
-                isOpen={isEditDialogOpen} 
-                onClose={() => setIsEditDialogOpen(false)} 
-                onSave={handleSaveShopInfo} 
-                shop={shopInfo} 
-            />
         </div>
     );
 };
