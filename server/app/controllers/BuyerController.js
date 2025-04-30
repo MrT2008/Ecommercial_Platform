@@ -392,14 +392,15 @@ class BuyerController {
                     await t.rollback();
                     return res.status(400).json({ message: 'No default payment method found' });
                 }
+                transactionPaymentType = "credit card"
                 payment = {
+                    type: transactionPaymentType,
                     bankName: userDefaultPayment.bankName,
                     bankAccountNumber: userDefaultPayment.bankAccountNumber,
                 }
-                transactionPaymentType = "credit card"
             } else if (paymentMethod.toLowerCase() === "cash") {
-                payment = {type: "cash"}
                 transactionPaymentType = "cash"
+                payment = {type: transactionPaymentType}
             } else {
                 await t.rollback();
                 return res.status(400).json({ message: 'Invalid payment method' });
