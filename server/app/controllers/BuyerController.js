@@ -212,14 +212,14 @@ class BuyerController {
             let cart = {}
             if (existingCart) {
                 if (existingCart.isDeleted) {
-                    existingCart.update({
+                    await existingCart.update({
                         isDeleted: false,
                         quantity: quantity
                     })
                     
                 } else {
                     const newQuantity = existingCart.quantity +  quantity
-                    existingCart.update({
+                    await existingCart.update({
                         quantity: newQuantity
                     })
                 }
