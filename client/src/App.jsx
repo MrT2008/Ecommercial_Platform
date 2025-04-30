@@ -26,6 +26,8 @@ import PendingPayment from "./pages/account/PendingPayment";
 import OngoingOrders from "./pages/account/OngoingOrders";
 import CompletedOrders from "./pages/account/CompletedOrders";
 import Cancellations from "./pages/account/Cancellations";
+import AdminBanner from "./pages/admin/adminBanner";
+import Dashboard from "./pages/admin/adminDashboard";
 
 function App() {
   const { user, loading } = useAuth();
@@ -50,30 +52,13 @@ function App() {
         </Route>
 
         <Route path="/seller">
-            <Route path="category" element={<Category />} />
-            <Route path="all-product" element={<AllProduct />} />
-            <Route path="shop-information" element={<ShopInformation />} />
-            <Route path="seller-banner" element={<SellerBanner />} />
-            <Route path="seller-dashboard" element={<SellerDashboard />} />
-            <Route path="all-order" element={<AllOrder />} />
-          </Route>
-
-
-
-        {/* Private routes for sellers */}
-        {/* <Route element={<PrivateRoute isAllowed={isSeller} redirectPath="/login"><MainLayout /></PrivateRoute>}>
-          <Route path="/pending-shops" element={<PendingShops />} />
-          <Route path="/seller">
-            <Route path="category" element={<Category />} />
-            <Route path="all-product" element={<AllProduct />} />
-            <Route path="shop-information" element={<ShopInformation />} />
-            <Route path="seller-banner" element={<SellerBanner />} />
-            <Route path="seller-dashboard" element={<SellerDashboard />} />
-            <Route path="all-order" element={<AllOrder />} />
-          </Route> */}
-          {/* Add seller-specific routes here */}
-        {/* </Route> */}
-
+          <Route path="category" element={<Category />} />
+          <Route path="all-product" element={<AllProduct />} />
+          <Route path="shop-information" element={<ShopInformation />} />
+          <Route path="seller-banner" element={<SellerBanner />} />
+          <Route path="seller-dashboard" element={<SellerDashboard />} />
+          <Route path="all-order" element={<AllOrder />} />
+        </Route>
         <Route path="/account" element={<MainLayout />}>
           <Route path="profile" element={<AccountProfile />} />
           <Route path="address" element={<AccountAddress />} />
@@ -84,6 +69,29 @@ function App() {
           <Route path="completed" element={<CompletedOrders />} />
           <Route path="cancellations" element={<Cancellations />} />
         </Route>
+        <Route path="/admin" element={<MainLayout />}>
+          <Route path="admin-dashboard" element={<Dashboard />} />
+          <Route path="pending-shops" element={<PendingShops />} />
+          <Route path="list-shops" element={<ListAllShops />} />
+          <Route path="banned-shops" element={<BannedShops />} />
+          <Route path="announcements" element={<AnnouncementsPage />} />
+          <Route path="admin-banner" element={<AdminBanner />} />
+        </Route>
+
+        {/* Private routes for sellers */}
+        {/* <Route element={<PrivateRoute isAllowed={isSeller} redirectPath="/login"><MainLayout /></PrivateRoute>}>
+          <Route path="/seller">
+            <Route path="category" element={<Category />} />
+            <Route path="all-product" element={<AllProduct />} />
+            <Route path="shop-information" element={<ShopInformation />} />
+            <Route path="seller-banner" element={<SellerBanner />} />
+            <Route path="seller-dashboard" element={<SellerDashboard />} />
+            <Route path="all-order" element={<AllOrder />} />
+          </Route> */}
+        {/* Add seller-specific routes here */}
+        {/* </Route> */}
+
+
 
         {/* Protected routes */}
         <Route element={<MainLayout />}>
