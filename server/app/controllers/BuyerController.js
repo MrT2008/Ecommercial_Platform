@@ -221,8 +221,13 @@ class BuyerController {
             await product.update({
                 stock: product.stock - quantity
             })
+
+            const shop = await models.Shop.findByPk(product.shopId)
+            if (!shop) {
+                return  res.status(400).json({ error: 'failed to find shop' });
+            }
             
-            return res.status(200).json({message: 'Add item to cart sucessfully'})
+            return res.status(200).json({message: 'Add item to cart sucessfully', shopName: shop.name, product})
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
