@@ -20,7 +20,7 @@
 
 a {
   font-weight: 500;
-  color: #575757;
+  color: var(--main);
   text-decoration: inherit;
 }
 a:hover {
