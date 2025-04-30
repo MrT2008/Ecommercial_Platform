@@ -284,8 +284,6 @@ class BuyerController {
             await productToBeUpdated.update({
                 stock: productToBeUpdated.stock + productToBeRemoved.quantity
             })
-
-
             return res.status(200).json({ message: 'Product removed from cart sucessfully', productToBeRemoved });
         } catch (error) {
             console.error(error);
@@ -302,8 +300,31 @@ class BuyerController {
                 }
             })
             const responseMessage = (!cartItems ? "No item in cart" : "Item in cart found successfully")
-
-            return res.status(200).json({message: responseMessage , cartItems})
+            let data = {}
+            if (cartItems) {
+                let item_index = 0
+                for (const item of cartItems) {
+                    const product = await models.Product.findByPk(item.productId)
+                    if (!product) {
+                        return res.status(400).json({ error: 'Found no product with this id' });
+                    }
+                    const shop = await models.Shop.findByPk(product.shopId)
+                    if (!shop) {
+                        return  res.status(400).json({ error: 'failed to find shop' });
+                    }
+                    const cartItem = {
+                        shopName: shop.name,
+                        userId: item.userId,
+                        productId: item.productId,
+                        productName: product.name,
+                        quantity: item.quantity
+                    }
+                    data[`product_${item_index}`] = cartItem
+                    console.log(data)
+                    item_index++
+                }
+            }
+            return res.status(200).json({message: responseMessage , data})
         } catch (error) {
             console.log(error)
             res.status(500).json({ message: 'Internal Server Error' });
@@ -339,7 +360,6 @@ class BuyerController {
             for (const cartItem of cartItems) {
                 console.log(cartItem.salePrice)
                 
-
                 const productInCart = await models.Product.findByPk(cartItem.productId)
                 
                 if (!productInCart) {
