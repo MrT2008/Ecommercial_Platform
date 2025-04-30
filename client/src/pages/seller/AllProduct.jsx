@@ -63,8 +63,8 @@ const AllProduct = () => {
       const userDataString = localStorage.getItem('userData') || localStorage.getItem('user');
       if (userDataString) {
         const userData = JSON.parse(userDataString);
-        if (userData && (userData.sellerId || userData.id)) {
-          return userData.sellerId || userData.id;
+        if (userData && (userData.shopId || userData.id)) {
+          return userData.shopId || userData.id;
         }
       }
     } catch (e) {
