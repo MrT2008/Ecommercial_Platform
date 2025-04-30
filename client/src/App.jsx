@@ -65,7 +65,7 @@ function App() {
           <Route path="/account" element={<AccountProfile />} />
           <Route path="/become-seller" element={<BecomeSeller/>} /> */}
 
-        <Route path="/seller">
+        <Route path="/seller" element={<MainLayout />}>
           <Route path="category" element={<Category />} />
           <Route path="all-product" element={<AllProduct />} />
           <Route path="shop-information" element={<ShopInformation />} />
