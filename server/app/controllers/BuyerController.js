@@ -1,8 +1,7 @@
 
-const { where, json } = require('sequelize');
+const { where } = require('sequelize');
 const { models } = require('../models');
 const reuse = require('../reuse/reuse');
-const { response } = require('express');
 
 class BuyerController {
     viewProfileInformation = async (req, res) => {
@@ -197,63 +196,38 @@ class BuyerController {
                 return res.status(405).json({ error: 'Doesnt have enough item to add to cart' });
             }
 
-            const shop = await models.Shop.findByPk(product.shopId)
-            if (!shop) {
-                return  res.status(400).json({ error: 'failed to find shop' });
-            }
-
             const existingCart = await models.Cart.findOne({
                 where: {
                     userId: buyerId,
-                    productId: productId,
+                    productId: productId
                 }
             })
 
-            let cart = {}
             if (existingCart) {
-                if (existingCart.isDeleted) {
-                    existingCart.update({
-                        isDeleted: false,
-                        quantity: quantity
-                    })
-                    
-                } else {
-                    const newQuantity = existingCart.quantity +  quantity
-                    existingCart.update({
-                        quantity: newQuantity
-                    })
-                }
-                const data = {
-                    shopName: shop.name,
-                    userId: existingCart.userId,
-                    productId: existingCart.productId,
-                    productName: product.name,
-                    quantity: existingCart.quantity
-                }
-                cart = data
+                const newQuantity = existingCart.quantity +  quantity
+                existingCart.update({
+                    quantity: newQuantity
+                })
             } else {
-                const newCart = await models.Cart.create({
+                const cart = await models.Cart.create({
                     userId: buyerId, 
                     productId, quantity
                 }) 
-                if (!newCart) {
+                if (!cart) {
                     return res.status(400).json({ error: 'failed to add item to cart' });
                 }
-                const data = {
-                    shopName: shop.name,
-                    userId: newCart.userId,
-                    productId: newCart.productId,
-                    productName: product.name,
-                    quantity: newCart.quantity
-                }
-                cart = data
             }
             
             await product.update({
                 stock: product.stock - quantity
             })
-    
-            return res.status(200).json({message: 'Add item to cart sucessfully', cart })
+
+            const shop = await models.Shop.findByPk(product.shopId)
+            if (!shop) {
+                return  res.status(400).json({ error: 'failed to find shop' });
+            }
+            
+            return res.status(200).json({message: 'Add item to cart sucessfully', shopName: shop.name, product})
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
@@ -285,8 +259,7 @@ class BuyerController {
                 stock: productToBeUpdated.stock + productToBeRemoved.quantity
             })
 
-
-            return res.status(200).json({ message: 'Product removed from cart sucessfully', productToBeRemoved });
+            return res.status(200).json({ message: 'Product removed from cart sucessfully' });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
