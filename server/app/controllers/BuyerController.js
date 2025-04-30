@@ -1,8 +1,9 @@
 
-const { where, json } = require('sequelize');
+const { where, json, Op} = require('sequelize');
 const { models } = require('../models');
 const reuse = require('../reuse/reuse');
 const { response } = require('express');
+
 
 class BuyerController {
     viewProfileInformation = async (req, res) => {
@@ -73,35 +74,63 @@ class BuyerController {
         try {
             const {buyerId} = req.params;
             const {bankName, bankAccountNumber, inUsed} = req.body
-
             const user = await models.User.findOne({
                 where:
                 {
                     id: buyerId
                 }
             })
-
             if (!user) {
                 return res.status(400).json({ message: 'User not  found' });
             }
 
+            let usePaymentMethod = inUsed
+            const allreadyHasDefault = await models.PaymentMethod.findOne({
+                where: {
+                    userId: buyerId,
+                    isDeleted: false
+                }
+            })
+            if (!allreadyHasDefault) {
+                usePaymentMethod = true
+            }
+            // console.log("usePyament aaaaaaaaaaaaa", usePaymentMethod)
             const existingPaymentMethod = await models.PaymentMethod.findOne({
                 where: {
                     userId: buyerId,
                     bankName, bankAccountNumber
                 }
             })
-
             if (existingPaymentMethod) {
-                return res.status(400).json({ message: 'Duplicated payment method' });
+                if (existingPaymentMethod.isDeleted) {
+                    if (inUsed) {
+                        const previousDefaultMethod = await models.PaymentMethod.findOne({
+                            where: {
+                                userId: buyerId,
+                                inUsed: true,
+                            }
+                        })
+                        if (previousDefaultMethod) {
+                            await previousDefaultMethod.update({
+                                inUsed: false
+                            })
+                        }
+                    }
+                    await existingPaymentMethod.update({
+                        isDeleted: false,
+                        inUsed: usePaymentMethod
+                    })
+                    return res.status(200).json({ message: 'Create payment method sucessfully', existingPaymentMethod});
+                } else {
+                    return res.status(400).json({ message: 'Duplicated payment method' });
+                }
             }
-
             if (inUsed) {
+                console.log("aaaaaaaaaaaaaaaaaaaa")
                 const previousDefaultMethod = await models.PaymentMethod.findOne({
                     where: {
                         userId: buyerId,
                         inUsed: true,
-                        isDeleted: false
                     }
                 })
                 if (previousDefaultMethod) {
@@ -111,14 +140,13 @@ class BuyerController {
                 }
             }
 
-
             const newPaymentMethod = await models.PaymentMethod.create({
                 userId: buyerId,
                 bankName: bankName,
                 bankAccountNumber: bankAccountNumber,
-                inUsed: inUsed
+                inUsed: usePaymentMethod
             })
-            return res.status(200).json({ message: 'Create payment method sucessfully'});
+            return res.status(200).json({ message: 'Create payment method sucessfully', newPaymentMethod});
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
@@ -128,18 +156,31 @@ class BuyerController {
     removePaymentMethod = async (req, res) =>{
         try {
             const {buyerId} = req.params;
-
             const {paymentId} = req.body;
-
-            const paymentMethodToBeDeleted = await models.PaymentMethod.findByPk(paymentId);
-            if (!paymentMethodToBeDeleted) {
-                return { error: 'Payment method not found' };
+            const paymentMethodToBeDeleted = await models.PaymentMethod.findByPk(paymentId)
+            if (!paymentMethodToBeDeleted || paymentMethodToBeDeleted.isDeleted) {
+                return res.status(400).json({ error: 'Payment method not found' });
+            }
+            if (paymentMethodToBeDeleted.inUsed) {
+                const newDefaultPayment = await models.PaymentMethod.findOne({
+                    where: {
+                        userId: buyerId,
+                        isDeleted: false,
+                        inUsed: false
+                    }
+                })
+                if (newDefaultPayment) {
+                    await newDefaultPayment.update({
+                        inUsed: true
+                    })
+                }
             }
             await paymentMethodToBeDeleted.update({
-                isDeleted: true
+                isDeleted: true,
+                inUsed: false
             })
 
-            return res.status(200).json({ message: 'Payment method removed sucessfully' });
+            return res.status(200).json({ message: 'Payment method removed sucessfully', paymentMethodToBeDeleted });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
@@ -333,17 +374,55 @@ class BuyerController {
     }
 
     proceedWithCheckout = async (req, res) => {
+        const t = await models.Announcement.sequelize.transaction();
         try {
             const {buyerId} = req.params
             const {paymentMethod} = req.body
+            let payment = {}
+            let transactionPaymentType = ""
+            if (paymentMethod.toLowerCase() === "bank") {
+                const userDefaultPayment = await models.PaymentMethod.findOne({
+                    where: {
+                        userId: buyerId,
+                        inUsed: true,
+                        isDeleted: false
+                    }
+                })
+                if (!userDefaultPayment) {
+                    await t.rollback();
+                    return res.status(400).json({ message: 'No default payment method found' });
+                }
+                payment = {
+                    bankName: userDefaultPayment.bankName,
+                    bankAccountNumber: userDefaultPayment.bankAccountNumber,
+                }
+                transactionPaymentType = "credit card"
+            } else if (paymentMethod.toLowerCase() === "cash") {
+                payment = {type: "cash"}
+                transactionPaymentType = "cash"
+            } else {
+                await t.rollback();
+                return res.status(400).json({ message: 'Invalid payment method' });
+            }
+            const user_shipping_info = await models.ShipInfo.findOne({
+                where: {
+                    userId: buyerId,
+                    status: "active"
+                }
+            })
+            if (!user_shipping_info) {
+                await t.rollback();
+                return res.status(400).json({ error: 'No default shipping information found'});
+            }
+            console.log("abc")
             const cartItems = await models.Cart.findAll({
                 where: {
                     userId: buyerId,
                     isDeleted: false
                 }
             })
-
             if (cartItems.length === 0) {
+                await t.rollback();
                 return res.status(404).json({ error: 'No product in cart to proceed' });
             }
             await models.Order.create({
@@ -356,17 +435,16 @@ class BuyerController {
                 },
                 order: [ [ 'createdAt', 'DESC' ]]
             })
+            console.log("abcd")
             let priceTotal = 0
-
+            let itemOrdered = {}
+            let item_index = 0
             for (const cartItem of cartItems) {
-                console.log(cartItem.salePrice)
-                
                 const productInCart = await models.Product.findByPk(cartItem.productId)
-                
                 if (!productInCart) {
+                    await t.rollback();
                     return res.status(404).json({ error: 'Not found product in cart'});
                 }
-
                 const orderItem = await models.OrderDetail.create({
                     orderId: orderJustCreated.id,
                     productId: cartItem.productId,
@@ -375,51 +453,83 @@ class BuyerController {
                     priceAtPurchase: cartItem.quantity * productInCart.salePrice
                 })
                 priceTotal += orderItem.priceAtPurchase
-            }
 
+                itemOrdered[`product_${item_index}`] = orderItem
+                item_index++
+            }
             await models.Cart.update(
                 {
                     isDeleted: true
                 }, {
                     where: {
                         userId: buyerId,
-                        // productId: cartItem.productId,
                         isDeleted: false
                     }
                 }
             )
-
-            const newOrder = await orderJustCreated.update({totalPrice: priceTotal })
+            await orderJustCreated.update({totalPrice: priceTotal })
             const newTransaction = await models.Transaction.create({
                 orderId: orderJustCreated.id,
-                paymentMethod: paymentMethod,
+                paymentMethod: transactionPaymentType,
             })
+            console.log("abcdef")
 
-            return res.status(200).json({message: 'Successfully place order'})
-
+            await t.commit();
+            return res.status(200).json({message: 'Successfully place order', 
+                order: {
+                    orderId: orderJustCreated.id,
+                    buyerId: buyerId,
+                    totalPrice: orderJustCreated.totalPrice,
+                    paymentMethod: payment,
+                    itemOrdered
+                },
+                shippingInformation: {
+                    receiverName: user_shipping_info.receiverName,
+                    address: user_shipping_info.address,
+                    phone: user_shipping_info.phone
+                }
+            })
         } catch (error) {
+            await t.rollback();
             console.log(error)
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
-
-    //lm them ship infor (create, edit, setdefault)
+    
     addShippingInfo = async (req, res) => {
         try {
             const {buyerId} = req.params
             const {receiverName, address, phone, status} = req.body
+            let inUsed = status
 
             const existingInfo  = await models.ShipInfo.findOne({
                 where: {
                     userId: buyerId,
-                receiverName: receiverName,
-                address: address,
-                phone: phone
+                    receiverName: receiverName,
+                    address: address,
+                    phone: phone
                 }
             })
+            const isNotTheOnlyOne = await models.ShipInfo.findOne({
+                where: {
+                    userId: buyerId,
+                    status: { [Op.ne]: "delete" }
+                }
+            })
+            if (!isNotTheOnlyOne) {
+                inUsed = "active"
+            }
 
             if (existingInfo) {
-                return res.status(404).json({ error: 'Duplicate shipping information', existingInfo});
+                if (existingInfo.status === 'delete') {
+                    console.log("a", inUsed)
+                    await existingInfo.update({
+                        status: inUsed
+                    })
+                    return res.status(200).json({message: "Shipping information successfully created"})
+                } else {
+                    return res.status(404).json({ error: 'Duplicate shipping information', existingInfo});
+                }
             }
 
             const newShipInfor = await models.ShipInfo.create({
@@ -427,7 +537,7 @@ class BuyerController {
                 receiverName: receiverName,
                 address: address,
                 phone: phone,
-                status: status
+                status: inUsed
             })
 
             if (!newShipInfor) {
@@ -483,7 +593,7 @@ class BuyerController {
             const updatedShippingInformation = await models.ShipInfo.findOne({
                 where: {
                     id,
-                    status: !"delete"
+                    status: { [Op.ne]: "delete" }
                 }
             })
             if (!updatedShippingInformation) {
@@ -510,6 +620,21 @@ class BuyerController {
             const shippingInformationToBeDeleted = await models.ShipInfo.findByPk(id);
             if (!shippingInformationToBeDeleted) {
                 return { error: 'Shipping information not found' };
+            }
+            console.log(shippingInformationToBeDeleted.status.toLowerCase())
+            if (shippingInformationToBeDeleted.status.toLowerCase() === "active") {
+                const newDefaultShippingInformation = await models.ShipInfo.findOne({
+                    where: {
+                        userId: buyerId,
+                        status: { [Op.ne]: "delete" }
+                    }
+                })
+
+                if (newDefaultShippingInformation) {
+                    await newDefaultShippingInformation.update({
+                        status: "active"
+                    })
+                }
             }
             await shippingInformationToBeDeleted.update({
                 status: "delete"
