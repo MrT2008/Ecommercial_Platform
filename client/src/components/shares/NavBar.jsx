@@ -1,15 +1,19 @@
 import { useState } from 'react';
-
+import { useAuth } from '../../hooks/useAuth';
 
 const Navbar = () => {
+  const { user } = useAuth();
+  const roles = user?.roles || [];
+  const isSeller = roles.includes('seller');
   const [activeItem, setActiveItem] = useState('Home');
-  
+
   const menuItems = [
     { name: 'Home', path: '/' },
-    { name: 'My Shops', path: '/my-shops' },
-    { name: 'Become Seller', path: '/become-seller' }
+    isSeller
+      ? { name: 'My Shops', path: '/my-shops' }
+      : { name: 'Become Seller', path: '/become-seller' }
   ];
-  
+
   return (
     <nav className="bg-white w-full">
       <div className="max-w-7xl mx-auto px-4">
