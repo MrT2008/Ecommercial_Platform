@@ -1,4 +1,4 @@
-import Sidebar from '../../components/admin/sellerSidebar';
+import Sidebar from '../../components/seller/sellerSidebar';
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
@@ -40,7 +40,7 @@ const ShopInformation = () => {
         <div className="flex">
             <Sidebar />
 
-            <div className="w-4/5 p-6">
+            <div className="w-4/5 p-6 py-12 px-8">
                 <h2 className="text-2xl font-bold mb-6 text-[#FFA50B]">Shop Information</h2>
 
                 <div className="bg-white p-8 rounded-md shadow flex flex-col justify-between min-h-[400px]">

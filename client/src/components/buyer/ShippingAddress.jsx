@@ -43,11 +43,11 @@ const ShippingAddress = ({ recipientName, phoneNumber, deliveryAddress }) => {
                     />
                 </div>
 
-                <div className="flex justify-end mt-3">
+                {/* <div className="flex justify-end mt-3">
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1.5 px-4 rounded text-sm">
                         Save
                     </button>
-                </div>
+                </div> */}
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import Sidebar from '../../components/admin/sellerSidebar';
+import Sidebar from '../../components/seller/sellerSidebar';
 import React, { useState } from 'react';
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,7 +32,7 @@ const Category = () => {
             <Sidebar />
     
             {/* Main Content */}
-            <div className="w-4/5 p-6">
+            <div className="w-4/5 p-6 py-12 px-8">
                 <h2 className="text-2xl font-bold mb-6 text-[#FFA50B]">Category Management</h2>
                 <div className="flex flex-row gap-6">
                 {/* Form to Add Category */}
