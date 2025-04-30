@@ -8,7 +8,6 @@ class Cart extends Model {}
 Cart.init({
     userId: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
         references: {
             model: User,
             key: 'id',
@@ -16,7 +15,6 @@ Cart.init({
     },
     productId: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
         references: {
             model: Product,
             key: 'id',
