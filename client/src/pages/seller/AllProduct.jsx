@@ -91,7 +91,7 @@ const AllProduct = () => {
 
   const handleSaveProduct = async (product) => {
     try {
-      const url = `http://localhost:8080/seller/${sellerId}/products`;
+      const url = `http://localhost:8080/seller/${sellerId}/postProduct`;  //sellerId truyền vào là userId, trong khi cái cần là shopId
       const method = editingProduct ? 'PUT' : 'POST';
       const endpoint = editingProduct ? `${url}/${editingProduct.id}` : url;
       
@@ -100,6 +100,7 @@ const AllProduct = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(product),
       });
 
@@ -169,7 +170,7 @@ const AllProduct = () => {
         {/* Empty State */}
         {!isLoading && !error && products.length === 0 && (
           <div className="text-center py-10 bg-gray-50 rounded-lg">
-            <p className="text-gray-600 mb-4">You don't have any products yet</p>
+            <p className="text-gray-600 mb-4">You do not have any products yet</p>
             <SecondaryButton title="Add your first product" onClick={() => setDialogOpen(true)} />
           </div>
         )}
