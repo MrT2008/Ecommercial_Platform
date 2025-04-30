@@ -1,4 +1,4 @@
-import Sidebar from '../../components/admin/sellerSidebar';
+import Sidebar from '../../components/seller/sellerSidebar';
 import { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
@@ -76,7 +76,7 @@ const AllOrder = () => {
     <div className="flex">
       <Sidebar />
 
-      <div className="w-4/5 p-6">
+      <div className="w-4/5 p-6 py-12 px-8">
         {/* Title and Filter Buttons */}
         <div className="flex flex-col gap-4 mb-6">
           <h2 className="text-2xl font-bold text-[#FFA50B]">All Orders</h2>

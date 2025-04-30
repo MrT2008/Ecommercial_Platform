@@ -179,7 +179,7 @@ const Cart = () => {
         localStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
         
         // Navigate to checkout page
-        navigate('/user/check-out');
+        navigate('/buyer/check-out');
     };
     return (
         <div className="p-8">

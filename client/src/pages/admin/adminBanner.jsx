@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import SecondaryButton from '../../components/shares/SecondaryButton';
-import Sidebar from '../../components/seller/sellerSidebar';
+import Sidebar from '../../components/admin/adminSidebar';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import AddBannerDialog from "../../pages/seller/AddBannerDialog";
 
-const SellerBanner = () => {
+const AdminBanner = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
   const [banners, setBanners] = useState([
@@ -58,7 +58,7 @@ const SellerBanner = () => {
       <div className="w-4/5 p-6 py-12 px-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-[#FFA50B]">Marketing Banner</h2>
-          <SecondaryButton title="Add new banner" onClick={() => handleOpenDialog()} />
+          {/* <SecondaryButton title="Add new banner" onClick={() => handleOpenDialog()} /> */}
         </div>
 
         <div className="space-y-6">
@@ -106,7 +106,7 @@ const SellerBanner = () => {
           ))}
         </div>
         
-        <AddBannerDialog
+        {/* <AddBannerDialog
           isOpen={isDialogOpen}
           onClose={() => {
             setIsDialogOpen(false);
@@ -114,10 +114,10 @@ const SellerBanner = () => {
           }}
           onSave={handleSaveBanner}
           editBanner={editingBanner}
-        />
+        /> */}
       </div>
     </div>
   );
 };
 
-export default SellerBanner;
+export default AdminBanner;
