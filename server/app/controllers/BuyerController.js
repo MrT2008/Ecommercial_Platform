@@ -299,32 +299,33 @@ class BuyerController {
                     userId: buyerId,
                 }
             })
-            const responseMessage = (!cartItems ? "No item in cart" : "Item in cart found successfully")
-            let data = {}
-            if (cartItems) {
-                let item_index = 0
-                for (const item of cartItems) {
+            let cartNotEmpty = false
+            let cart = {}
+            let item_index = 0
+            for (const item of cartItems) {
+                if (!item.isDeleted) {
+                    cartNotEmpty = true
                     const product = await models.Product.findByPk(item.productId)
-                    if (!product) {
-                        return res.status(400).json({ error: 'Found no product with this id' });
-                    }
-                    const shop = await models.Shop.findByPk(product.shopId)
-                    if (!shop) {
-                        return  res.status(400).json({ error: 'failed to find shop' });
-                    }
-                    const cartItem = {
-                        shopName: shop.name,
-                        userId: item.userId,
-                        productId: item.productId,
-                        productName: product.name,
-                        quantity: item.quantity
-                    }
-                    data[`product_${item_index}`] = cartItem
-                    console.log(data)
-                    item_index++
+                if (!product) {
+                    return res.status(400).json({ error: 'Found no product with this id' });
+                }
+                const shop = await models.Shop.findByPk(product.shopId)
+                if (!shop) {
+                    return  res.status(400).json({ error: 'failed to find shop' });
+                }
+                const cartItem = {
+                    shopName: shop.name,
+                    userId: item.userId,
+                    productId: item.productId,
+                    productName: product.name,
+                    quantity: item.quantity
+                }
+                cart[`product_${item_index}`] = cartItem
+                item_index++
                 }
             }
-            return res.status(200).json({message: responseMessage , data})
+            const responseMessage = (!cartNotEmpty ? "No item in cart" : "Item in cart found successfully")
+            return res.status(200).json({message: responseMessage , cart})
         } catch (error) {
             console.log(error)
             res.status(500).json({ message: 'Internal Server Error' });
