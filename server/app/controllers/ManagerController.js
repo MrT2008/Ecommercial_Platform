@@ -7,9 +7,9 @@ class ManagerController {
     sendAnnouncement = async (req, res) => {
         const t = await models.Announcement.sequelize.transaction();
         try {
-            const { title, imageURL, script } = req.body;
+            const { title, script } = req.body;
+            const imageURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Annoucement.jpg'; 
             const senderId = req.user.id;
-            imageURL = imageURL || 'Pictures/defaut/Annoucement.jpg';
 
             const announcement = await reuse.sentAnnouncement(senderId, title, imageURL, script, { transaction: t });
             if (announcement.error) {
@@ -29,6 +29,9 @@ class ManagerController {
     getAllAnnouncements = async (req, res) => {
         try {
             const announcements = await reuse.getAllAnnouncements();
+            for (const announcement of announcements) {
+                announcements.thumbnailURL = announcements.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+            }
             res.status(200).json({ message: 'Announcements retrieved successfully', announcements });
         } catch (error) {
             console.error(error);

@@ -23,6 +23,7 @@ const sentAnnouncement = async (senderId, title, imageURL, script, options = {})
 
 const getAllAnnouncements = async () => {
     return await models.Announcement.findAll({
+        
         include: { model: models.User, as: 'sender' },
     });
 };
