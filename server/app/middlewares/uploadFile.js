@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Create upload directory if it doesn't exist
+
 const uploadPath = path.join(__dirname, '../../../client/public/Pictures/product');
 fs.mkdirSync(uploadPath, { recursive: true });
 

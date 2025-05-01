@@ -3,6 +3,7 @@ const { models } = require('../models');
 const { all } = require('../../routes/seller');
 const PaymentMethod = require('../models/PaymentMethod');
 const { or } = require('sequelize');
+const reuse = require('../reuse/reuse');
 
 class SellerController {
     //Shop
@@ -164,52 +165,11 @@ class SellerController {
     getProducts = async (req, res) => {
         try {
             const { id } = req.params;
-            const products = await models.Product.findAll({ where: { shopId: id }});
-        
-            if (!products.length) {
+            const products = await models.Product.findAll({where: { shopId: id }});;
+            const allProducts = await reuse.getProducts(products,req);     
+            if (allProducts.length === 0) {
                 return res.status(404).json({ error: 'Products not found' });
             }
-            const allProducts = [];
-            for (const product of products) {
-                if (product.thumbnailURL) {
-                    product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
-                    product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
-                }
-                const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
-                const categoryNames = [];
-                for (const category of categories) {
-                    const categoryData = await models.Category.findOne({ where: { id: category.categoryId } });
-                    if (categoryData) {
-                        categoryNames.push(categoryData.name);
-                    }
-                }
-                const reviewProduct = await models.Review.findAll({ where: { productId: product.id }});
-                const totalRating = reviewProduct.reduce((acc, review) => acc + review.rating, 0);
-        
-                allProducts.push({
-                    ...product.toJSON(),
-                    categories: categoryNames,
-                    totalRating: totalRating / reviewProduct.length || 0,
-                });
-            }
-                        if (category.length > 1) {
-               for (const categoryName of category) {
-                    const category = await models.Category.findOne({ where: { name: categoryName }});
-                    if (!category) {
-                        return res.status(404).json({ error: 'Category not found' });
-                    }
-                    await models.ProductCategory.create({
-                        productId: product.id,
-                        categoryId: category.id
-                    });
-                }
-            } else{
-                await models.ProductCategory.create({
-                    productId: product.id,
-                    categoryId: await models.Category.findOne({ where: { name: category[0] }}).id
-                });
-            }
-        
             return res.json(allProducts);
         } catch (error) {
             console.error(error);

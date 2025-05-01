@@ -269,13 +269,34 @@ const getTotalProductsByShopId = async (shopId) => {
 
 
 // PRODUCT MANAGEMENT
-const getAllProductsByShopId = async (shopId) => {
-    return await models.Product.findAll({where: { shopId }});;
+const getProducts = async (products, req) => {
+    const allProducts = [];
+    for (const product of products) {
+        if (product.thumbnailURL) {
+            product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+            product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
+        }
+        const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
+        const categoryNames = [];
+        for (const category of categories) {
+            const categoryData = await models.Category.findOne({ where: { id: category.categoryId } });
+            if (categoryData) {
+                categoryNames.push(categoryData.name);
+            }
+        }
+        const reviewProduct = await models.Review.findAll({ where: { productId: product.id }});
+        const totalRating = reviewProduct.reduce((acc, review) => acc + review.rating, 0);
+
+        allProducts.push({
+            ...product.toJSON(),
+            categories: categoryNames,
+            totalRating: totalRating / reviewProduct.length || 0,
+        });
+    }
+    return allProducts;
 }
 
-const getAllProducts = async () => {
-    return await models.Product.findAll();
-}
+
 
 const getProductById = async (id) => {
     return await models.Product.findByPk(id);
@@ -479,8 +500,7 @@ module.exports = {
     getAverageRatingsByShopId,
     getTotalEvaluationsByShopId,
     getTotalProductsByShopId,
-    getAllProductsByShopId,
-    getAllProducts,
+    getProducts,
     getProductById,
     banProductById,
     unbanProductById,
@@ -492,6 +512,6 @@ module.exports = {
     getAllPromotions,
     getPromotionById,
     createPromotion,
-    deletePromotionById,
+    deletePromotionById
     
 }
