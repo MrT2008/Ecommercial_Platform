@@ -102,7 +102,7 @@ const HeadingBar = () => {
                                 </div>
                             )}
                         </div>
-                        <button
+                        {/* <button
                             className="bg-white border-2 font-bold border-blue-950 text-blue-950 px-4 py-1.5 rounded-4xl hover:border-blue-950 transition-colors duration-200"
                             onClick={() => {
                                 if (user.roles?.includes('seller')) {
@@ -113,7 +113,7 @@ const HeadingBar = () => {
                             }}
                         >
                             {user.roles?.includes('seller') ? 'View Shop' : 'Become Seller'}
-                        </button>
+                        </button> */}
                     </>
                 ) : (
                     <>

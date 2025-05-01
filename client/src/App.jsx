@@ -32,6 +32,7 @@ import CompletedOrders from "./pages/account/CompletedOrders";
 import Cancellations from "./pages/account/Cancellations";
 import AdminBanner from "./pages/admin/adminBanner";
 import Dashboard from "./pages/admin/adminDashboard";
+import ModeratorRole from "./pages/admin/ModeratorRole";
 
 function App() {
   const { user, loading } = useAuth();
@@ -90,6 +91,7 @@ function App() {
           <Route path="banned-shops" element={<BannedShops />} />
           <Route path="announcements" element={<AnnouncementsPage />} />
           <Route path="admin-banner" element={<AdminBanner />} />
+          <Route path="moderator-role" element={<ModeratorRole />} />
         </Route>
 
         {/* Private routes for sellers */}
