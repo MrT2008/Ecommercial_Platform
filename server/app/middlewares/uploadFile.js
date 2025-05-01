@@ -3,11 +3,28 @@ const path = require('path');
 const fs = require('fs');
 
 
-const uploadPath = path.join(__dirname, '../../../client/public/Pictures/product');
-fs.mkdirSync(uploadPath, { recursive: true });
+const uploadPaths = {
+    product: path.join(__dirname, '../../../client/public/Pictures/product'),
+    promotion: path.join(__dirname, '../../../client/public/Pictures/promotion'),
+    shop: path.join(__dirname, '../../../client/public/Pictures/shop'),
+    announcement: path.join(__dirname, '../../../client/public/Pictures/announcement'),
+    user: path.join(__dirname, '../../../client/public/Pictures/user')
+};
+// Ensure directories exist
+Object.values(uploadPaths).forEach(dir => {
+    fs.mkdirSync(dir, { recursive: true });
+});
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+        const type = req.body.type; // now it's safely available due to setUploadType
+        const uploadPath = uploadPaths[type];
+
+        if (!uploadPath) {
+            console.log('Invalid upload type:', type);
+            return cb(new Error('Invalid upload type'), null);
+        }
+
         cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
