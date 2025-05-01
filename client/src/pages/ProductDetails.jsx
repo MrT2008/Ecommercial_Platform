@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faStarHalfAlt } from '@fortawesome/free-solid-svg-icons';
 import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
 import { faTruck, faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import Button from '../components/shares/Button';
 import ReviewList from '../components/shoppingElements/ReviewList.jsx';
+
 const ProductDetail = () => {
+    const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
     // const [activeTab, setActiveTab] = useState('all');
 
@@ -23,6 +26,7 @@ const ProductDetail = () => {
 
     // Shop data
     const shop = {
+        id: 1, // Add shop ID
         name: 'Miumiu Shop',
         rating: 5,
         evaluation: '12.6k',
@@ -226,15 +230,17 @@ const ProductDetail = () => {
                     <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50">
                         Chat Now
                     </button>
-                    <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50">
+                    <Link 
+                        to={`/shop/${shop.id}`} 
+                        className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 flex items-center justify-center"
+                    >
                         View Shop
-                    </button>
+                    </Link>
                 </div>
             </div>
         
             {/* Review List */}
             <ReviewList reviews={reviews} />
-            {/* </div> */}
         </div>
     );
 };
