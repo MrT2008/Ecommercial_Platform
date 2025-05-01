@@ -7,7 +7,8 @@ class ManagerController {
     sendAnnouncement = async (req, res) => {
         const t = await models.Announcement.sequelize.transaction();
         try {
-            const { title, imageURL, script } = req.body;
+            const { title, script } = req.body;
+            const imageURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Annoucement.jpg'; 
             const senderId = req.user.id;
 
             const announcement = await reuse.sentAnnouncement(senderId, title, imageURL, script, { transaction: t });
@@ -15,7 +16,6 @@ class ManagerController {
                 await t.rollback();
                 return res.status(404).json({ error: announcement.error });
             }
-
             await t.commit();
 
             res.status(201).json({ message: 'Announcement sent successfully', announcement });
@@ -29,6 +29,9 @@ class ManagerController {
     getAllAnnouncements = async (req, res) => {
         try {
             const announcements = await reuse.getAllAnnouncements();
+            for (const announcement of announcements) {
+                announcements.thumbnailURL = announcements.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+            }
             res.status(200).json({ message: 'Announcements retrieved successfully', announcements });
         } catch (error) {
             console.error(error);
@@ -534,6 +537,33 @@ class ManagerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
+    getAllUsers = async (req, res) => {
+        
+        try {
+            const users = await models.User.findAll({
+                where: { isActive: true },
+            });
+            const allUsers =[];
+            for (const user of users) {
+                const userRole = await models.UserRole.findAll({where: {userId : user.id}}); 
+                const nameRole = [];
+
+                for (const r of userRole) {
+                    const role = await models.Role.findOne({where: {id:r.roleId}})
+                    nameRole.push(role.name);
+                };
+                allUsers.push({
+                    ...user.toJSON(),
+                    role : nameRole
+                })
+            }           
+            res.status(200).json({ message: 'Users retrieved successfully', allUsers });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    
 }
 
 module.exports = new ManagerController();

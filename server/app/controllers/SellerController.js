@@ -6,14 +6,14 @@ const { or } = require('sequelize');
 
 class SellerController {
     //Shop
-    getShop = async (req, res) => {
+    getShop = async (req, res) =>{
         try {
             const { id } = req.params;
             if (!id) {
-                return res.status(400).json({ error: 'Shop ID is required' });
+                return res.status(400).json({ error: 'user ID is required' });
             }
-
-            const shop = await models.Shop.findOne({ where: { id } });
+            
+            const shop = await models.Shop.findOne({ where: { ownerId:id } });
 
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
@@ -26,21 +26,21 @@ class SellerController {
             }
 
             return res.status(200).json({
-                data: { shop: shopData }
+                data: { shop: shopData}
             });
         } catch (error) {
             console.error('Error fetching shop:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-
+    
     getAllShop = async (req, res) => {
         const allShop = await models.Shop.findAll();
         return res.status(200).json(allShop);
 
     };
     getPendingShop = async (req, res) => {
-        const pendingShop = await models.Shop.findAll({ where: { status: 'pending' } });
+        const pendingShop = await models.Shop.findAll({ where: { status: 'pending'}});
         if (!pendingShop) {
             return res.status(404).json({ error: 'Pending shop not found' });
         }
@@ -52,7 +52,7 @@ class SellerController {
         try {
             const { id } = req.params;
             const { name } = req.body;
-            if (!name) {
+            if (!name ) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
 
@@ -69,7 +69,8 @@ class SellerController {
     }
     getCategory = async (req, res) => {
         try {
-            const categories = await models.Category.findAll();
+            const {id} = req.params;
+            const categories = await models.Category.findAll({where : {shopId : id}});
             return res.status(200).json({ categories });
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -83,7 +84,7 @@ class SellerController {
             if (!name) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
-            const category = await models.Category.findOne({ where: { id: categoryId, shopId: id } });
+            const category = await models.Category.findOne({ where: { id: categoryId, shopId: id }});
             if (!category) {
                 return res.status(404).json({ error: 'Category not found' });
             }
@@ -99,7 +100,7 @@ class SellerController {
     deleteCategory = async (req, res) => {
         try {
             const { id, categoryId } = req.params;
-            const category = await models.Category.findOne({ where: { id: categoryId, shopId: id } });
+            const category = await models.Category.findOne({ where: { id: categoryId, shopId: id }});
             if (!category) {
                 return res.status(404).json({ error: 'Category not found' });
             }
@@ -115,9 +116,11 @@ class SellerController {
     }
     //Product
     postProduct = async (req, res) => {
-        console.log("Request body:", req.body);
         try {
             const { id } = req.params;
+            const { name, price, description, quantity, category,discount} = req.body;
+            const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg'; 
+            
             if (!id) {
                 return res.status(400).json({ error: 'Shop ID is required' });
             }
@@ -125,32 +128,25 @@ class SellerController {
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
-            const { name, price, description, thumbnailURL, stock, categoryId, salePrice, status } = req.body;
-            if (!name || !price || !description || !thumbnailURL || !stock) {
+
+            if (!name || !price || !description || !category || !quantity) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
+
+            const salePrice = price * (1 - (discount || 0) / 100);
 
             const newProduct = await models.Product.create({
                 shopId: id,
                 name,
                 description,
                 price,
-                thumbnailURL,
+                thumbnailURL: thumbnailURL,
                 ownerId: shop.ownerId,
                 salePrice: salePrice || 0,
-                status: status || 'active',
-                stock
+                status: 'active',
+                stock: quantity || 0,
             });
-            categoryId.forEach(async (categoryId) => {
-                const category = await models.Category.findOne({ where: { id: categoryId } });
-                if (!category) {
-                    return res.status(404).json({ error: 'Category not found' });
-                }
-                await models.ProductCategory.create({
-                    productId: newProduct.id,
-                    categoryId: categoryId
-                });
-            });
+
             return res.status(201).json({ product: newProduct });
         } catch (error) {
             console.error('Error creating product:', error);
@@ -160,21 +156,20 @@ class SellerController {
     getProducts = async (req, res) => {
         try {
             const { id } = req.params;
-            const products = await models.Product.findAll({ where: { shopId: id } });
-
+            const products = await models.Product.findAll({ where: { shopId: id }});
+        
             if (!products.length) {
                 return res.status(404).json({ error: 'Products not found' });
             }
-
             const allProducts = [];
-
+        
             for (const product of products) {
                 if (product.thumbnailURL) {
+                    product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
 
                 const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
-
                 const categoryNames = [];
                 for (const category of categories) {
                     const categoryData = await models.Category.findOne({ where: { id: category.categoryId } });
@@ -182,13 +177,14 @@ class SellerController {
                         categoryNames.push(categoryData.name);
                     }
                 }
-
+                
+        
                 allProducts.push({
                     ...product.toJSON(),
                     categories: categoryNames
                 });
             }
-
+        
             return res.json(allProducts);
         } catch (error) {
             console.error(error);
@@ -198,11 +194,12 @@ class SellerController {
     getProductById = async (req, res) => {
         try {
             const { id, productId } = req.params;
-            const product = await models.Product.findOne({ where: { id: productId, shopId: id } });
+            const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
             if (!product) {
                 return res.status(404).json({ error: 'Product not found' });
             }
             if (product.thumbnailURL) {
+                product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                 product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
             }
 
@@ -215,12 +212,13 @@ class SellerController {
     getProductByCategory = async (req, res) => {
         try {
             const { cid } = req.params;
-            const products = await models.Product.findAll({ where: { categoryId: cid } });
+            const products = await models.Product.findAll({ where: { categoryId: cid }});
             if (!products) {
                 return res.status(404).json({ error: 'Products not found' });
             }
             products.forEach(product => {
                 if (product.thumbnailURL) {
+                    product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
             });
@@ -234,27 +232,27 @@ class SellerController {
     updateProduct = async (req, res) => {
         try {
             const { id, productId } = req.params;
-            const { name, price, description, thumbnailURL, stock, categoryId, salePrice, status } = req.body;
+            const { name, price, description, stock, categoryId,salePrice,status} = req.body;
 
-            const product = await models.Product.findOne({ where: { id: productId, shopId: id } });
+            const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
             if (!product) {
                 return res.status(404).json({ error: 'Product not found' });
             }
-
+            const thumbnailURL = req.file ? req.file.path : product.thumbnailURL; 
             await product.update({
                 name: name || product.name,
                 price: price || product.price,
                 description: description || product.description,
-                thumbnailURL: thumbnailURL || product.thumbnailURL,
+                thumbnailURL: thumbnailURL,
                 salePrice: salePrice || product.salePrice,
-                status: status || product.status,
+                status: status ||  product.status,
                 stock: stock || product.stock
             });
-            await models.ProductCategory.destroy({ where: { productId: productId } });
+            await models.ProductCategory.destroy({ where: { productId: productId }});
 
             if (categoryId.length > 1) {
                 categoryId.forEach(async (categoryId) => {
-                    const category = await models.Category.findOne({ where: { id: categoryId } });
+                    const category = await models.Category.findOne({ where: { id: categoryId }});
                     if (!category) {
                         return res.status(404).json({ error: 'Category not found' });
                     }
@@ -263,7 +261,7 @@ class SellerController {
                         categoryId: categoryId
                     });
                 });
-            } else {
+            } else{
                 await models.ProductCategory.create({
                     productId: product.id,
                     categoryId: categoryId[0]
@@ -279,7 +277,7 @@ class SellerController {
     deleteProduct = async (req, res) => {
         try {
             const { id, productId } = req.params;
-            const product = await models.Product.findOne({ where: { id: productId, shopId: id } });
+            const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
             if (!product) {
                 return res.status(404).json({ error: 'Product not found' });
             }
@@ -298,35 +296,36 @@ class SellerController {
     getOrders = async (req, res) => {
         try {
             const { id } = req.params;
-            const ordersDetails = await models.OrderDetail.findAll({ where: { shopId: id } });
+            const ordersDetails = await models.OrderDetail.findAll({ where: { shopId: id }});
 
             const allOrders = [];
             const allProducts = [];
             const seenOrderIds = new Set();
 
             for (const orderDetail of ordersDetails) {
-
+                
                 const orders = await models.Order.findAll({ where: { id: orderDetail.orderId } });
                 if (!orders || orders.length === 0) {
                     return res.status(404).json({ error: 'Orders not found' });
 
                 }
                 for (const order of orders) {
-                    if (seenOrderIds.has(order.id)) {
+                    if(seenOrderIds.has(order.id)){
                         continue;
                     }
                     const transaction = await models.Transaction.findOne({ where: { orderId: order.id } });
-                    const buyer = await models.User.findOne({ where: { id: order.buyerId } });
-
+                    const buyer = await models.User.findOne({ where: { id: order.buyerId }});
+                    
                     seenOrderIds.add(order.id);
                     allOrders.push({
                         ...order.toJSON(),
-                        buyerName: buyer.fullName,
-                        paymentMethod: transaction.paymentMethod,
+                        buyerName:buyer.fullName,
+                        paymentMethod : transaction.paymentMethod,
                     });
-
+                    
                 }
                 const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
+                product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                 if (product) {
                     allProducts.push({
                         name: product.name,
@@ -334,11 +333,11 @@ class SellerController {
                         orderId: orderDetail.orderId,
                     });
                 }
-
+                            
             }
-
+    
             return res.status(200).json({ allOrders, allProducts });
-
+    
         } catch (error) {
             console.error('Error fetching orders:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -352,7 +351,7 @@ class SellerController {
                 return res.status(400).json({ error: 'Status is required' });
             }
 
-            const order = await models.Order.findOne({ where: { id: orderId } });
+            const order = await models.Order.findOne({ where: { id: orderId }});
             if (!order) {
                 return res.status(404).json({ error: 'Order not found' });
             }
@@ -370,8 +369,9 @@ class SellerController {
     postPromotion = async (req, res) => {
         try {
             const { id } = req.params;
-            const { imageURL } = req.body;
-            if (!imageURL) {
+            const { title} = req.body;
+            const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg'; 
+            if (!thumbnailURL) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
             const shop = await models.Shop.findOne({ where: { id } });
@@ -380,7 +380,8 @@ class SellerController {
             }
             const newPromotion = await models.Promotion.create({
                 shopId: id,
-                imageURL,
+                title,
+                imageURL: thumbnailURL,
                 status: 'show',
                 banReason: null
             });
@@ -394,12 +395,13 @@ class SellerController {
     getPromotion = async (req, res) => {
         try {
             const { id } = req.params;
-            const promotions = await models.Promotion.findAll({ where: { shopId: id } });
+            const promotions = await models.Promotion.findAll({ where: { shopId: id }});
             if (!promotions) {
                 return res.status(404).json({ error: 'Promotions not found' });
             }
             promotions.forEach(promotion => {
                 if (promotion.imageURL) {
+                    promotion.imageURL = promotion.imageURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     promotion.imageURL = `${req.protocol}://${req.get('host')}/${promotion.imageURL}`;
                 }
             });
@@ -413,7 +415,7 @@ class SellerController {
     deletePromotion = async (req, res) => {
         try {
             const { id, promotionId } = req.params;
-            const promotion = await models.Promotion.findOne({ where: { id: promotionId, shopId: id } });
+            const promotion = await models.Promotion.findOne({ where: { id: promotionId, shopId: id }});
             if (!promotion) {
                 return res.status(404).json({ error: 'Promotion not found' });
             }
@@ -435,12 +437,12 @@ class SellerController {
                 return res.status(404).json({ error: 'Shop not found' });
             }
 
-            const completedOrders = await models.Order.findAll({ where: { shopId: id, status: 'completed' } });
-            const orderDetails = await models.OrderDetail.findAll({ where: { orderId: completedOrders.map(order => order.id) } });
+            const completedOrders = await models.Order.findAll({ where: { shopId: id, status: 'completed' }});
+            const orderDetails = await models.OrderDetail.findAll({ where: { orderId: completedOrders.map(order => order.id) }});
             const totalSales = orderDetails.reduce((total, detail) => total + (detail.priceAtPurchase * detail.quantity), 0);
-            const totalProducts = await models.Product.count({ where: { shopId: id } });
-            const totalOrders = await models.Order.count({ where: { shopId: id } });
-            const totalCategories = await models.Category.count({ where: { shopId: id } });
+            const totalProducts = await models.Product.count({ where: { shopId: id }});
+            const totalOrders = await models.Order.count({ where: { shopId: id }});
+            const totalCategories = await models.Category.count({ where: { shopId: id }});
 
             return res.status(200).json({
                 totalProducts,
@@ -475,20 +477,20 @@ class SellerController {
     updateInformation = async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, imageUrl, address, phoneNumber, email, bankAccount, bankName } = req.body;
+            const { name, imageUrl, address, phoneNumber, email, bankAccount, bankName} = req.body;
             const shop = await models.Shop.findOne({ where: { id } });
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
 
             await shop.update({
-                name: name || shop.name,
-                imageUrl: imageUrl || shop.imageUrl,
-                address: address || shop.address,
-                phoneNumber: phoneNumber || shop.phoneNumber,
-                email: email || shop.email,
-                bankAccount: bankAccount || shop.bankAccount,
-                bankName: bankName || shop.bankName,
+                name : name || shop.name,
+                imageUrl : imageUrl || shop.imageUrl,
+                address : address || shop.address,
+                phoneNumber : phoneNumber || shop.phoneNumber,
+                email : email || shop.email,
+                bankAccount : bankAccount || shop.bankAccount,
+                bankName : bankName || shop.bankName,
             });
 
             return res.status(200).json({ shop });
