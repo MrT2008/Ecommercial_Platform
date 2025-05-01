@@ -25,3 +25,13 @@ export const addToCart = async (buyerID, productID, quantity) => {
     return false;
   }
 }
+
+export const getCartById = async (buyerID) => {
+  try {
+    const response = await api.get(`/buyer/${buyerID}/cart`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    return null;
+  }
+}
