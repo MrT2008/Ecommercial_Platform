@@ -1,49 +1,31 @@
+const { on } = require('nodemailer/lib/xoauth2');
 const { models } = require('../models');
+const Category = require('../models/Category');
 const reuse = require('../reuse/reuse');
 
 class GuestController {
     getAllProducts = async (req, res) => {
         try {
-            const products = await reuse.getAllProducts();
-
-            if (products.length === 0) {
-                return res.status(404).json({ error: 'No product found' });
-            }
-            
-            const response = products.map(product => ({
-                id: product.id,
-                shopId: product.shopId,
-                name: product.name,
-                description: product.description,
-                price: product.price,
-                salePrice: product.salePrice,
-                stock: product.stock,
-                saled: product.saled,
-                thumbnailURL: product.thumbnailURL,
-            }));
-
-            res.status(200).json({ message: 'Products retrieved successfully', response });
+            const products = await models.Product.findAll();
+            const allProducts = await reuse.getProducts(products, req);
+            res.status(200).json({ message: 'Products retrieved successfully', allProducts });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
         }
-    };
+    }
 
-    // getAllProductsOnSale = async (req, res) => {
-    //     try {
-    //         const saledProducts = await models.Product.findAll({
-    //             where: {
-    //                 saled: {
-    //                     [Op.ne]: null,
-    //                 }
-    //             }
-    //         }
-    //         )
-    //     } catch (error) {
-    //         console.error(error);
-    //             res.status(500).json({ message: 'Internal Server Error' });
-    //     }
-    // };
+    getAllProductsOnSale = async (req, res) => {
+        try {
+            const products = await models.Product.findAll();
+            const onSaleProducts = products.filter(product => product.salePrice < product.price);
+
+            res.status(200).json({ message: 'Products retrieved successfully', onSaleProducts });
+        } catch (error) {
+            console.error(error);
+                res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
 
     getProductById = async (req, res) => {
             try {
@@ -77,6 +59,77 @@ class GuestController {
                 res.status(500).json({ message: 'Internal Server Error' });
             }
         }
+    getAllShops = async (req, res) => {
+        try {
+            const shops = await reuse.getAllShops();
+
+            res.status(200).json({ message: 'Shops retrieved successfully', shops });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    getShopById = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const shop = await reuse.getShopById(id);
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+
+            res.status(200).json({ message: 'Shop retrieved successfully', shop });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    getProductsByShopId = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const products = await models.Product.findAll({where: { shopId: id }});;
+
+            const allProducts = await reuse.getAllProductsByShopId(products,req);
+            if (!allProducts) {
+                return res.status(404).json({ error: 'Products not found' });
+            }
+
+            res.status(200).json({ message: 'Products retrieved successfully', allProducts });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+    getCategoriesByShopId = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const category = await reuse.getCategoryById(id);
+            if (!category) {
+                return res.status(404).json({ error: 'Category not found' });
+            }
+
+            res.status(200).json({ message: 'Category retrieved successfully', category });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+    getProductsByCategoryId = async (req, res) => {
+        try {
+            const { id,cId } = req.params;
+
+            const ProductCategory = await models.ProductCategory.findAll({
+                where: { categoryId: cId }
+            });
+            const products = await models.Product.findAll({
+                where: { id: ProductCategory.map(pc => pc.productId) },
+            });
+            const allProducts = await reuse.getProducts(products,req);
+            res.status(200).json({ message: 'Products retrieved successfully', allProducts });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
 }
 
 module.exports = new GuestController();
