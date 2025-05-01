@@ -10,10 +10,10 @@ class SellerController {
         try {
             const { id } = req.params;
             if (!id) {
-                return res.status(400).json({ error: 'Shop ID is required' });
+                return res.status(400).json({ error: 'user ID is required' });
             }
             
-            const shop = await models.Shop.findOne({ where: { id } });
+            const shop = await models.Shop.findOne({ where: { ownerId:id } });
 
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
@@ -69,7 +69,8 @@ class SellerController {
     }
     getCategory = async (req, res) => {
         try {
-            const categories = await models.Category.findAll();
+            const {id} = req.params;
+            const categories = await models.Category.findAll({where : {shopId : id}});
             return res.status(200).json({ categories });
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -117,6 +118,9 @@ class SellerController {
     postProduct = async (req, res) => {
         try {
             const { id } = req.params;
+            const { name, price, description, quantity, category,discount} = req.body;
+            const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg'; 
+            
             if (!id) {
                 return res.status(400).json({ error: 'Shop ID is required' });
             }
@@ -124,32 +128,25 @@ class SellerController {
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
-            const { name, price, description, thumbnailURL, stock, categoryId,salePrice,status} = req.body;
-            if (!name || !price || !description || !thumbnailURL || !stock) {
+
+            if (!name || !price || !description || !category || !quantity) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
+
+            const salePrice = price * (1 - (discount || 0) / 100);
 
             const newProduct = await models.Product.create({
                 shopId: id,
                 name,
                 description,
                 price,
-                thumbnailURL,
+                thumbnailURL: thumbnailURL,
                 ownerId: shop.ownerId,
                 salePrice: salePrice || 0,
-                status: status || 'active',
-                stock
+                status: 'active',
+                stock: quantity || 0,
             });
-            categoryId.forEach(async (categoryId) => {
-                const category = await models.Category.findOne({ where: { id: categoryId }});
-                if (!category) {
-                    return res.status(404).json({ error: 'Category not found' });
-                }
-                await models.ProductCategory.create({
-                    productId: newProduct.id,
-                    categoryId: categoryId
-                });
-            });
+
             return res.status(201).json({ product: newProduct });
         } catch (error) {
             console.error('Error creating product:', error);
@@ -164,16 +161,13 @@ class SellerController {
             if (!products.length) {
                 return res.status(404).json({ error: 'Products not found' });
             }
-        
             const allProducts = [];
-        
             for (const product of products) {
                 if (product.thumbnailURL) {
+                    product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
-        
                 const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
-        
                 const categoryNames = [];
                 for (const category of categories) {
                     const categoryData = await models.Category.findOne({ where: { id: category.categoryId } });
@@ -181,10 +175,13 @@ class SellerController {
                         categoryNames.push(categoryData.name);
                     }
                 }
+                const reviewProduct = await models.Review.findAll({ where: { productId: product.id }});
+                const totalRating = reviewProduct.reduce((acc, review) => acc + review.rating, 0);
         
                 allProducts.push({
                     ...product.toJSON(),
-                    categories: categoryNames
+                    categories: categoryNames,
+                    totalRating: totalRating / reviewProduct.length || 0,
                 });
             }
         
@@ -202,6 +199,7 @@ class SellerController {
                 return res.status(404).json({ error: 'Product not found' });
             }
             if (product.thumbnailURL) {
+                product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                 product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
             }
 
@@ -220,6 +218,7 @@ class SellerController {
             }
             products.forEach(product => {
                 if (product.thumbnailURL) {
+                    product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
             });
@@ -233,18 +232,18 @@ class SellerController {
     updateProduct = async (req, res) => {
         try {
             const { id, productId } = req.params;
-            const { name, price, description, thumbnailURL, stock, categoryId,salePrice,status} = req.body;
+            const { name, price, description, stock, categoryId,salePrice,status} = req.body;
 
             const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
             if (!product) {
                 return res.status(404).json({ error: 'Product not found' });
             }
-
+            const thumbnailURL = req.file ? req.file.path : product.thumbnailURL; 
             await product.update({
                 name: name || product.name,
                 price: price || product.price,
                 description: description || product.description,
-                thumbnailURL: thumbnailURL || product.thumbnailURL,
+                thumbnailURL: thumbnailURL,
                 salePrice: salePrice || product.salePrice,
                 status: status ||  product.status,
                 stock: stock || product.stock
@@ -326,6 +325,7 @@ class SellerController {
                     
                 }
                 const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
+                product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                 if (product) {
                     allProducts.push({
                         name: product.name,
@@ -369,8 +369,9 @@ class SellerController {
     postPromotion = async (req, res) => {
         try {
             const { id } = req.params;
-            const { imageURL } = req.body;
-            if (!imageURL) {
+            const { title} = req.body;
+            const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg'; 
+            if (!thumbnailURL) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
             const shop = await models.Shop.findOne({ where: { id } });
@@ -379,7 +380,8 @@ class SellerController {
             }
             const newPromotion = await models.Promotion.create({
                 shopId: id,
-                imageURL,
+                title,
+                imageURL: thumbnailURL,
                 status: 'show',
                 banReason: null
             });
@@ -399,6 +401,7 @@ class SellerController {
             }
             promotions.forEach(promotion => {
                 if (promotion.imageURL) {
+                    promotion.imageURL = promotion.imageURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     promotion.imageURL = `${req.protocol}://${req.get('host')}/${promotion.imageURL}`;
                 }
             });
