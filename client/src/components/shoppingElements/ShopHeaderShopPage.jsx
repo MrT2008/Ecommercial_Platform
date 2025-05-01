@@ -6,7 +6,7 @@ const ShopHeaderShopPage = ({ shopId }) => {
   const [shop, setShop] = useState({
     id: '12345678982',
     name: 'Miumiu Store',
-    rating: 5,
+    rating: 2,
     evaluation: '12.6k',
     products: 102,
     image: 'https://randomuser.me/api/portraits/cats/2.jpg', // Placeholder cat image
@@ -19,19 +19,19 @@ const ShopHeaderShopPage = ({ shopId }) => {
   }, [shopId]);
 
   // Generate star rating display
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 0; i < 5; i++) {
-      stars.push(
-        <FontAwesomeIcon 
-          key={i} 
-          icon={faStar} 
-          className={`text-yellow-400 text-lg`} 
-        />
-      );
-    }
-    return stars;
-  };
+    const renderStars = (rating) => {
+        const stars = [];
+        for (let i = 0; i < 5; i++) {
+        stars.push(
+            <FontAwesomeIcon 
+            key={i} 
+            icon={faStar} 
+            className={i < rating ? "text-yellow-400 text-lg" : "text-gray-300 text-lg"} 
+            />
+        );
+        }
+        return stars;
+    };
 
   return (
     <div className="container mx-auto px-4 py-4 mb-6">
