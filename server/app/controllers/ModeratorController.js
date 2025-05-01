@@ -8,7 +8,6 @@ class ModeratorController {
         try {
             const { title, imageURL, script } = req.body;
             const senderId = req.user.id;
-            imageURL = imageURL || 'Pictures/defaut/Annoucement.jpg';
 
             const announcement = await reuse.sentAnnouncement(senderId, title, imageURL, script, { transaction: t });
             if (announcement.error) {

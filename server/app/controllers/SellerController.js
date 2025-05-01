@@ -10,10 +10,10 @@ class SellerController {
         try {
             const { id } = req.params;
             if (!id) {
-                return res.status(400).json({ error: 'user ID is required' });
+                return res.status(400).json({ error: 'Shop ID is required' });
             }
             
-            const shop = await models.Shop.findOne({ where: { ownerId:id } });
+            const shop = await models.Shop.findOne({ where: { id } });
 
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
@@ -69,8 +69,7 @@ class SellerController {
     }
     getCategory = async (req, res) => {
         try {
-            const {id} = req.params;
-            const categories = await models.Category.findAll({where : {shopId : id}});
+            const categories = await models.Category.findAll();
             return res.status(200).json({ categories });
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -118,9 +117,6 @@ class SellerController {
     postProduct = async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, price, description, quantity, category,discount} = req.body;
-            const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg'; 
-            
             if (!id) {
                 return res.status(400).json({ error: 'Shop ID is required' });
             }
@@ -128,34 +124,33 @@ class SellerController {
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
-
-            const salePrice = price * (1 - (discount || 0) / 100);
+            const { name, price, description, thumbnailURL, stock, categoryId,salePrice,status} = req.body;
+            if (!name || !price || !description || !thumbnailURL || !stock) {
+                return res.status(400).json({ error: 'All fields are required' });
+            }
 
             const newProduct = await models.Product.create({
                 shopId: id,
                 name,
                 description,
                 price,
-                thumbnailURL: thumbnailURL,
+                thumbnailURL,
                 ownerId: shop.ownerId,
                 salePrice: salePrice || 0,
-                status: 'active',
-                stock: quantity || 0,
+                status: status || 'active',
+                stock
             });
-            if (category.length > 0) {
-                for (const categoryName of category) {
-                    const category = await models.Category.findOne({ where: { name: categoryName }});
-                    if (!category) {
-                        return res.status(404).json({ error: 'Category not found' });
-                    }
-                    await models.ProductCategory.create({
-                        productId: newProduct.id,
-                        categoryId: category.id
-                    });
+            categoryId.forEach(async (categoryId) => {
+                const category = await models.Category.findOne({ where: { id: categoryId }});
+                if (!category) {
+                    return res.status(404).json({ error: 'Category not found' });
                 }
-            }
-
-            return res.status(201).json({ product: newProduct, category: category });
+                await models.ProductCategory.create({
+                    productId: newProduct.id,
+                    categoryId: categoryId
+                });
+            });
+            return res.status(201).json({ product: newProduct });
         } catch (error) {
             console.error('Error creating product:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -169,13 +164,16 @@ class SellerController {
             if (!products.length) {
                 return res.status(404).json({ error: 'Products not found' });
             }
+        
             const allProducts = [];
+        
             for (const product of products) {
                 if (product.thumbnailURL) {
-                    product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
+        
                 const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
+        
                 const categoryNames = [];
                 for (const category of categories) {
                     const categoryData = await models.Category.findOne({ where: { id: category.categoryId } });
@@ -183,30 +181,10 @@ class SellerController {
                         categoryNames.push(categoryData.name);
                     }
                 }
-                const reviewProduct = await models.Review.findAll({ where: { productId: product.id }});
-                const totalRating = reviewProduct.reduce((acc, review) => acc + review.rating, 0);
         
                 allProducts.push({
                     ...product.toJSON(),
-                    categories: categoryNames,
-                    totalRating: totalRating / reviewProduct.length || 0,
-                });
-            }
-                        if (category.length > 1) {
-               for (const categoryName of category) {
-                    const category = await models.Category.findOne({ where: { name: categoryName }});
-                    if (!category) {
-                        return res.status(404).json({ error: 'Category not found' });
-                    }
-                    await models.ProductCategory.create({
-                        productId: product.id,
-                        categoryId: category.id
-                    });
-                }
-            } else{
-                await models.ProductCategory.create({
-                    productId: product.id,
-                    categoryId: await models.Category.findOne({ where: { name: category[0] }}).id
+                    categories: categoryNames
                 });
             }
         
@@ -224,7 +202,6 @@ class SellerController {
                 return res.status(404).json({ error: 'Product not found' });
             }
             if (product.thumbnailURL) {
-                product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                 product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
             }
 
@@ -243,7 +220,6 @@ class SellerController {
             }
             products.forEach(product => {
                 if (product.thumbnailURL) {
-                    product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
             });
@@ -257,41 +233,43 @@ class SellerController {
     updateProduct = async (req, res) => {
         try {
             const { id, productId } = req.params;
-            const { name, price, description, quantity, category,discount, status} = req.body;
-
-            const salePrice = price * (1 - (discount || 0) / 100);
+            const { name, price, description, thumbnailURL, stock, categoryId,salePrice,status} = req.body;
 
             const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
             if (!product) {
                 return res.status(404).json({ error: 'Product not found' });
             }
-            const thumbnailURL = req.file ? req.file.path : product.thumbnailURL; 
+
             await product.update({
                 name: name || product.name,
                 price: price || product.price,
                 description: description || product.description,
-                thumbnailURL: thumbnailURL,
+                thumbnailURL: thumbnailURL || product.thumbnailURL,
                 salePrice: salePrice || product.salePrice,
                 status: status ||  product.status,
-                stock: quantity || product.stock
+                stock: stock || product.stock
             });
             await models.ProductCategory.destroy({ where: { productId: productId }});
 
-            if (category.length > 0) {
-                for (const categoryName of category) {
-                    const category = await models.Category.findOne({ where: { name: categoryName }});
- 
+            if (categoryId.length > 1) {
+                categoryId.forEach(async (categoryId) => {
+                    const category = await models.Category.findOne({ where: { id: categoryId }});
                     if (!category) {
                         return res.status(404).json({ error: 'Category not found' });
                     }
                     await models.ProductCategory.create({
                         productId: product.id,
-                        categoryId: category.id
+                        categoryId: categoryId
                     });
-                }
+                });
+            } else{
+                await models.ProductCategory.create({
+                    productId: product.id,
+                    categoryId: categoryId[0]
+                });
             }
 
-            return res.status(200).json({ product, category });
+            return res.status(200).json({ product });
         } catch (error) {
             console.error('Error updating product:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -338,18 +316,16 @@ class SellerController {
                     }
                     const transaction = await models.Transaction.findOne({ where: { orderId: order.id } });
                     const buyer = await models.User.findOne({ where: { id: order.buyerId }});
-
                     
                     seenOrderIds.add(order.id);
                     allOrders.push({
                         ...order.toJSON(),
                         buyerName:buyer.fullName,
-                        transaction: transaction ? transaction.toJSON() : null,
+                        paymentMethod : transaction.paymentMethod,
                     });
                     
                 }
                 const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
-                product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                 if (product) {
                     allProducts.push({
                         name: product.name,
@@ -393,9 +369,8 @@ class SellerController {
     postPromotion = async (req, res) => {
         try {
             const { id } = req.params;
-            const { title} = req.body;
-            const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg'; 
-            if (!thumbnailURL) {
+            const { imageURL } = req.body;
+            if (!imageURL) {
                 return res.status(400).json({ error: 'All fields are required' });
             }
             const shop = await models.Shop.findOne({ where: { id } });
@@ -404,8 +379,7 @@ class SellerController {
             }
             const newPromotion = await models.Promotion.create({
                 shopId: id,
-                title,
-                imageURL: thumbnailURL,
+                imageURL,
                 status: 'show',
                 banReason: null
             });
@@ -425,7 +399,6 @@ class SellerController {
             }
             promotions.forEach(promotion => {
                 if (promotion.imageURL) {
-                    promotion.imageURL = promotion.imageURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
                     promotion.imageURL = `${req.protocol}://${req.get('host')}/${promotion.imageURL}`;
                 }
             });
