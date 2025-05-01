@@ -43,10 +43,12 @@ const HeadingBar = () => {
             </div>
             {/* Center - Navbar + Search */}
             <div className="flex flex-col md:flex-row items-center justify-center flex-grow gap-2 md:gap-4">
+            {user && (
                 <div className="w-full md:w-1/2">
                     <Navbar />
                 </div>
-                <div className="w-full md:w-1/2">
+            )}
+                <div className={`w-full ${user ? 'md:w-1/2' : 'md:w-full'}`}>
                     <SearchBar placeholder="What are you looking for?" />
                 </div>
             </div>
@@ -102,18 +104,6 @@ const HeadingBar = () => {
                                 </div>
                             )}
                         </div>
-                        <button
-                            className="bg-white border-2 font-bold border-blue-950 text-blue-950 px-4 py-1.5 rounded-4xl hover:border-blue-950 transition-colors duration-200"
-                            onClick={() => {
-                                if (user.roles?.includes('seller')) {
-                                    navigate('/shop');
-                                } else {
-                                    navigate('/become-seller');
-                                }
-                            }}
-                        >
-                            {user.roles?.includes('seller') ? 'View Shop' : 'Become Seller'}
-                        </button>
                     </>
                 ) : (
                     <>
