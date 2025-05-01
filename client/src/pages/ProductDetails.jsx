@@ -5,22 +5,47 @@ import { faStar, faStarHalfAlt, faTruck, faArrowRotateLeft } from '@fortawesome/
 import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
 import Button from '../components/shares/Button';
 import ReviewList from '../components/shoppingElements/ReviewList.jsx';
-
+import { getProductById } from '../api/guestAPI.jsx';
+import { addToCart } from '../api/buyerAPI.jsx';
+import { useAuth } from '../hooks/useAuth.js';
+import { useNavigate } from 'react-router-dom';
 const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const { user, loading } = useAuth(); // Assuming you have a useAuth hook to get user info
+    const navigate = useNavigate();
 
+    if (loading) return null; // Show loading state if needed
+
+    const productId = window.location.pathname.split('/').pop(); 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const res = await axios.get('http://localhost:8080/seller/1/getProduct/8');
-                setProduct(res.data.product);
-            } catch (err) {
-                console.error('Failed to fetch product:', err);
+                const response = await getProductById(productId);
+                setProduct(response.product);
+            } catch (error) {
+                console.error('Error fetching product:', error);
             }
         };
         fetchProduct();
-    }, []);
+    }, [productId]);
+
+    const handleAddToCart = async () => {
+        if (!user) {
+            navigate('/login'); // Redirect to login if user is not authenticated
+            return;
+        }
+        try {
+            const response = await addToCart(user.id, productId, quantity);
+            if (response) {
+                navigate('/buyer/cart'); 
+            } else {
+                alert('Failed to add product to cart. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error adding product to cart:', error);
+        }
+    };
 
     const shop = {
         name: 'Miumiu Shop',
@@ -88,6 +113,8 @@ const ProductDetail = () => {
 
     if (!product) return <div className="p-10 text-center">Loading...</div>;
 
+    
+
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex items-center text-sm text-gray-500 mb-6">
@@ -135,8 +162,8 @@ const ProductDetail = () => {
                             />
                             <button onClick={increaseQuantity} className="px-3 py-2 border-l border-gray-300 hover:bg-gray-100">+</button>
                         </div>
-                        <Button text='Add to cart' otherClassName='mt-5' type='button' href='' />
-                        <Button text='Buy Now' otherClassName='mt-5' type='button' href='' />
+                        <Button onClick={handleAddToCart} text='Add to cart' otherClassName='yellow' type='button'  />
+                        <Button text='Buy Now' otherClassName='blue' type='button' href='' />
                     </div>
 
                     <div className="border border-gray-200 rounded mb-6">
