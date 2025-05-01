@@ -27,6 +27,11 @@ Announcement.init({
       },
     imageURL: {
         type: DataTypes.STRING, 
+        allowNull: false,
+        validate: {
+            isURL: true,
+            notEmpty: true
+        }
     },
     script: {
         type: DataTypes.STRING,
