@@ -129,10 +129,6 @@ class SellerController {
                 return res.status(404).json({ error: 'Shop not found' });
             }
 
-            if (!name || !price || !description || !category || !quantity) {
-                return res.status(400).json({ error: 'All fields are required' });
-            }
-
             const salePrice = price * (1 - (discount || 0) / 100);
 
             const newProduct = await models.Product.create({
@@ -146,8 +142,20 @@ class SellerController {
                 status: 'active',
                 stock: quantity || 0,
             });
+            if (category.length > 0) {
+                for (const categoryName of category) {
+                    const category = await models.Category.findOne({ where: { name: categoryName }});
+                    if (!category) {
+                        return res.status(404).json({ error: 'Category not found' });
+                    }
+                    await models.ProductCategory.create({
+                        productId: newProduct.id,
+                        categoryId: category.id
+                    });
+                }
+            }
 
-            return res.status(201).json({ product: newProduct });
+            return res.status(201).json({ product: newProduct, category: category });
         } catch (error) {
             console.error('Error creating product:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -182,6 +190,23 @@ class SellerController {
                     ...product.toJSON(),
                     categories: categoryNames,
                     totalRating: totalRating / reviewProduct.length || 0,
+                });
+            }
+                        if (category.length > 1) {
+               for (const categoryName of category) {
+                    const category = await models.Category.findOne({ where: { name: categoryName }});
+                    if (!category) {
+                        return res.status(404).json({ error: 'Category not found' });
+                    }
+                    await models.ProductCategory.create({
+                        productId: product.id,
+                        categoryId: category.id
+                    });
+                }
+            } else{
+                await models.ProductCategory.create({
+                    productId: product.id,
+                    categoryId: await models.Category.findOne({ where: { name: category[0] }}).id
                 });
             }
         
@@ -232,7 +257,9 @@ class SellerController {
     updateProduct = async (req, res) => {
         try {
             const { id, productId } = req.params;
-            const { name, price, description, stock, categoryId,salePrice,status} = req.body;
+            const { name, price, description, quantity, category,discount, status} = req.body;
+
+            const salePrice = price * (1 - (discount || 0) / 100);
 
             const product = await models.Product.findOne({ where: { id: productId, shopId: id }});
             if (!product) {
@@ -246,29 +273,25 @@ class SellerController {
                 thumbnailURL: thumbnailURL,
                 salePrice: salePrice || product.salePrice,
                 status: status ||  product.status,
-                stock: stock || product.stock
+                stock: quantity || product.stock
             });
             await models.ProductCategory.destroy({ where: { productId: productId }});
 
-            if (categoryId.length > 1) {
-                categoryId.forEach(async (categoryId) => {
-                    const category = await models.Category.findOne({ where: { id: categoryId }});
+            if (category.length > 0) {
+                for (const categoryName of category) {
+                    const category = await models.Category.findOne({ where: { name: categoryName }});
+ 
                     if (!category) {
                         return res.status(404).json({ error: 'Category not found' });
                     }
                     await models.ProductCategory.create({
                         productId: product.id,
-                        categoryId: categoryId
+                        categoryId: category.id
                     });
-                });
-            } else{
-                await models.ProductCategory.create({
-                    productId: product.id,
-                    categoryId: categoryId[0]
-                });
+                }
             }
 
-            return res.status(200).json({ product });
+            return res.status(200).json({ product, category });
         } catch (error) {
             console.error('Error updating product:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
@@ -315,12 +338,13 @@ class SellerController {
                     }
                     const transaction = await models.Transaction.findOne({ where: { orderId: order.id } });
                     const buyer = await models.User.findOne({ where: { id: order.buyerId }});
+
                     
                     seenOrderIds.add(order.id);
                     allOrders.push({
                         ...order.toJSON(),
                         buyerName:buyer.fullName,
-                        paymentMethod : transaction.paymentMethod,
+                        transaction: transaction ? transaction.toJSON() : null,
                     });
                     
                 }
