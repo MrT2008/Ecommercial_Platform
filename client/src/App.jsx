@@ -11,6 +11,7 @@ import Signup from "./pages/signup";
 import BannedShops from "./pages/admin/bannedShop";
 import AnnouncementsPage from "./pages/admin/announcementPage";
 import ProductDetails from "./pages/ProductDetails";
+import ShopPage from "./pages/ShopPage";
 import Category from "./pages/seller/Category";
 import AllProduct from "./pages/seller/AllProduct";
 import ShopInformation from "./pages/seller/ShopInformation";
@@ -52,7 +53,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/product/:id" element={<ProductDetails />} />
-          {/* http://localhost:5173/product/1 */}
+          <Route path="/shop/:id" element={<ShopPage />} /> {/* New route for shop page with ID parameter */}
         </Route>
           
         <Route path="/buyer" element={<MainLayout />}>
