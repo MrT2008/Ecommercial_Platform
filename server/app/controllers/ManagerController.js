@@ -26,14 +26,17 @@ class ManagerController {
         }
     };
     
+   
     getAllAnnouncements = async (req, res) => {
         try {
             const announcements = await reuse.getAllAnnouncements();
             for (const announcement of announcements) {
                 if (announcement.imageURL) {
-                announcements.imageURL = announcements.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
-                announcements.imageURL = `${req.protocol}://${req.get('host')}/${announcements.imageURL}`;
-            }
+                    // Normalize the image path
+                    announcement.imageURL = announcement.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/');
+                    // Prepend the full URL
+                    announcement.imageURL = `${req.protocol}://${req.get('host')}${announcement.imageURL}`;
+                }
             }
             res.status(200).json({ message: 'Announcements retrieved successfully', announcements });
         } catch (error) {
@@ -41,6 +44,7 @@ class ManagerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     };
+
 
     editAnnouncementById = async (req, res) => {
         try {
