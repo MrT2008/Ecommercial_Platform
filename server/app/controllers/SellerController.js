@@ -257,6 +257,29 @@ class SellerController {
     }
   };
 
+  // Get all products for a shop
+  getProducts = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const products = await models.Product.findAll({ where: { shopId: id } });
+      if (!products) {
+        return res.status(404).json({ error: "No products found for this shop" });
+      }
+      // Optionally, format thumbnailURL with host
+      const formattedProducts = products.map((product) => {
+        const prod = product.toJSON();
+        if (prod.thumbnailURL) {
+          prod.thumbnailURL = `${req.protocol}://${req.get("host")}/${prod.thumbnailURL}`;
+        }
+        return prod;
+      });
+      return res.status(200).json(formattedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
   //Order
   getOrders = async (req, res) => {
     try {
