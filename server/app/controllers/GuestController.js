@@ -47,7 +47,7 @@ class GuestController {
 
     getProductById = async (req, res) => {
             try {
-                const { id } = req.params;
+                const { id } = req.body;
         
                 const product = await reuse.getProductById(id);
                 if (!product) {

@@ -167,7 +167,7 @@ const syncModels = async () => {
   try {
     await sequelize.authenticate();
     console.log('Database connected!');
-    await sequelize.sync({FORCE:false}); 
+    await sequelize.sync({FORCE: false}); 
     console.log('Database synced!');
   } catch (err) {
     console.error('Database connection or sync failed:', err);
