@@ -42,7 +42,7 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
-                imageURL: imageURL
+                imageURL: imageURL || user.imageURL,
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
