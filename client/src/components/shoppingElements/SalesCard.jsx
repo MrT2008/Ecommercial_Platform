@@ -12,6 +12,7 @@ const SalesCard = ({
   rating,
   reviewCount,
   imageUrl,
+  shopId,
   isNew = true,
 }) => {
   const navigate = useNavigate();
