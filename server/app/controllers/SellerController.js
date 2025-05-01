@@ -183,7 +183,7 @@ class SellerController {
                 return res.status(404).json({ error: 'Product not found' });
             }
             if (product.thumbnailURL) {
-                product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
                 product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
             }
 
@@ -202,7 +202,7 @@ class SellerController {
             }
             products.forEach(product => {
                 if (product.thumbnailURL) {
-                    product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+                    product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
             });
@@ -308,7 +308,7 @@ class SellerController {
                     
                 }
                 const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
-                product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
                 if (product) {
                     allProducts.push({
                         name: product.name,
@@ -384,7 +384,7 @@ class SellerController {
             }
             promotions.forEach(promotion => {
                 if (promotion.imageURL) {
-                    promotion.imageURL = promotion.imageURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+                    promotion.imageURL = promotion.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
                     promotion.imageURL = `${req.protocol}://${req.get('host')}/${promotion.imageURL}`;
                 }
             });
@@ -419,21 +419,36 @@ class SellerController {
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
-            const pendingOrders = await models.Order.findAll({ where: { shopId: id, status: 'pending' }});
-            const processingOrders = await models.Order.findAll({ where: { shopId: id, status: 'processing' }});
-            const cancelledOrders = await models.Order.findAll({ where: { shopId: id, status: 'cancelled' }});
+            const orderDetails = await models.OrderDetail.findAll({ where: { shopId: id }});
+            const pendingOrders = []
+            const processingOrders = []
+            const cancelledOrders = []
+            for (const orderDetail of orderDetails) {
+                const order = await models.Order.findOne({ where: { id: orderDetail.orderId }});
+                if (!order) {
+                    return res.status(404).json({ error: 'Order not found' });
+                }
+                if (order.status === 'pending') {
+                    pendingOrders.push(orderDetail);
+                } else if (order.status === 'processing') {
+                    processingOrders.push(orderDetail);
+                } else if (order.status === 'cancelled') {
+                    cancelledOrders.push(orderDetail);
+                }
+            }
 
-           
             const totalSales = orderDetails.reduce((total, detail) => total + (detail.priceAtPurchase * detail.quantity), 0);
-            const totalProducts = await models.Product.count({ where: { shopId: id }});
-            const totalOrders = await models.Order.count({ where: { shopId: id }});
-            const totalCategories = await models.Category.count({ where: { shopId: id }});
+
+
+            const products = await models.Product.findAll({ where: { shopId: id }});
 
             return res.status(200).json({
-                totalProducts,
-                totalOrders,
+                pendingOrders: pendingOrders.length,
+                processingOrders: processingOrders.length,
+                cancelledOrders: cancelledOrders.length,
                 totalSales,
-                totalCategories
+                totalOrders: orderDetails.length,
+                products: products,
             });
         } catch (error) {
             console.error('Error fetching dashboard data:', error);

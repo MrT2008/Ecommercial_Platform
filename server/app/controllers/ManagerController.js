@@ -30,7 +30,10 @@ class ManagerController {
         try {
             const announcements = await reuse.getAllAnnouncements();
             for (const announcement of announcements) {
-                announcements.thumbnailURL = announcements.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+                if (announcement.imageURL) {
+                announcements.imageURL = announcements.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
+                announcements.imageURL = `${req.protocol}://${req.get('host')}/${announcements.imageURL}`;
+            }
             }
             res.status(200).json({ message: 'Announcements retrieved successfully', announcements });
         } catch (error) {

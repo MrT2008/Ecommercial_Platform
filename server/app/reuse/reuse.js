@@ -273,7 +273,7 @@ const getProducts = async (products, req) => {
     const allProducts = [];
     for (const product of products) {
         if (product.thumbnailURL) {
-            product.thumbnailURL = product.thumbnailURL.replace('D:\\GitHub\\Ecommercial_Platform\\client\\public\\', '/',); // Normalize the path
+            product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
             product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
         }
         const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
