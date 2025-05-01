@@ -83,14 +83,6 @@ function App() {
           <Route path="completed" element={<CompletedOrders />} />
           <Route path="cancellations" element={<Cancellations />} />
         </Route>
-        <Route path="/admin" element={<MainLayout />}>
-          <Route path="admin-dashboard" element={<Dashboard />} />
-          <Route path="pending-shops" element={<PendingShops />} />
-          <Route path="list-shops" element={<ListAllShops />} />
-          <Route path="banned-shops" element={<BannedShops />} />
-          <Route path="announcements" element={<AnnouncementsPage />} />
-          <Route path="admin-banner" element={<AdminBanner />} />
-        </Route>
 
         {/* Private routes for sellers */}
         {/* <Route element={<PrivateRoute isAllowed={isSeller} redirectPath="/login"><MainLayout /></PrivateRoute>}>
@@ -122,9 +114,13 @@ function App() {
         {/* Private Route for admin */}
         <Route element={<PrivateRoute isAllowed={isAdmin} redirectPath="/login"><MainLayout /></PrivateRoute>}>
           <Route path="/admin" >
+            <Route path="admin-dashboard" element={<Dashboard />} />
+            <Route path="pending-shops" element={<PendingShops />} />
             <Route path="list-shops" element={<ListAllShops />} />
             <Route path="banned-shops" element={<BannedShops />} />
             <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="admin-banner" element={<AdminBanner />} />
+
           </Route>
           {/* Add admin-specific routes here */}
           {/* Private routes for both buyers and sellers */}

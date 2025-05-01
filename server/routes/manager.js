@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../app/middlewares/authenticate ');
 
 const ManagerController = require('../app/controllers/ManagerController');
 
-router.post('/announcements/new', ManagerController.sendAnnouncement);
+router.post('/announcements/new', authenticateToken, ManagerController.sendAnnouncement);
 router.put('/announcements/edit/:id', ManagerController.editAnnouncementById);
 router.put('/announcements/delete/:id', ManagerController.deleteAnnouncementById);
 router.get('/announcements', ManagerController.getAllAnnouncements);

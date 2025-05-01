@@ -1,6 +1,26 @@
 import PropTypes from 'prop-types';
-const ShopCard = ({ shop }) => {
-    return (
+import { useState } from 'react';
+import { banShop } from '../../api/adminAPI';
+import BanReasonDialog from './BanReasonDialog'; 
+
+const ShopCard = ({ shop, onBanSuccess }) => {
+  const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
+
+  const handleConfirmBan = async (reason) => {
+    try {
+      const response = await banShop(shop.id, reason); 
+      if (response) {
+        onBanSuccess(shop.id);
+      } else {
+        console.error("Error banning shop:", response);
+      }
+    } catch (error) {
+      console.error("Error banning shop:", error);
+    }
+  };
+
+  return (
+    <>
       <div className="flex items-center justify-between border-b py-4">
         <div className="flex items-center">
           <img 
@@ -30,27 +50,37 @@ const ShopCard = ({ shop }) => {
           <button className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">
             View Shop
           </button>
-          <button className="px-4 py-2 border border-red-300 rounded text-red-500 hover:bg-red-50 flex items-center">
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <button
+            onClick={() => setIsBanDialogOpen(true)}
+            className="px-4 py-2 border border-red-300 rounded text-red-500 hover:bg-red-50 flex items-center">
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
             Ban
           </button>
         </div>
       </div>
-    );
-  };
 
-  // PropTypes validation
+      {/* Ban Reason Dialog */}
+      <BanReasonDialog
+        isOpen={isBanDialogOpen}
+        onClose={() => setIsBanDialogOpen(false)}
+        onSubmit={handleConfirmBan}
+      />
+    </>
+  );
+};
+
 ShopCard.propTypes = {
-    shop: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      image: PropTypes.string.isRequired,
-      evaluations: PropTypes.number.isRequired,
-      products: PropTypes.number.isRequired,
-      rating: PropTypes.number.isRequired
-    }).isRequired
-  };
-  
-  export default ShopCard;
+  shop: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    image: PropTypes.string.isRequired,
+    evaluations: PropTypes.number.isRequired,
+    products: PropTypes.number.isRequired,
+    rating: PropTypes.number.isRequired,
+  }).isRequired,
+  onBanSuccess: PropTypes.func.isRequired,
+};
+
+export default ShopCard;
