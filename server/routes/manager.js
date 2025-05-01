@@ -25,6 +25,7 @@ router.put('/moderators/delete/:id', ManagerController.banModeratorById);
 router.get('/moderators/', ManagerController.getAllModerators);
 
 router.get('/users/:id', ManagerController.getUserById);
+router.get('/users/', ManagerController.getAllUsers);
 
 router.get('/', function (req, res) {
     res.json({
