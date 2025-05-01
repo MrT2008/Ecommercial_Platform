@@ -20,8 +20,6 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import BecomeSeller from "./pages/becomeSeller";
 import PrivateRoute from './routes/privateRoute';
 import AllOrder from "./pages/seller/AllOrder";
-import ShopPage from "./pages/ShopPage";
-import axios from 'axios';
 import Cart from './pages/buyer/Cart'
 import CheckOut from './pages/buyer/CheckOut';
 import AccountAddress from "./pages/account/AccountAddress";

@@ -9,11 +9,9 @@ import ReviewList from '../components/shoppingElements/ReviewList.jsx';
 import { getProductById } from '../api/guestAPI.jsx';
 import { addToCart } from '../api/buyerAPI.jsx';
 import { useAuth } from '../hooks/useAuth.js';
-import { useNavigate } from 'react-router-dom';
 
 const ProductDetail = () => {
     const [product, setProduct] = useState(null);
-    const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
     const { user, loading } = useAuth(); // Assuming you have a useAuth hook to get user info
     const navigate = useNavigate();
