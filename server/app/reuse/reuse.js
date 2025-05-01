@@ -23,7 +23,7 @@ const sentAnnouncement = async (senderId, title, imageURL, script, options = {})
 
 const getAllAnnouncements = async () => {
     return await models.Announcement.findAll({
-        
+
         include: { model: models.User, as: 'sender' },
     });
 };
@@ -269,6 +269,10 @@ const getTotalProductsByShopId = async (shopId) => {
 
 
 // PRODUCT MANAGEMENT
+const getAllProductsByShopId = async (shopId) => {
+    return await models.Product.findAll({where: { shopId }});;
+}
+
 const getAllProducts = async () => {
     return await models.Product.findAll();
 }
@@ -475,6 +479,7 @@ module.exports = {
     getAverageRatingsByShopId,
     getTotalEvaluationsByShopId,
     getTotalProductsByShopId,
+    getAllProductsByShopId,
     getAllProducts,
     getProductById,
     banProductById,
@@ -488,4 +493,5 @@ module.exports = {
     getPromotionById,
     createPromotion,
     deletePromotionById,
+    
 }

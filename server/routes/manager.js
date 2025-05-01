@@ -15,6 +15,7 @@ router.put('/shops/approve/:id', ManagerController.approveShopById);
 router.put('/shops/reject/:id', ManagerController.rejectShopById);
 router.get('/shops/banned/', ManagerController.getAllBannedShops);
 router.put('/shops/unban/:id', ManagerController.unbanShopById);
+router.get('/shops/getProducts/:id', ManagerController.getAllProductsByShopId);
 router.get('/shops/:id', ManagerController.getShopById);
 router.get('/shops/', ManagerController.getAllActiveShops);
 
