@@ -32,7 +32,7 @@ const loginForm = () => {
     useEffect(() => {
         if (session) {
             if (user?.roles?.includes('manager')) {
-                navigate('/admin/dashboard'); // just an example, we don't have the admin page yet
+                navigate('/admin/admin-dashboard'); 
             } else if (user?.roles?.includes('buyer')) {
                 navigate('/');
             } else if (user?.roles?.length === undefined) { //handle case when user has no role

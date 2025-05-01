@@ -2,13 +2,16 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Sidebar from '../../components/admin/adminSidebar';
 import TitlePage from '../../components/shares/TitlePage';
+import { getAllShops } from '../../api/adminAPI';
 // Mock data file (normally would be in a separate file)
+const shops = await getAllShops();
+const totalShops = shops.length;
 const mockData = {
     users: {
         title: "List of users",
         metrics: [
             { label: "Total Users", value: "12,400" },
-            { label: "Total Shops", value: "9,560" }
+            { label: "Total Shops", value: totalShops },
         ]
     },
     sales: {

@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 const Sidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
@@ -8,40 +8,40 @@ const Sidebar = () => {
         <h2 className="text-lg font-bold mb-4">Management Center</h2>
         <ul className="mb-6">
           <li className="mb-2">
-            <a href="/admin/admin-dashboard" className={`${isActive('/admin/admin-dashboard') ? 'active' : ''} hover:text-[#FFA50B] px-4`}>
+            <Link to="/admin/admin-dashboard" className={`${isActive('/admin/admin-dashboard') ? 'active' : ''} text-gray-700 hover:text-[#FFA50B] px-4`}>
               Dashboard
-            </a>
+            </Link>
           </li>
         </ul>
         <h2 className="text-lg font-bold mb-4">Shops Management</h2>
         <ul className="mb-6">
           <li className="mb-2">
-            <a href="/admin/list-shops" className={`${isActive('/admin/list-shops') ? 'active' : ''}  hover:text-[#FFA50B] px-4`}>
-              List Shops
-            </a>
+            <Link to="/admin/list-shops" className={`${isActive('/admin/list-shops') ? 'active' : ''} text-gray-700 hover:text-[#FFA50B] px-4`}>
+              All Shops
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/admin/pending-shops" className={`${isActive('/admin/pending-shops') ? 'active' : ''} hover:text-[#FFA50B] px-4`}>
+            <Link to="/admin/pending-shops" className={`${isActive('/admin/pending-shops') ? 'active' : ''} text-gray-700 hover:text-[#FFA50B] px-4`}>
               Pending Shops
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/admin/banned-shops" className={`${isActive('/admin/banned-shops') ? 'active' : ''} hover:text-[#FFA50B] px-4`}>
+            <Link to="/admin/banned-shops" className={`${isActive('/admin/banned-shops') ? 'active' : ''} text-gray-700 hover:text-[#FFA50B] px-4`}>
               Banned Shops
-            </a>
+            </Link>
           </li>
         </ul>
         <h2 className="text-lg font-bold mb-4">Media Management</h2>
         <ul>
           <li className="mb-2">
-            <a href="/admin/announcements" className={`${isActive('/admin/announcements') ? 'active' : ''} text-gray-700 hover:text-[#FFA50B] px-4`}>
+            <Link to="/admin/announcements" className={`${isActive('/admin/announcements') ? 'active' : ''} text-gray-700 hover:text-[#FFA50B] px-4`}>
               Announcements
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/admin/admin-banner" className={`${isActive('/admin/admin-banner') ? 'active' : ''} hover:text-[#FFA50B] px-4`}>
-              Banners
-            </a>
+            <Link to="/admin/admin-banner" className={`${isActive('/admin/admin-banner') ? 'active' : ''} text-gray-700 hover:text-[#FFA50B] px-4`}>
+              Admin Banners
+            </Link>
           </li>
         </ul>
       </div>
