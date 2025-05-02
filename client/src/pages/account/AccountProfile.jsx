@@ -1,18 +1,42 @@
-import React, { useState } from "react"; 
+import React, { useState,useEffect } from "react"; 
 import Sidebar from "../../components/account/accountSidebar";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import EditProfileDialog from "../account/EditProfileDialog"; 
 
 const AccountProfile = () => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userId = storedUser?.id;
     const [userInfo, setUserInfo] = useState({
-        username: "ntpt12345",
-        email: "ntpt123456789@gmail.com",
-        phone: "02343256789",
-        image: "/images/cat-avatar.jpg", // Đường dẫn mặc định đến ảnh avatar
+        username: "",
+        email: "",
+        // phone: "",
+        image: "", 
     });
-
-    const [image, setImage] = useState(userInfo.image);
+    const [image, setImage] = useState("");
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+    // 👉 Fetch API
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/buyer/${userId}/viewProfile`);
+                const result = await response.json();
+                const user = result.data.User;
+                
+                setUserInfo({
+                    username: user.fullName || "", 
+                    email: user.email || "",
+                    // phone: "", 
+                    image: user.imageURL || "/images/cat-avatar.jpg"
+                });
+                setImage(user.imageURL || "/images/cat-avatar.jpg");
+            } catch (error) {
+                console.error("Failed to fetch user data:", error);
+            }
+        };
+
+        fetchUserData();
+    }, [userId]);
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -64,10 +88,10 @@ const AccountProfile = () => {
                                     <div className="w-45 text-[#666666] font-medium">Email</div>
                                     <div>{userInfo.email}</div>
                                 </div>
-                                <div className="flex">
+                                {/* <div className="flex">
                                     <div className="w-45 text-[#666666] font-medium">Phone Number</div>
                                     <div>{userInfo.phone}</div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
 
