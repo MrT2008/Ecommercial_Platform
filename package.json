@@ -6,6 +6,7 @@
     "esbuild": "^0.25.3",
     "jwt-decode": "^4.0.0",
     "prop-types": "^15.8.1",
+    "react-native-dotenv": "^3.4.11",
     "vite": "^6.3.3"
   }
 }

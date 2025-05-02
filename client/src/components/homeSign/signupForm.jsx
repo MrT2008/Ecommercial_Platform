@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin} from '@react-oauth/google';
-import {useAuth } from '../../hooks/useAuth';
+import { useContext } from "react";
+import { AuthContext } from '../../hooks/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -16,7 +17,7 @@ const SignUpForm = () => {
     const [fullName, setFullName] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [agree, setAgree] = useState(false);
-    const { signUp, login, loginWithGoogle, session, error, user } = useAuth();
+    const { signUp, login, loginWithGoogle, session, error, user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
 
