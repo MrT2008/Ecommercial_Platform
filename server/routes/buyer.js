@@ -10,7 +10,7 @@ router.put('/:buyerId/editProfile', BuyerController.editProfileInformation) //.
 router.post('/:buyerId/payment/', BuyerController.addPaymentMethod) //.
 router.get('/:buyerId/payment/', BuyerController.viewAllPaymentMethod) //.
 router.put('/:buyerId/payment/setdefault', BuyerController.setDefaultPaymentMethod) //.
-router.put('/:buyerId/payment/remove/', BuyerController.removePaymentMethod) //.
+router.put('/:buyerId/payment/remove', BuyerController.removePaymentMethod) //.
 
 //cart
 router.post('/:buyerId/product/addToCart', BuyerController.addProductToCart) //.
