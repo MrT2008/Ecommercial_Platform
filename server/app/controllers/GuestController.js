@@ -4,6 +4,27 @@ const Category = require('../models/Category');
 const reuse = require('../reuse/reuse');
 
 class GuestController {
+    searchProducts = async (req, res) => {
+        try {
+            const { keyword } = req.params;
+            const products = await models.Product.findAll({
+                where: {
+                    name: {
+                        [models.Sequelize.Op.like]: `%${keyword}%`,
+                    },
+                },
+            });
+            const allProducts = await reuse.getProducts(products, req);
+            if (allProducts.length === 0) {
+                return res.status(404).json({ message: 'No products found' });
+            }
+            
+            res.status(200).json({ message: 'Products retrieved successfully', allProducts });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
     getAllProducts = async (req, res) => {
         try {
             const products = await models.Product.findAll();
@@ -29,7 +50,7 @@ class GuestController {
 
     getProductById = async (req, res) => {
             try {
-                const { id } = req.body;
+                const { id } = req.params;
         
                 const product = await reuse.getProductById(id);
                 if (!product) {
