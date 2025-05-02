@@ -182,9 +182,9 @@ const Cart = () => {
         navigate('/buyer/check-out');
     };
     return (
-        <div className="p-8">
+        <div className="p-8 max-w-7xl mx-auto">
             {/* Heading */}
-            <div className="text-3xl font-bold mb-6">
+            <div className="text-3xl font-bold mb-6 text-[#FFA50B]">
                 <p>Cart</p>
             </div>
 
@@ -199,11 +199,11 @@ const Cart = () => {
                     />
                     <span>Product</span>
                 </div>
-                <div className="col-span-1"></div>
-                <div>Price</div>
-                <div>Quantity</div>
-                <div>Subtotal</div>
-                <div>Action</div>
+                <div className="col-span-1 "></div>
+                <div className="flex justify-center items-center">Price</div>
+                <div className="flex justify-center items-center">Quantity</div>
+                <div className="flex justify-center items-center">Subtotal</div>
+                <div className="flex justify-center items-center">Action</div>
             </div>
 
             {/* Product List Grouped by Shop */}
@@ -227,35 +227,37 @@ const Cart = () => {
                         {/* Shop Items */}
                         {itemsByShop[shopId].items.map((item) => (
                             <div key={item.id} className="grid grid-cols-6 gap-4 items-center border-b py-4">
-                                {/* Checkbox */}
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedItems[item.id] || false}
-                                        onChange={() => toggleSelectItem(item.id)}
-                                        className="mx-2"
-                                    />
-                                </div>
+                                <div className="flex items-center col-span-2">
+                                    {/* Checkbox */}
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedItems[item.id] || false}
+                                            onChange={() => toggleSelectItem(item.id)}
+                                            className="mx-2"
+                                        />
+                                    </div>
 
-                                {/* Product Info */}
-                                <div className="flex items-center gap-4">
-                                    <img src={item.image} alt={item.name} className="w-16 h-16 object-cover" />
-                                    <div>
-                                        <div className="font-medium">{item.name}</div>
-                                        {item.variant && (
-                                            <div className="text-sm text-gray-500">
-                                                <span>{item.variantLabel} </span>
-                                                <span>{item.variant}</span>
-                                            </div>
-                                        )}
+                                    {/* Product Info */}
+                                    <div className="flex items-center gap-4">
+                                        <img src={item.image} alt={item.name} className="w-16 h-16 object-cover" />
+                                        <div>
+                                            <div className="font-medium">{item.name}</div>
+                                            {item.variant && (
+                                                <div className="text-sm text-gray-500">
+                                                    <span>{item.variantLabel} </span>
+                                                    <span>{item.variant}</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Price */}
-                                <div>${item.price}</div>
+                                <div className="text-center">${item.price}</div>
 
                                 {/* Quantity Control */}
-                                <div className="flex items-center">
+                                <div className="flex justify-center">
                                     <button
                                         className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
                                         onClick={() => decreaseQuantity(item.id)}
@@ -274,17 +276,17 @@ const Cart = () => {
                                 </div>
 
                                 {/* Subtotal */}
-                                <div>${item.price * item.quantity}</div>
+                                <div className="text-center">${item.price * item.quantity}</div>
 
                                 {/* Remove Button */}
-                                <div>
+                                <div className="flex justify-center">
                                     <button
                                         onClick={() => removeItem(item.id)}
-                                        className="text-gray-500 hover:text-gray-700"
+                                        className="text-[#EA4335] "
                                         title="Remove item"
                                     >
                                         {/* <i className="fas fa-trash"></i> */}
-                                        <FontAwesomeIcon icon={faTrash} />
+                                        <FontAwesomeIcon icon={faTrash}  />
                                     </button>
                                 </div>
                             </div>
@@ -313,7 +315,9 @@ const Cart = () => {
                 </div>
 
                 {/* Checkout Button */}
-                <SecondaryButton title="Proceed to checkout" onClick={handleCheckout} align="left" />
+                <div className="flex justify-end mt-6">
+                    <SecondaryButton title="Proceed to checkout" onClick={handleCheckout} />
+                </div>
                 {/* href="/user/check-out" */}
             </div>
         </div>
