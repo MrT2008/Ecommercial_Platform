@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import SecondaryButton from '../../components/shares/SecondaryButton';
 import OutlineButton from '../../components/shares/OutlineButton';
-
+import { getSellerId } from "../../api/sellerAPI";
 const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -13,7 +13,10 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
   const [category, setCategory] = useState([]);
   const [image, setImage] = useState(null);
 
+  const [allCategories, setAllCategories] = useState([]);
+
   useEffect(() => {
+    // Initialize form values based on product prop
     if (product) {
       setName(product.name || '');
       setDescription(product.description || '');
@@ -24,7 +27,6 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
       setCategory(product.category || []);
       setImage(product.image || null);
     } else {
-     
       setName('');
       setDescription('');
       setPrice('');
@@ -34,7 +36,25 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
       setCategory([]);
       setImage(null);
     }
-  }, [product]);
+
+    const fetchCategories = async () => {
+      try {
+        const userId = getSellerId();
+        const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
+        const shopData = await shopRes.json();
+        const shopId = shopData.data.shop.id;
+
+        const res = await fetch(`http://localhost:8080/seller/${shopId}/getCategory`);
+        const data = await res.json();
+        setAllCategories(data.categories || []);
+      } catch (err) {
+        console.error("Lỗi khi fetch categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
 
   const handleCategoryChange = (e) => {
     const value = Array.from(
@@ -55,19 +75,83 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
     }
   };
 
-  const handleSave = () => {
-    const newProduct = {
-      name,
-      description,
-      price: parseFloat(price || 0),
-      discount: discount ? `${discount}%` : '0%',
-      quantity: parseInt(quantity || 0),
-      status,
-      category,
-      image,
-    };
+  const handleSave = async () => {
+    try {
+      const userId = getSellerId();
+      const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
+      const shopData = await shopRes.json();
+      const shopId = shopData.data.shop.id;
+      // setLoading(true);
+      // setError(null);
 
-    onSave(newProduct);
+      if (!shopId) {
+        throw new Error("Shop ID not found");
+      }
+
+      // Create form data object
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('price', price);
+      formData.append('description', description);
+
+      // Add each category separately
+      category.forEach((cat, index) => {
+        formData.append(`category[${index}]`, cat);
+      });
+
+      formData.append('quantity', quantity);
+      formData.append('type', 'product'); // As seen in the API example
+      formData.append('discount', discount);
+
+      // Handle image upload
+      if (image && image.startsWith('data:')) {
+        // Convert base64 to blob
+        const response = await fetch(image);
+        const blob = await response.blob();
+        formData.append('thumbnailURL', blob, 'product-image.jpg');
+      }
+
+      // Make API request
+      
+      try {
+        // Fetch the shop ID first
+        const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
+        const shopData = await shopRes.json();
+        if (!shopData.data?.shop?.id) {
+          throw new Error("Shop ID not found in response");
+        }
+        console.log("Found shop ID:", shopId);
+      } catch (err) {
+        console.error("Error getting shop ID:", err);
+        alert("Failed to find your shop. Please check if you're logged in properly.");
+        return;
+      }
+      const response = await fetch(`http://localhost:8080/seller/${shopId}/postProduct`, {
+        method: 'POST',
+        body: formData,
+        // Don't set Content-Type header, let the browser set it with boundary for FormData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      // const data = await response.json();
+
+      // Call the onSave prop with the new product data
+      // onSave(data);
+
+      // Close dialog
+      onClose();
+     
+
+    } catch (err) {
+      console.error("Error creating product:", err);
+      // setError("Failed to create product. Please try again.");
+    }
+    // finally {
+    // setLoading(false);
+    // }
   };
 
   if (!isOpen) return null;
@@ -126,21 +210,21 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
         <div className="mb-6">
           <label className="block mb-1">Category</label>
           <div className="bg-gray-100 rounded p-2 flex flex-col gap-2">
-            {['Fashion', 'Summer', 'Rep11'].map((cat) => (
-              <label key={cat} className="flex items-center gap-2">
+            {allCategories.map((cat) => (
+              <label key={cat.id || cat.name} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  value={cat}
-                  checked={category.includes(cat)}
+                  value={cat.name}
+                  checked={category.includes(cat.name)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setCategory([...category, cat]);
+                      setCategory([...category, cat.name]);
                     } else {
-                      setCategory(category.filter((c) => c !== cat));
+                      setCategory(category.filter((c) => c !== cat.name));
                     }
                   }}
                 />
-                <span>{cat}</span>
+                <span>{cat.name}</span>
               </label>
             ))}
           </div>
@@ -159,7 +243,7 @@ AddProductDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  product: PropTypes.object, // 👈 thêm dòng này
+  product: PropTypes.object,
 };
 
 export default AddProductDialog;

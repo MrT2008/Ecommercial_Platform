@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import AddProductDialog from "../../pages/seller/AddProductDialog";
+import { getSellerId, getShopIdFromUserId } from "../../api/sellerAPI";
 
 const AllProduct = () => {
   const [products, setProducts] = useState([]);
@@ -18,20 +19,23 @@ const AllProduct = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Lấy seller ID
-        const id = getSellerId();
-        setSellerId(id);
-        
-        console.log(`Đang fetch sản phẩm cho seller với ID: ${id}`);
-        const response = await fetch(`http://localhost:8080/seller/${id}/getProducts`);
-        
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
+        // Lấy seller (user) ID
+        const userId = getSellerId();
+        setSellerId(userId);
+        console.log(`Đang fetch shop cho user ID: ${userId}`);
+  
+        const shopId = await getShopIdFromUserId(userId);
+        console.log(`Shop ID: ${shopId}`);
+
+        // Gọi API để lấy danh sách sản phẩm từ shop ID
+        const productRes = await fetch(`http://localhost:8080/seller/${shopId}/getProducts`);
+        if (!productRes.ok) {
+          throw new Error(`Error: ${productRes.status}`);
         }
-        
-        const data = await response.json();
-        console.log(`Đã nhận được ${data.length} sản phẩm từ API`);
-        setProducts(data);
+  
+        const products = await productRes.json();
+        console.log(`Đã nhận được ${products.length} sản phẩm từ API`);
+        setProducts(products);
         setError(null);
       } catch (err) {
         console.error("Không thể fetch sản phẩm:", err);
@@ -41,86 +45,115 @@ const AllProduct = () => {
         setIsLoading(false);
       }
     };
-
+  
     fetchProducts();
   }, []);
-
-  // Helper function to get seller ID
-  const getSellerId = () => {
-    // PHƯƠNG PHÁP 1: Lấy từ React Router (nếu bạn đang sử dụng react-router-dom)
-    // Ví dụ nếu URL là /seller/5/products
-    try {
-      const match = window.location.pathname.match(/\/seller\/(\d+)/);
-      if (match && match[1]) {
-        return match[1];
-      }
-    } catch (e) {
-      console.error("Không thể lấy sellerId từ URL:", e);
-    }
-    
-    // PHƯƠNG PHÁP 2: Lấy từ localStorage (nếu đã lưu khi đăng nhập)
-    try {
-      const userDataString = localStorage.getItem('userData') || localStorage.getItem('user');
-      if (userDataString) {
-        const userData = JSON.parse(userDataString);
-        if (userData && (userData.shopId || userData.id)) {
-          return userData.shopId || userData.id;
-        }
-      }
-    } catch (e) {
-      console.error("Không thể lấy sellerId từ localStorage:", e);
-    }
-    
-    // PHƯƠNG PHÁP 3: Lấy từ sessionStorage
-    try {
-      const sessionDataString = sessionStorage.getItem('userData') || sessionStorage.getItem('user');
-      if (sessionDataString) {
-        const sessionData = JSON.parse(sessionDataString);
-        if (sessionData && (sessionData.sellerId || sessionData.id)) {
-          return sessionData.sellerId || sessionData.id;
-        }
-      }
-    } catch (e) {
-      console.error("Không thể lấy sellerId từ sessionStorage:", e);
-    }
-    
-    // Mặc định trả về 1 nếu không tìm thấy từ các nguồn trên
-    console.warn("Không tìm thấy sellerId, sử dụng giá trị mặc định: 1");
-    return 1;
-  };
-
+  
   const handleSaveProduct = async (product) => {
     try {
-      const url = `http://localhost:8080/seller/${sellerId}/postProduct`;  //sellerId truyền vào là userId, trong khi cái cần là shopId
+      // Get the shop ID first
+      const userId = getSellerId(); // Make sure you have this function or replace with appropriate way to get userId
+      let shopId;
+      
+      try {
+        // Fetch the shop ID first
+        const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
+        const shopData = await shopRes.json();
+        if (!shopData.data?.shop?.id) {
+          throw new Error("Shop ID not found in response");
+        }
+        shopId = shopData.data.shop.id;
+        console.log("Found shop ID:", shopId);
+      } catch (err) {
+        console.error("Error getting shop ID:", err);
+        alert("Failed to find your shop. Please check if you're logged in properly.");
+        return;
+      }
+      
+      const url = `http://localhost:8080/seller/${shopId}/postProduct`; 
       const method = editingProduct ? 'PUT' : 'POST';
       const endpoint = editingProduct ? `${url}/${editingProduct.id}` : url;
       
+      console.log("Sending request to:", endpoint);
+      
+      // Create FormData object instead of JSON
+      const formData = new FormData();
+      
+      // Add all fields with null checks
+      formData.append('name', product.name || '');
+      formData.append('price', product.price?.toString() || '0');
+      formData.append('description', product.description || '');
+      
+      // Handle categories
+      if (Array.isArray(product.categories) && product.categories.length > 0) {
+        product.categories.forEach((cat, index) => {
+          formData.append(`categories[${index}]`, cat);
+        });
+      } else {
+        // Add a default category if none provided
+        formData.append('categories[0]', 'uncategorized');
+      }
+      
+      formData.append('quantity', product.quantity?.toString() || '0');
+      formData.append('type', 'product');
+      formData.append('discount', product.discount?.toString() || '0');
+      
+      // Handle image upload
+      if (product.image) {
+        if (typeof product.image === 'string' && product.image.startsWith('data:')) {
+          // Convert base64 to blob
+          const response = await fetch(product.image);
+          const blob = await response.blob();
+          formData.append('thumbnailURL', blob, 'product-image.jpg');
+        } else if (typeof product.image === 'string') {
+          // If it's a URL or file path from an existing product
+          formData.append('thumbnailURL', product.image);
+        } else if (product.image instanceof File) {
+          // If it's already a File object
+          formData.append('thumbnailURL', product.image);
+        }
+      }
+  
+      // Log what we're sending
+      console.log('Sending product data to:', endpoint);
+      const formDataEntries = {};
+      for (let [key, value] of formData.entries()) {
+        formDataEntries[key] = value instanceof Blob ? 'Blob/File data' : value;
+      }
+      console.log('Form data:', formDataEntries);
+      
       const response = await fetch(endpoint, {
         method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        // Don't set Content-Type header when using FormData
+        // The browser will automatically set it with the correct boundary
         credentials: 'include',
-        body: JSON.stringify(product),
+        body: formData,
       });
-
+  
       if (!response.ok) {
-        throw new Error('Failed to save product');
+        const errorData = await response.text();
+        console.error('Server error response:', errorData);
+        throw new Error(`Failed to save product: ${response.status} ${response.statusText}`);
       }
-
+  
       // Refresh products list after saving
       const updatedProductsResponse = await fetch(`http://localhost:8080/seller/${sellerId}/getProducts`);
       if (updatedProductsResponse.ok) {
         const updatedProducts = await updatedProductsResponse.json();
         setProducts(updatedProducts);
+      } else {
+        console.warn('Failed to refresh products list');
       }
+      
+      // Show success message
+      alert('Product saved successfully!');
     } catch (err) {
       console.error("Error saving product:", err);
-      // You could add a toast notification here
+      alert(`Error saving product: ${err.message}`);
+    } finally {
+      setEditingProduct(null);
+      setDialogOpen(false);
     }
-    
-    setEditingProduct(null);
-    setDialogOpen(false);
   };
 
   const handleDeleteProduct = async (productId) => {
@@ -223,7 +256,7 @@ const AllProduct = () => {
                   </td>
                   <td className="p-2">
                     <div className="flex flex-wrap justify-center gap-1">
-                      {Array.isArray(p.category) ? p.category.map((cat, idx) => (
+                      {Array.isArray(p.categories) ? p.categories.map((cat, idx) => (
                         <span
                           key={idx}
                           className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full"
@@ -232,7 +265,7 @@ const AllProduct = () => {
                         </span>
                       )) : (
                         <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full">
-                          {p.category || 'Uncategorized'}
+                          {p.categories || 'Uncategorized'}
                         </span>
                       )}
                     </div>
