@@ -6,17 +6,14 @@ const QuickLink = () => {
         <h2 className='text-lg md:text-xl font-bold mb-3 md:mb-4'>
             Quick Links
         </h2>
-        <a href='' className='text-sm md:text-base mb-2 hover:underline'>
+        <a href='/link/privacy-policy' className='text-sm md:text-base mb-2 hover:underline '>
             Privacy Policy
         </a>
-        <a href='' className='text-sm md:text-base mb-2 hover:underline'>
+        <a href='/link/term-of-use' className='text-sm md:text-base mb-2 hover:underline'>
             Term of Use
         </a>
-        <a href='' className='text-sm md:text-base mb-2 hover:underline'>
+        <a href='/link/faq' className='text-sm md:text-base mb-2 hover:underline'>
             FAQ
-        </a>
-        <a href='' className='text-sm md:text-base hover:underline'>
-            Contact
         </a>
     </div>
   )

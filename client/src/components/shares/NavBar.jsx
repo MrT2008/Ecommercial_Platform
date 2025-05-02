@@ -5,14 +5,18 @@ const Navbar = () => {
   const { user } = useAuth();
   const location = useLocation();
   const roles = user?.roles || [];
+
+
   const isSeller = roles.includes('seller');
+  const isAdmin = roles.includes('admin');
 
   const menuItems = [
     { name: 'Home', path: '/' },
-    isSeller
-      ? { name: 'My Shops', path: '/seller/seller-dashboard' }
-      : { name: 'Become Seller', path: '/become-seller' }
-  ];
+    isSeller && { name: 'My Shop', path: '/shop/:id' },
+    !isSeller && !isAdmin && { name: 'Become Seller', path: '/become-seller' },
+    isAdmin && { name: 'Admin Dashboard', path: '/admin/admin-dashboard' },
+  ].filter(Boolean);
+
 
   return (
     <nav className="bg-white w-full">
@@ -28,7 +32,9 @@ const Navbar = () => {
                   to={item.path}
                   className={`inline-flex items-center px-4 border-b-2 ${
                     isActive
-                      ? 'border-[var(--secondary)] text-[var(--secondary)]'
+
+                      ? 'active border-[var(--secondary)] text-[var(--secondary)]'
+
                       : 'border-transparent hover:text-[var(--button)]'
                   } text-sm font-medium`}
                 >

@@ -18,7 +18,7 @@ const Subscribe = () => {
             <p className='text-white text-xs md:text-sm mb-3 md:mb-4'>
                 Get 10% off your first order
             </p>
-            <form action='' className='flex relative w-full'>
+            {/* <form action='' className='flex relative w-full'>
                 <input
                     type='email'
                     name='email'
@@ -36,7 +36,7 @@ const Subscribe = () => {
                         className='text-white px-3 md:px-4 py-2 md:py-3' 
                     />
                 </button>
-            </form>
+            </form> */}
         </div>
     )
 }
