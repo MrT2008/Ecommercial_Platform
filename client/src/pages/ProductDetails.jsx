@@ -1,36 +1,62 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faStarHalfAlt } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faStarHalfAlt, faTruck, faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
-import { faTruck, faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import Button from '../components/shares/Button';
 import ReviewList from '../components/shoppingElements/ReviewList.jsx';
-const ProductDetail = () => {
-    const [quantity, setQuantity] = useState(1);
-    // const [activeTab, setActiveTab] = useState('all');
+import { getProductById } from '../api/guestAPI.jsx';
+import { addToCart } from '../api/buyerAPI.jsx';
+import { useAuth } from '../hooks/useAuth.js';
 
-    // Product data
-    const product = {
-        id: 'g-92',
-        name: 'Havic HV G-92 Gamepad',
-        price: 192.00,
-        rating: 4.5,
-        reviewCount: 150,
-        stock: true,
-        description: 'PlayStation 5 Controller Skin: High quality vinyl with air channel adhesive for easy bubble free install & mess free removal. Pressure sensitive.',
-        image: '/product-gamepad.jpg', // Replace with actual image path
+const ProductDetail = () => {
+    const [product, setProduct] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+    const { user, loading } = useAuth(); // Assuming you have a useAuth hook to get user info
+    const navigate = useNavigate();
+
+    if (loading) return null; // Show loading state if needed
+
+    const productId = window.location.pathname.split('/').pop(); 
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const response = await getProductById(productId);
+                setProduct(response.product);
+            } catch (error) {
+                console.error('Error fetching product:', error);
+            }
+        };
+        fetchProduct();
+    }, [productId]);
+
+    const handleAddToCart = async () => {
+        if (!user) {
+            navigate('/login'); // Redirect to login if user is not authenticated
+            return;
+        }
+        try {
+            const response = await addToCart(user.id, productId, quantity);
+            if (response) {
+                navigate('/buyer/cart'); 
+            } else {
+                alert('Failed to add product to cart. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error adding product to cart:', error);
+        }
     };
 
-    // Shop data
     const shop = {
+        id: 1, // Add shop ID
         name: 'Miumiu Shop',
         rating: 5,
         evaluation: '12.6k',
         products: 102,
-        image: '/shop-logo.jpg', // Replace with actual image path
+        image: 'https://th.bing.com/th/id/R.3903470f5b74222bd2e2e09db1a0f2c3?rik=s%2fLEM7YUHQe2Zg&pid=ImgRaw&r=0',
     };
 
-    // Reviews data
     const reviews = [
         {
             id: 1,
@@ -62,19 +88,6 @@ const ProductDetail = () => {
         }
     ];
 
-    // Calculate average rating
-    // const avgRating = 4.0;
-
-    // Rating counts
-    //   const ratingCounts = {
-    //     5: 120,
-    //     4: 20,
-    //     3: 5,
-    //     2: 3,
-    //     1: 2
-    //   };
-
-    // Function to render stars
     const renderStars = (rating) => {
         const stars = [];
         const fullStars = Math.floor(rating);
@@ -92,87 +105,69 @@ const ProductDetail = () => {
         return stars;
     };
 
-    // Handle quantity change
     const decreaseQuantity = () => {
-        if (quantity > 1) {
-            setQuantity(quantity - 1);
-        }
+        if (quantity > 1) setQuantity(quantity - 1);
     };
 
     const increaseQuantity = () => {
         setQuantity(quantity + 1);
     };
 
+    if (!product) return <div className="p-10 text-center">Loading...</div>;
+
+    
+
     return (
         <div className="container mx-auto px-4 py-8">
-            {/* Breadcrumb */}
             <div className="flex items-center text-sm text-gray-500 mb-6">
                 <a href="/account" className="hover:text-blue-600">Account</a>
                 <span className="mx-2">/</span>
-                <a href="/gaming" className="hover:text-blue-600">Gaming</a>
+                <a href="/furniture" className="hover:text-blue-600">Furniture</a>
                 <span className="mx-2">/</span>
-                <span className="text-gray-700">Havic HV G-92 Gamepad</span>
+                <span className="text-gray-700">{product.name}</span>
             </div>
 
-            {/* Product Section */}
             <div className="flex flex-col md:flex-row gap-8 mb-12">
-                {/* Product Image */}
                 <div className="w-full md:w-1/2 bg-gray-100 p-8 rounded-lg">
                     <img
-                        src={product.image || "/api/placeholder/400/400"}
+                        src={product.thumbnailURL}
                         alt={product.name}
                         className="w-full object-contain"
                     />
                 </div>
 
-                {/* Product Details */}
                 <div className="w-full md:w-1/2">
                     <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
 
-                    {/* Rating */}
                     <div className="flex items-center gap-2 mb-1">
                         <div className="flex">
-                            {renderStars(product.rating)}
+                            {renderStars(4.5)}
                         </div>
-                        <span className="text-gray-500">({product.reviewCount} Reviews)</span>
-                        <span className="text-green-500 ml-4">{product.stock ? 'In Stock' : 'Out of Stock'}</span>
+                        <span className="text-gray-500">(150 Reviews)</span>
+                        <span className="text-green-500 ml-4">{product.stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
                     </div>
 
-                    {/* Price */}
-                    <div className="text-2xl font-bold text-red-600 mb-4">${product.price.toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-red-600 mb-4">${parseFloat(product.price).toFixed(2)}</div>
 
-                    {/* Description */}
                     <p className="text-gray-700 mb-8">{product.description}</p>
 
                     <hr className="my-6" />
 
-                    {/* Quantity and Add to Cart */}
                     <div className="flex items-center gap-4 mb-6">
                         <div className="flex items-center border border-gray-300 rounded">
-                            <button
-                                onClick={decreaseQuantity}
-                                className="px-3 py-2 border-r border-gray-300 hover:bg-gray-100"
-                            >
-                                −
-                            </button>
+                            <button onClick={decreaseQuantity} className="px-3 py-2 border-r border-gray-300 hover:bg-gray-100">−</button>
                             <input
                                 type="text"
                                 value={quantity}
                                 onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
                                 className="w-12 text-center py-2"
                             />
-                            <button
-                                onClick={increaseQuantity}
-                                className="px-3 py-2 border-l border-gray-300 hover:bg-gray-100"
-                            >
-                                +
-                            </button>
+                            <button onClick={increaseQuantity} className="px-3 py-2 border-l border-gray-300 hover:bg-gray-100">+</button>
                         </div>
-                        <Button text='Add to cart' otherClassName='mt-5 ' type='button' href='' />
-                        <Button text='Buy Now' otherClassName='mt-5' type='button' href='' />
+                        <Button onClick={handleAddToCart} text='Add to cart' otherClassName='yellow' type='button'  />
+                        <Button text='Buy Now' otherClassName='blue' type='button' href='' />
                     </div>
 
-                    {/* Delivery Options */}
                     <div className="border border-gray-200 rounded mb-6">
                         <div className="p-4 flex items-start">
                             <FontAwesomeIcon icon={faTruck} className="text-gray-700 mt-1 mr-3" />
@@ -196,11 +191,7 @@ const ProductDetail = () => {
             {/* Shop Section */}
             <div className="flex items-center justify-between border-t border-b py-6 mb-8">
                 <div className="flex items-center">
-                    <img
-                        src={shop.image || "/api/placeholder/64/64"}
-                        alt={shop.name}
-                        className="w-16 h-16 rounded-full object-cover mr-4"
-                    />
+                    <img src={shop.image} alt={shop.name} className="w-16 h-16 rounded-full object-cover mr-4" />
                     <div>
                         <h3 className="font-medium text-lg">{shop.name}</h3>
                         <div className="flex text-yellow-400">
@@ -210,7 +201,6 @@ const ProductDetail = () => {
                         </div>
                     </div>
                 </div>
-
                 <div className="flex gap-4">
                     <div className="text-center">
                         <div className="font-medium text-blue-600">{shop.evaluation}</div>
@@ -221,20 +211,21 @@ const ProductDetail = () => {
                         <div className="text-sm text-gray-500">Product</div>
                     </div>
                 </div>
-
                 <div className="flex gap-2">
                     <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50">
                         Chat Now
                     </button>
-                    <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50">
+                    <Link 
+                        to={`/shop/${shop.id}`} 
+                        className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 flex items-center justify-center"
+                    >
                         View Shop
-                    </button>
+                    </Link>
                 </div>
             </div>
-        
+
             {/* Review List */}
             <ReviewList reviews={reviews} />
-            {/* </div> */}
         </div>
     );
 };

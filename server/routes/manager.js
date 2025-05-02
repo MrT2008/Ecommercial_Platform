@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../app/middlewares/authenticate ');
+const upload = require('../app/middlewares/uploadFile');
 
 const ManagerController = require('../app/controllers/ManagerController');
 
-router.post('/announcements/new', ManagerController.sendAnnouncement);
+router.post('/announcements/new', upload.single('imageURL'),authenticateToken, ManagerController.sendAnnouncement);
 router.put('/announcements/edit/:id', ManagerController.editAnnouncementById);
 router.put('/announcements/delete/:id', ManagerController.deleteAnnouncementById);
 router.get('/announcements', ManagerController.getAllAnnouncements);

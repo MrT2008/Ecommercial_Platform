@@ -40,6 +40,7 @@ const HeadingBar = () => {
     };
 
     return (
+
         <div className="px-8">
             <div className="w-full flex flex-col md:flex-row items-center justify-between border-b border-gray-300 px-4 py-3 gap-4">
                 {/* Left side - Logo */}
@@ -59,6 +60,7 @@ const HeadingBar = () => {
                     <div className={`w-full ${user ? 'md:w-1/2' : 'md:w-full'}`}>
                         <SearchBar placeholder="What are you looking for?" />
                     </div>
+
                 </div>
     
                 {/* Right side - User controls */}
@@ -68,6 +70,7 @@ const HeadingBar = () => {
                             <button className="text-gray-700 hover:text-gray-900 text-md">
                                 <FontAwesomeIcon icon={faBell} />
                             </button>
+
                             <button className="text-gray-700 hover:text-gray-900 text-md">
                                 <Link to="/buyer/cart">
                                     <FontAwesomeIcon icon={faCartShopping} />
@@ -136,6 +139,7 @@ const HeadingBar = () => {
                         </>
                     )}
                 </div>
+
             </div>
         </div>
     );

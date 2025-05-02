@@ -3,6 +3,8 @@ const { models } = require('../models');
 const sendGmailToUser = require('../utilities/sendGmail');
 const sequelize = require('sequelize');
 const OrderDetail = require('../models/OrderDetail');
+const { error } = require('console');
+const { get } = require('http');
 
 // FEATURES MANAGEMENT
 const sentAnnouncement = async (senderId, title, imageURL, script, options = {}) => {
@@ -21,6 +23,7 @@ const sentAnnouncement = async (senderId, title, imageURL, script, options = {})
 
 const getAllAnnouncements = async () => {
     return await models.Announcement.findAll({
+
         include: { model: models.User, as: 'sender' },
     });
 };
@@ -32,7 +35,11 @@ const editAnnouncementById = async (id, title, imageURL, script) => {
             return { error: 'Announcement not found' };
         }
 
-        await announcement.update({ title, imageURL, script });
+        await announcement.update({ 
+            title: title || announcement.title, 
+            imageURL: imageURL || announcement.imageURL, 
+            script: script || announcement.script
+        });
 
         return announcement;
     } catch (error) {
@@ -115,11 +122,15 @@ const approveShopById = async (id, options = {}) => {
             return { message: 'Shop is already active', shop };
         }
 
+        const sellerRole = await models.UserRole.create({
+            userId: shop.ownerId, roleId: 4
+        });
+
         const updatedShop = await shop.update({
             status: 'active'
         }, options);
 
-        return updatedShop;
+        return updatedShop, sellerRole;
     } catch (error) {
         console.error(error);
         return { error: 'Internal Server Error' };
@@ -258,9 +269,34 @@ const getTotalProductsByShopId = async (shopId) => {
 
 
 // PRODUCT MANAGEMENT
-const getAllProducts = async () => {
-    return await models.Product.findAll();
+const getProducts = async (products, req) => {
+    const allProducts = [];
+    for (const product of products) {
+        if (product.thumbnailURL) {
+            product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
+            product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
+        }
+        const categories = await models.ProductCategory.findAll({ where: { productId: product.id } });
+        const categoryNames = [];
+        for (const category of categories) {
+            const categoryData = await models.Category.findOne({ where: { id: category.categoryId } });
+            if (categoryData) {
+                categoryNames.push(categoryData.name);
+            }
+        }
+        const reviewProduct = await models.Review.findAll({ where: { productId: product.id }});
+        const totalRating = reviewProduct.reduce((acc, review) => acc + review.rating, 0);
+
+        allProducts.push({
+            ...product.toJSON(),
+            categories: categoryNames,
+            totalRating: totalRating / reviewProduct.length || 0,
+        });
+    }
+    return allProducts;
 }
+
+
 
 const getProductById = async (id) => {
     return await models.Product.findByPk(id);
@@ -464,7 +500,7 @@ module.exports = {
     getAverageRatingsByShopId,
     getTotalEvaluationsByShopId,
     getTotalProductsByShopId,
-    getAllProducts,
+    getProducts,
     getProductById,
     banProductById,
     unbanProductById,
@@ -476,5 +512,6 @@ module.exports = {
     getAllPromotions,
     getPromotionById,
     createPromotion,
-    deletePromotionById,
+    deletePromotionById
+    
 }

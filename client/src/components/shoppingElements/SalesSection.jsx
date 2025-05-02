@@ -5,7 +5,7 @@ import TitleSection from "../shares/TitleSection";
 import SecondaryButton from "../shares/SecondaryButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import axios from "axios";
+import { getAllProducts } from "../../api/guestAPI";
 
 const SalesSection = () => {
   const scrollRef = useRef(null);
@@ -14,6 +14,7 @@ const SalesSection = () => {
   const SCROLL_AMOUNT = CARD_WIDTH * CARDS_PER_VIEW;
 
   const [products, setProducts] = useState([]);
+  const [visibleProducts, setVisibleProducts] = useState(20);
 
   const scrollLeft = () => {
     if (scrollRef.current) {
@@ -28,15 +29,23 @@ const SalesSection = () => {
   };
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8080/seller/1/getProducts")
-      .then((res) => {
-        setProducts(res.data);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch products:", err);
-      });
+    const fetchProducts = async () => {
+      try {
+        const data = await getAllProducts();
+        setProducts(data.allProducts);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
   }, []);
+
+  const handleLoadMore = () => {
+    setVisibleProducts((prev) => prev + 20);
+  }
+
+  const visibleProductsList = products.slice(0, visibleProducts);
 
   return (
     <div className="container mx-auto px-4 py-4">
@@ -73,7 +82,7 @@ const SalesSection = () => {
               msOverflowStyle: "none",
             }}
           >
-            {products.map((product) => (
+            {visibleProductsList.map((product) => (
               <div
                 key={product.id}
                 className="scrollSnapAlign-start min-w-[250px] w-[250px]"
@@ -81,14 +90,15 @@ const SalesSection = () => {
                 <SalesCard
                   id={product.id.toString()}
                   productName={product.name}
-                  // Giá xạo tó :v
-                  salePrice={(Math.random() * 500 + 100).toFixed(0)}
-                  originalPrice={(Math.random() * 800 + 500).toFixed(0)}
-                  discountPercentage={Math.floor(Math.random() * 50) + 10}
-                  rating={Math.floor(Math.random() * 5) + 1}
-                  // Giá xạo tó :v
+                  salePrice={Math.floor(product.salePrice * 100 + product.price)}
+                  originalPrice={product.price}
+                  discountPercentage={product.salePrice * 100}
+                  // Not right, but for demo purpose
+                  rating={Math.floor(Math.random() * 5) + 1} 
                   reviewCount={Math.floor(Math.random() * 100)}
+                  // Not right, but for demo purpose
                   imageUrl={product.thumbnailURL}
+                  shopId={product.shopId}
                 />
               </div>
             ))}
@@ -96,9 +106,14 @@ const SalesSection = () => {
         </div>
       </div>
 
-      <SecondaryButton title="View All Products" />
+      {
+        visibleProducts < products.length && (
+          <div className="flex justify-center mt-4">
+            <SecondaryButton title="Load More" onClick={handleLoadMore} />
+          </div>
+        )}
     </div>
   );
-};
+}
 
 export default SalesSection;

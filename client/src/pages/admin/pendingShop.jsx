@@ -1,39 +1,57 @@
 import Sidebar from '../../components/admin/adminSidebar';
 import TitlePage from '../../components/shares/TitlePage';
+import { useEffect, useState } from 'react';
+import { getAllPendingShops, approveShop, rejectShop } from '../../api/adminAPI';
 // Main Pending Shops Page
 const PendingShops = () => {
 <link
   href="https://fonts.googleapis.com/icon?family=Material+Icons"
   rel="stylesheet"/>
-  const shops = [
-    {
-      id: 1,
-      name: "MiuMiuShop",
-      email: "123thnh@gmail.com",
-      phone: "0235162374",
-      address: "123 Green Street, District 1, Ho Chi Minh City, Vietnam",
-      bank: "MB Bank",
-      account: "12345654321",
-    },
-    {
-      id: 2,
-      name: "MiuMiu Shop",
-      email: "123thnh@gmail.com",
-      phone: "0235162374",
-      address: "123 Green Street, District 1, Ho Chi Minh City, Vietnam",
-      bank: "MB Bank",
-      account: "12345654321",
-    },
-    {
-      id: 3,
-      name: "MiuMiu Shop",
-      email: "123thnh@gmail.com",
-      phone: "0235162374",
-      address: "123 Green Street, District 1, Ho Chi Minh City, Vietnam",
-      bank: "MB Bank",
-      account: "12345654321",
-    },
-  ];
+  
+  const [shops, setShops] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        const response = await getAllPendingShops();
+        setShops(response);
+      } catch (error) {
+        console.error("Error fetching shops:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchShops();
+  }
+  , []);
+
+  const handleApprove = async (shopId) => {
+    try {
+      const response = await approveShop(shopId);
+      if (response) {
+        setShops(shops.filter(shop => shop.id !== shopId));
+      } else {
+        console.error("Error approving shop:", response);
+      }
+    } catch (error) {
+      console.error("Error approving shop:", error);
+    }
+  }
+  
+  const handleReject = async (shopId) => {
+    try {
+      const response = await rejectShop(shopId);
+      if (response) {
+        setShops(shops.filter(shop => shop.id !== shopId));
+      } else {
+        console.error("Error rejecting shop:", response);
+      }
+    } catch (error) {
+      console.error("Error rejecting shop:", error);
+    }
+  }
 
   return (
     <div>
@@ -71,11 +89,13 @@ const PendingShops = () => {
                   <td className="p-2">{shop.email}</td>
                   <td className="p-2">{shop.phone}</td>
                   <td className="p-2">{shop.address}</td>
-                  <td className="p-2">{shop.bank}</td>
-                  <td className="p-2">{shop.account}</td>
+                  <td className="p-2">{shop.bankName}</td>
+                  <td className="p-2">{shop.bankAccount}</td>
                   <td className="p-2">
                     <div className="flex flex-col gap-2">
-                        <button className="flex items-center justify-center bg-[#E6F4EA] text-[#34A853] border border-[#34A853] px-2 py-1 rounded">
+                        <button
+                        onClick={() => handleApprove(shop.id)}
+                        className="flex items-center justify-center bg-[#E6F4EA] text-[#34A853] border border-[#34A853] px-2 py-1 rounded">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 mr-1"
@@ -92,7 +112,9 @@ const PendingShops = () => {
                         </svg>
                         Approve
                         </button>
-                        <button className="flex items-center justify-center bg-[#FCE8E6] text-[#EA4335] border border-[#EA4335] px-2 py-1 rounded">
+                        <button 
+                        onClick={() => handleReject(shop.id)}
+                        className="flex items-center justify-center bg-[#FCE8E6] text-[#EA4335] border border-[#EA4335] px-2 py-1 rounded">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 mr-1"

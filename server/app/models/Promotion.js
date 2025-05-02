@@ -18,9 +18,15 @@ Promotion.init({
             key: 'id'
         }
     },
-    imageURL: {
+    title: {
         type: DataTypes.STRING,
         allowNull: false,
+        validate: {
+            notEmpty: true
+        }
+      },
+    imageURL: {
+        type: DataTypes.STRING,
     },
     status: {
         type: DataTypes.ENUM('show', 'hide', 'ban','isDeleted'),

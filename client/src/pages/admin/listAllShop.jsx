@@ -3,59 +3,33 @@ import ShopCard from '../../components/admin/shopCard';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import TitlePage from '../../components/shares/TitlePage';
+import { getAllShops, banShop } from '../../api/adminAPI';
 
 
 const ListAllShops = () => {
-    // Sample shops data
-    //   const shops = [
-    //     {
-    //       id: '1234567892',
-    //       name: 'Miumiu Store',
-    //       image: '/path-to-cat-image.jpg', // Replace with actual image path
-    //       evaluations: 12.6,
-    //       products: 102,
-    //       rating: 5
-    //     },
-    //     {
-    //       id: '1234567892',
-    //       name: 'Miumiu Store',
-    //       image: '/path-to-cat-image.jpg', // Replace with actual image path
-    //       evaluations: 12.6,
-    //       products: 102,
-    //       rating: 5
-    //     },
-    //     {
-    //       id: '1234567892',
-    //       name: 'Miumiu Store',
-    //       image: '/path-to-cat-image.jpg', // Replace with actual image path
-    //       evaluations: 12.6,
-    //       products: 102,
-    //       rating: 5
-    //     },
-    //     {
-    //       id: '1234567892',
-    //       name: 'Miumiu Store',
-    //       image: '/path-to-cat-image.jpg', // Replace with actual image path
-    //       evaluations: 12.6,
-    //       products: 102,
-    //       rating: 5
-    //     }
-    //   ];
+    
     const [shops, setShops] = useState([]);
-
-    const fetchShops = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/seller/getAllShop');
-            setShops(response.data);
-            console.error('OKKKKKKKKKKKKKKKKKKKKKKK');
-        } catch (error) {
-            console.error('Error fetching shops:', error);
-        }
-    };
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchShops = async () => {
+            try {
+                const response = await getAllShops();
+                setShops(response);
+            } catch (error) {
+                console.error("Error fetching shops:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchShops();
-    }, []);
+    }
+    , []);
+
+    const handleBanSuccess = (shopId) => {
+        setShops(prev => prev.filter(shop => shop.id !== shopId));
+    }
 
     return (
         <div>
@@ -70,7 +44,7 @@ const ListAllShops = () => {
 
                     <div className="bg-white rounded-lg shadow p-6">
                         {shops.map((shop, index) => (
-                            <ShopCard key={index} shop={shop} />
+                            <ShopCard key={index} shop={shop} onBanSuccess={handleBanSuccess} />
                         ))}
                     </div>
                 </div>

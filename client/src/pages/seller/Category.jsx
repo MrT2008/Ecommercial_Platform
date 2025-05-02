@@ -1,17 +1,34 @@
 import Sidebar from '../../components/seller/sellerSidebar';
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { getSellerId } from "../../api/sellerAPI";
 
 const Category = () => {
-    const [categories, setCategories] = useState([
-      "Clothes",
-      "Health",
-      "Electronic",
-      "Footwear",
-    ]);
+    const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState("");
+    const [shopId, setShopId] = useState(null);
+  
+    useEffect(() => {
+      const fetchCategories = async () => {
+        try {
+          const userId = getSellerId(); 
+          const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
+          const shopData = await shopRes.json();
+          const shopId = shopData.data.shop.id;
+          setShopId(shopId);
+  
+          const res = await fetch(`http://localhost:8080/seller/${shopId}/getCategory`);
+          const data = await res.json();
+          setCategories(data.categories || []);
+        } catch (err) {
+          console.error("Lỗi khi fetch categories:", err);
+        }
+      };
+  
+      fetchCategories();
+    }, []);
   
     const handleAddCategory = () => {
       if (newCategory.trim()) {
@@ -68,7 +85,7 @@ const Category = () => {
                             className={`${index % 2 === 0 ? "bg-[#F7F6FF]" : "bg-white"} text-center`}
                         >
                             <td className="p-2">{index + 1}</td>
-                            <td className="p-2">{category}</td>
+                            <td className="p-2">{category.name}</td>
                             <td className="p-2">
                             <div className="flex items-center justify-center gap-2">
                                 <button
