@@ -6,7 +6,7 @@ const HomePage = () => {
     return (
       <div className=" mx-auto text-center p-8">
         <Carosel />
-        <SalesSection />
+        {/* <SalesSection /> */}
         <OurProductsSection /> 
       </div>
     );

@@ -1,29 +1,33 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../../components/account/accountSidebar";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import AddNewAddressDialog from "../../pages/account/AddNewAddressDialog";
 
 const AccountAddress = () => {
-  const [addresses, setAddresses] = useState([
-    {
-      name: "Nguyen Kieu Phuong",
-      phone: "+84 987777666",
-      address:
-        "Đường Trần Đại Nghĩa, Linh Xuân, Thủ Đức, Phường Linh Xuân, Thành Phố Thủ Đức, TP Hồ Chí Minh",
-      isDefault: true,
-    },
-    {
-      name: "Nguyen Kieu Phuong",
-      phone: "+84 987777666",
-      address:
-        "Đường Trần Đại Nghĩa, Linh Xuân, Thủ Đức, Phường Linh Xuân, Thành Phố Thủ Đức, TP Hồ Chí Minh",
-      isDefault: false,
-    },
-  ]);
-
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userId = storedUser?.id;
+  const [addresses, setAddresses] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAddress, setEditingAddress] = useState(null); // null = add mode
+  const [editingAddress, setEditingAddress] = useState(null);
 
+  useEffect(() => {
+    fetch(`http://localhost:8080/buyer/${userId}/shippingInfo`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.userShippingInfo) {
+          const formatted = data.userShippingInfo.map((item) => ({
+            name: item.receiverName,
+            phone: item.phone,
+            address: item.address,
+            isDefault: item.status === "active",
+          }));
+          setAddresses(formatted);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch shipping info:", err);
+      });
+  }, [userId]);
   const openAddDialog = () => {
     setEditingAddress(null);
     setIsDialogOpen(true);

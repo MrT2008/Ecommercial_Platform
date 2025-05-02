@@ -1,26 +1,32 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../../components/account/accountSidebar";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import AddNewCardDialog from "../../pages/account/AddNewCardDialog";
 
 const AccountAddress = () => {
-  const [cards, setCards] = useState([
-    {
-      name: "Nguyen Kieu Phuong",
-      number: "987777666",
-      bank: "MB Bank",
-      isDefault: true,
-    },
-    {
-      name: "Nguyen Kieu Phuong",
-      number: "123456789",
-      bank: "TP Bank",
-      isDefault: false,
-    },
-  ]);
-
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userId = storedUser?.id;
+  const [cards, setCards] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCard, setEditingCard] = useState(null); // null = add mode
+  const [editingCard, setEditingCard] = useState(null);
+
+  // 📦 Fetch API khi load page
+  useEffect(() => {
+    fetch(`http://localhost:8080/buyer/${userId}/payment/`)
+      .then((res) => res.json())
+      .then((data) => {
+        const serverCards = data.paymentMethodList.map((item) => ({
+          name: "Card Holder", // Không có từ API nên có thể cho nhập sau
+          number: item.bankAccountNumber,
+          bank: item.bankName,
+          isDefault: item.inUsed,
+        }));
+        setCards(serverCards);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch payment methods:", err);
+      });
+  }, [userId]);
 
   // Mở dialog thêm mới
   const openAddDialog = () => {
