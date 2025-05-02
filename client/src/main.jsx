@@ -3,9 +3,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { GoogleOAuthProvider } from '@react-oauth/google'
-import { AuthProvider } from './hooks/useAuth'
+import { AuthProvider } from './hooks/AuthContext'
 
-const CLIENT_ID = "538664650648-rmfraegli8gel23fa1mj4a9o092l9s69.apps.googleusercontent.com"
+const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

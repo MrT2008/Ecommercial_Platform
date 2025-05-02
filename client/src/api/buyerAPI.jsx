@@ -35,3 +35,14 @@ export const getCartById = async (buyerID) => {
     return null;
   }
 }
+
+export const getBuyerProfile = async(buyerID) => {
+  try {
+    const response = await api.get(`buyer/${buyerID}/viewProfile`);
+    return response.data;
+  } catch (error) {
+    console.error("Error: ", error);
+    return null;
+  }
+}
+

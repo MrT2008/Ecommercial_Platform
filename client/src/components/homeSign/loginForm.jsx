@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import {useAuth } from '../../hooks/useAuth';
+import { useContext } from "react";
+import { AuthContext } from "../../hooks/AuthContext";
 
 import Logo from '../shares/logo';
 import Button from '../shares/Button';
@@ -13,7 +14,7 @@ const loginForm = () => {
     const [userEmail, setUserEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const { login, loginWithGoogle, session, error, user } = useAuth();
+    const { login, loginWithGoogle, session, error, user } = useContext(AuthContext);
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 

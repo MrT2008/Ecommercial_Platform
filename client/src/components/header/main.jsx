@@ -1,16 +1,17 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import Logo from "../shares/logo";
 import SearchBar from "../searchBar";
 import Button from "../shares/Button";
-import { useAuth } from "../../hooks/useAuth";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell, faUser} from "@fortawesome/free-regular-svg-icons";
 import { faCartShopping, faRightFromBracket, faShop } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from '../shares/NavBar';
+import { AuthContext } from '../../hooks/AuthContext';
 
 const HeadingBar = () => {
-    const { user, logout } = useAuth();
+    const { user, logout } = useContext(AuthContext);
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
     const navigate = useNavigate();

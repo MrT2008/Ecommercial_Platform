@@ -1,5 +1,4 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { useAuth } from './hooks/useAuth';
 import "./index.css";
 import MainLayout from "./layouts/MainLayout";
 import AccountProfile from "./pages/account/AccountProfile";
@@ -31,13 +30,15 @@ import CompletedOrders from "./pages/account/CompletedOrders";
 import Cancellations from "./pages/account/Cancellations";
 import AdminBanner from "./pages/admin/adminBanner";
 import Dashboard from "./pages/admin/adminDashboard";
+import { AuthContext } from "./hooks/AuthContext";
+import { useContext } from "react";
 import ModeratorRole from "./pages/admin/ModeratorRole";
 import PrivacyPolicy from "./pages/quickLink/PrivacyPolicy";
 import TermOfUse from "./pages/quickLink/TermOfUse";
 import FAQ from "./pages/quickLink/FAQ";
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useContext(AuthContext);
   if (loading) return null; // or a loading spinner
   const isBuyer = user?.roles.includes("buyer");
   const isSeller = user?.roles.includes("seller");

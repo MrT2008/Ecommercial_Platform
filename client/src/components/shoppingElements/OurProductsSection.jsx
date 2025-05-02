@@ -9,7 +9,7 @@ const OurProductsSection = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/seller/1/getProducts")
+      .get(`${import.meta.env.VITE_HOST_POST}/seller/1/getProducts`)
       .then((res) => {
         setProducts(res.data);
       })

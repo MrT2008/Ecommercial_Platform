@@ -8,12 +8,15 @@ import Button from '../components/shares/Button';
 import ReviewList from '../components/shoppingElements/ReviewList.jsx';
 import { getProductById } from '../api/guestAPI.jsx';
 import { addToCart } from '../api/buyerAPI.jsx';
+import { useContext } from "react";
+import { AuthContext } from '../hooks/AuthContext.js';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 
 const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
-    const { user, loading } = useAuth(); // Assuming you have a useAuth hook to get user info
+    const { user, loading } = useContext(AuthContext); // Assuming you have a useAuth hook to get user info
     const navigate = useNavigate();
 
     if (loading) return null; // Show loading state if needed

@@ -2,7 +2,8 @@ import React from "react";
 import Button from "../shares/Button";
 import { useState } from "react";
 import { createShop } from "../../api/buyerAPI";
-import { useAuth } from "../../hooks/useAuth";
+import { useContext } from "react";
+import { AuthContext } from "../../hooks/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const BecomeSellerForm = () => {
@@ -16,7 +17,7 @@ const BecomeSellerForm = () => {
         accountNumber: "",
         streetAddress: ""
     });
-    const { user } = useAuth(); 
+    const { user } = useContext(AuthContext); 
     const handleCreateShop = async (e) => {
         e.preventDefault();
         const buyerID = user.id;

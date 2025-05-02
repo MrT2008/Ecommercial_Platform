@@ -1,8 +1,9 @@
-import { useAuth } from '../../hooks/useAuth';
+import { useContext } from "react";
+import { AuthContext } from "../../hooks/AuthContext";
 import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
   const location = useLocation();
   const roles = user?.roles || [];
 
