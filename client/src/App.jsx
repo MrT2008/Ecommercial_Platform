@@ -65,9 +65,10 @@ function App() {
         </Route>
         
         {/* Private routes for both buyers and sellers */}
-        {/* <Route element={<PrivateRoute isAllowed={ isBuyer || isSeller } redirectPath="/login"><MainLayout /></PrivateRoute>}>
+        <Route element={<PrivateRoute isAllowed={ isBuyer || isSeller } redirectPath="/login"><MainLayout /></PrivateRoute>}>
           <Route path="/account" element={<AccountProfile />} />
-          <Route path="/become-seller" element={<BecomeSeller/>} /> */}
+          <Route path="/become-seller" element={<BecomeSeller/>} />
+        </Route>
 
         <Route path="/seller" element={<MainLayout />}>
           <Route path="category" element={<Category />} />
@@ -137,10 +138,10 @@ function App() {
           </Route>
           {/* Add admin-specific routes here */}
           {/* Private routes for both buyers and sellers */}
-          <Route element={<PrivateRoute isAllowed={isBuyer || isSeller} redirectPath="/login"><MainLayout /></PrivateRoute>}>
+          {/* <Route element={<PrivateRoute isAllowed={isBuyer || isSeller} redirectPath="/login"><MainLayout /></PrivateRoute>}>
             <Route path="/account" element={<AccountProfile />} />
             <Route path="/become-seller" element={<BecomeSeller />} />
-          </Route>
+          </Route> */}
         </Route>
       </Routes>
     </Router>
