@@ -1,24 +1,54 @@
 import Sidebar from '../../components/seller/sellerSidebar';
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import SecondaryButton from "../../components/shares/SecondaryButton";
-import EditInfShopDialog from "../seller/EditShopInfDialog"; // Import your dialog component
+import EditInfShopDialog from "../seller/EditShopInfDialog";
+import { getSellerId, getShopIdFromUserId } from "../../api/sellerAPI";
 
 const ShopInformation = () => {
-    const [shopInfo, setShopInfo] = useState({
-        name: "MiuMiu Store",
-        email: "ntptmiumiu12345@gmail.com",
-        phone: "02343256789",
-        address: "Tran Dai Nghia Street, Thu Duc, Linh Xuan Ward, Thu Duc City, Ho Chi Minh City",
-        bankHolder: "Nguyen Kieu Phuong",
-        bank: "Vietcombank: 78******86",
-        image: "/images/fashion-store-logo.png"
-    });
 
-    const [image, setImage] = useState(shopInfo.image);
+    const [shopInfo, setShopInfo] = useState({});
+    const [image, setImage] = useState("/images/fashion-store-logo.png");
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    // const [image, setImage] = useState(shopInfo.image);
+    // const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State for controlling dialog visibility
 
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State for controlling dialog visibility
+    useEffect(() => {
+        const fetchShopInfo = async () => {
+            try {
+                const userId = getSellerId();
+                console.log(`Đang fetch shop cho user ID: ${userId}`);
+
+                const shopId = await getShopIdFromUserId(userId);
+                console.log(`Shop ID: ${shopId}`);
+
+                const res = await fetch(`http://localhost:8080/seller/${shopId}/getInformation`);
+                if (!res.ok) {
+                    throw new Error(`Không thể lấy thông tin shop: ${res.status}`);
+                }
+
+                const data = await res.json();
+                if (data.shop) {
+                    setShopInfo(data.shop);
+                    setImage(data.shop.avatarUrl || "/images/fashion-store-logo.png");
+                } else {
+                    throw new Error("Dữ liệu shop không tồn tại trong response");
+                }
+
+                // setError(null);
+            } catch (err) {
+                console.error("Không thể fetch thông tin shop:", err);
+                // setError("Không thể tải thông tin shop. Vui lòng thử lại sau.");
+                setShopInfo({});
+            }
+            // finally {
+            //     setIsLoading(false);
+            // }
+        };
+
+        fetchShopInfo();
+    }, []);
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -47,7 +77,7 @@ const ShopInformation = () => {
                     <div className="flex">
                         {/* Left Side: Shop Info */}
                         <div className="flex-1 pr-6 relative">
-                            <a 
+                            <a
                                 href="#"
                                 className="absolute right-0 top-0 text-blue-700 text-sm"
                                 onClick={() => setIsEditDialogOpen(true)} // Open dialog when clicked
@@ -75,8 +105,8 @@ const ShopInformation = () => {
                                 <div className="flex">
                                     <div className="w-40 text-[#666666] font-medium">Bank Account</div>
                                     <div>
-                                        <div>{shopInfo.bankHolder}</div>
-                                        <div>{shopInfo.bank}</div>
+                                        <div>{shopInfo.bankName}</div>
+                                        <div>{shopInfo.bankAccount}</div>
                                     </div>
                                 </div>
                             </div>
@@ -117,11 +147,11 @@ const ShopInformation = () => {
             </div>
 
             {/* EditInfShopDialog - Conditional rendering based on dialog state */}
-            <EditInfShopDialog 
-                isOpen={isEditDialogOpen} 
-                onClose={() => setIsEditDialogOpen(false)} 
-                onSave={handleSaveShopInfo} 
-                shop={shopInfo} 
+            <EditInfShopDialog
+                isOpen={isEditDialogOpen}
+                onClose={() => setIsEditDialogOpen(false)}
+                onSave={handleSaveShopInfo}
+                shop={shopInfo}
             />
         </div>
     );

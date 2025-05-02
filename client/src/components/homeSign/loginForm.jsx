@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useContext } from "react";
@@ -6,7 +6,6 @@ import { AuthContext } from "../../hooks/AuthContext";
 
 import Logo from '../shares/logo';
 import Button from '../shares/Button';
-import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';

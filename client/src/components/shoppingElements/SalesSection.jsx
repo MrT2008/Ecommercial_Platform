@@ -32,7 +32,7 @@ const SalesSection = () => {
     const fetchProducts = async () => {
       try {
         const data = await getAllProducts();
-        setProducts(data.response);
+        setProducts(data.allProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
       }

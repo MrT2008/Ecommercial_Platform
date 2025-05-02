@@ -1,30 +1,51 @@
 import Sidebar from '../../components/seller/sellerSidebar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getSellerId, getShopIdFromUserId } from "../../api/sellerAPI";
 
 const SellerDashboard = () => {
-  const [soldProducts, setSoldProducts] = useState([
-    {
-      id: 1,
-      name: 'Hat',
-      price: 4.95,
-      sold: 33,
-      image: '/path-to-your-image/hat.png', // sửa lại path cho đúng nếu cần
-    },
-    {
-      id: 2,
-      name: 'Hat',
-      price: 4.95,
-      sold: 33,
-      image: '/path-to-your-image/hat.png',
-    },
-    {
-      id: 3,
-      name: 'Hat',
-      price: 4.95,
-      sold: 33,
-      image: '/path-to-your-image/hat.png',
-    },
-  ]);
+  const [pendingOrders, setPendingOrders] = useState(0);
+  const [processingOrders, setProcessingOrders] = useState(0);
+  const [cancelledOrders, setCancelledOrders] = useState(0);
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [soldProducts, setSoldProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const userId = getSellerId();
+                console.log(`Đang fetch shop cho user ID: ${userId}`);
+
+                const shopId = await getShopIdFromUserId(userId);
+                console.log(`Shop ID: ${shopId}`);
+        const res = await fetch(`http://localhost:8080/seller/${shopId}/getDashboard`);
+        const data = await res.json();
+
+        setPendingOrders(data.pendingOrders);
+        setProcessingOrders(data.processingOrders);
+        setCancelledOrders(data.cancelledOrders);
+        setTotalSales(data.totalSales);
+        setTotalOrders(data.totalOrders);
+
+        // lọc các sản phẩm còn hoạt động và đã bán ít nhất 1
+        const sold = data.products
+          .filter((p) => p.status === 'active' && p.saled > 0)
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            price: parseFloat(p.salePrice || p.price),
+            sold: p.saled,
+            image: `/${p.thumbnailURL}`, // sửa path nếu cần
+          }));
+
+        setSoldProducts(sold);
+      } catch (error) {
+        console.error('Error fetching dashboard:', error);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
 
   return (
     <div className="flex">
@@ -41,16 +62,16 @@ const SellerDashboard = () => {
             <h3 className="text-lg font-semibold mb-4 text-[#020202]">To do list</h3>
             <div className="flex justify-between text-center">
               <div>
-                <p className="text-xl font-bold text-[#000282]">40</p>
-                <p className="text-gray-600 text-sm">Pending goods</p>
+                <p className="text-xl font-bold text-[#000282]">{pendingOrders}</p>
+                <p className="text-gray-600 text-sm">Pending Orders</p>
               </div>
               <div>
-                <p className="text-xl font-bold text-[#000282]">100</p>
-                <p className="text-gray-600 text-sm">Processed</p>
+                <p className="text-xl font-bold text-[#000282]">{processingOrders}</p>
+                <p className="text-gray-600 text-sm">Processing Orders</p>
               </div>
               <div>
-                <p className="text-xl font-bold text-[#000282]">10</p>
-                <p className="text-gray-600 text-sm">Canceled</p>
+                <p className="text-xl font-bold text-[#000282]">{cancelledOrders}</p>
+                <p className="text-gray-600 text-sm">Canceled Orders</p>
               </div>
             </div>
           </div>
@@ -60,11 +81,11 @@ const SellerDashboard = () => {
             <h3 className="text-lg font-semibold mb-4 text-[#020202]">Sales Analysis</h3>
             <div className="flex justify-between text-center">
               <div>
-                <p className="text-xl font-bold text-[#000282]">20,000,000</p>
+                <p className="text-xl font-bold text-[#000282]">{totalSales}</p>
                 <p className="text-gray-600 text-sm">Total Sales</p>
               </div>
               <div>
-                <p className="text-xl font-bold text-[#000282]">100</p>
+                <p className="text-xl font-bold text-[#000282]">{totalOrders}</p>
                 <p className="text-gray-600 text-sm">Total Orders</p>
               </div>
             </div>

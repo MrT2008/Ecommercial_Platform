@@ -44,6 +44,14 @@ const Sidebar = () => {
             </Link>
           </li>
         </ul>
+        <h2 className="text-lg font-bold mb-4">Role Management</h2>
+        <ul className="mb-6">
+          <li className="mb-2">
+            <a href="/admin/moderator-role" className={`${isActive('/admin/moderator-role') ? 'active' : ''} hover:text-[#FFA50B] px-4`}>
+              Moderator Role
+            </a>
+          </li>
+        </ul>
       </div>
     );
   };

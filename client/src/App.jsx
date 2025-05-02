@@ -9,7 +9,8 @@ import PendingShops from "./pages/admin/pendingShop";
 import Signup from "./pages/signup";
 import BannedShops from "./pages/admin/bannedShop";
 import AnnouncementsPage from "./pages/admin/announcementPage";
-import ProductDetails from "./pages/ProductDetails"; 
+import ProductDetails from "./pages/ProductDetails";
+import ShopPage from "./pages/ShopPage";
 import Category from "./pages/seller/Category";
 import AllProduct from "./pages/seller/AllProduct";
 import ShopInformation from "./pages/seller/ShopInformation";
@@ -18,8 +19,6 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import BecomeSeller from "./pages/becomeSeller";
 import PrivateRoute from './routes/privateRoute';
 import AllOrder from "./pages/seller/AllOrder";
-import ShopPage from "./pages/ShopPage";
-import axios from 'axios';
 import Cart from './pages/buyer/Cart'
 import CheckOut from './pages/buyer/CheckOut';
 import AccountAddress from "./pages/account/AccountAddress";
@@ -33,6 +32,10 @@ import AdminBanner from "./pages/admin/adminBanner";
 import Dashboard from "./pages/admin/adminDashboard";
 import { AuthContext } from "./hooks/AuthContext";
 import { useContext } from "react";
+import ModeratorRole from "./pages/admin/ModeratorRole";
+import PrivacyPolicy from "./pages/quickLink/PrivacyPolicy";
+import TermOfUse from "./pages/quickLink/TermOfUse";
+import FAQ from "./pages/quickLink/FAQ";
 
 function App() {
   const { user, loading } = useContext(AuthContext);
@@ -53,7 +56,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/product/:id" element={<ProductDetails />} />
-          {/* http://localhost:5173/product/1 */}
+          <Route path="/shop/:id" element={<ShopPage />} /> {/* New route for shop page with ID parameter */}
         </Route>
           
         <Route path="/buyer" element={<MainLayout />}>
@@ -62,13 +65,11 @@ function App() {
         </Route>
         
         {/* Private routes for both buyers and sellers */}
-        <Route element={<PrivateRoute isAllowed={ isBuyer } redirectPath="/login"><MainLayout /></PrivateRoute>}>
-          <Route path="/account" element={<AccountProfile />} />
-        </Route>
-        {/* Only buyer can access */}
 
-        <Route element={<PrivateRoute isAllowed={ userRoles?.length === 1 && isBuyer } redirectPath="/login"><MainLayout /></PrivateRoute>}>
-          <Route path="/become-seller" element={<BecomeSeller />} />
+        <Route element={<PrivateRoute isAllowed={ isBuyer || isSeller } redirectPath="/login"><MainLayout /></PrivateRoute>}>
+          <Route path="/account" element={<AccountProfile />} />
+          <Route path="/become-seller" element={<BecomeSeller/>} />
+
         </Route>
 
         <Route path="/seller" element={<MainLayout />}>
@@ -90,6 +91,15 @@ function App() {
           <Route path="cancellations" element={<Cancellations />} />
         </Route>
 
+        <Route path="/admin" element={<MainLayout />}>
+          <Route path="admin-dashboard" element={<Dashboard />} />
+          <Route path="pending-shops" element={<PendingShops />} />
+          <Route path="list-shops" element={<ListAllShops />} />
+          <Route path="banned-shops" element={<BannedShops />} />
+          <Route path="announcements" element={<AnnouncementsPage />} />
+          <Route path="admin-banner" element={<AdminBanner />} />
+          <Route path="moderator-role" element={<ModeratorRole />} />
+        </Route>
         {/* Private routes for sellers */}
         {/* <Route element={<PrivateRoute isAllowed={isSeller} redirectPath="/login"><MainLayout /></PrivateRoute>}>
           <Route path="/seller">
@@ -103,7 +113,11 @@ function App() {
         {/* Add seller-specific routes here */}
         {/* </Route> */}
 
-
+        <Route path="/link" element={<MainLayout />}>
+          <Route path="privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="term-of-use" element={<TermOfUse />} />
+          <Route path="faq" element={<FAQ />} />
+        </Route>
 
         {/* Protected routes */}
         <Route element={<MainLayout />}>
