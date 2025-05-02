@@ -33,6 +33,9 @@ import Cancellations from "./pages/account/Cancellations";
 import AdminBanner from "./pages/admin/adminBanner";
 import Dashboard from "./pages/admin/adminDashboard";
 import ModeratorRole from "./pages/admin/ModeratorRole";
+import PrivacyPolicy from "./pages/quickLink/PrivacyPolicy";
+import TermOfUse from "./pages/quickLink/TermOfUse";
+import FAQ from "./pages/quickLink/FAQ";
 
 function App() {
   const { user, loading } = useAuth();
@@ -107,7 +110,11 @@ function App() {
         {/* Add seller-specific routes here */}
         {/* </Route> */}
 
-
+        <Route path="/link" element={<MainLayout />}>
+          <Route path="privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="term-of-use" element={<TermOfUse />} />
+          <Route path="faq" element={<FAQ />} />
+        </Route>
 
         {/* Protected routes */}
         <Route element={<MainLayout />}>
