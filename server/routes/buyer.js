@@ -15,10 +15,12 @@ router.put('/:buyerId/payment/remove', BuyerController.removePaymentMethod) //.
 //cart
 router.post('/:buyerId/product/addToCart', BuyerController.addProductToCart) //.
 router.get('/:buyerId/cart', BuyerController.viewCart) //.
+router.put('/:buyerId/cart/update/', BuyerController.updateCart) //.
 router.put('/:buyerId/cart/remove/', BuyerController.removeProductFromCart) //.
 
 //Checkout
 router.post('/:buyerId/checkout', BuyerController.proceedWithCheckout) //.
+router.get('/:buyerId/order/:status', BuyerController.viewAllOrderByStatus) //.
 
 //Shipping Information
 router.post('/:buyerId/shippingInfo', BuyerController.addShippingInfo) //. 

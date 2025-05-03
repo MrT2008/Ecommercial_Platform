@@ -300,6 +300,37 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     };
+    updateCart = async (req, res) => {
+        try {
+            const {buyerId} = req.params;
+            const {productId, quantity} = req.body;
+
+            const productInCart = await models.Cart.findOne({
+                where: {
+                    userId: buyerId,
+                    productId: productId
+                }
+            })
+            const quantityBeforeUpdate = productInCart.quantity
+
+            if (!productInCart) {
+                return res.status(404).json({ error: 'Product not found in cart' });
+            }
+
+            await productInCart.update({
+                quantity: quantity
+            })
+
+            const productToBeUpdated = await models.Product.findByPk(productId)
+            await productToBeUpdated.update({
+                stock: productToBeUpdated.stock + quantityBeforeUpdate - quantity
+            })
+            return res.status(200).json({ message: 'Update cart sucessfully', productInCart });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
 
     removeProductFromCart = async (req, res) => {
         try {
@@ -377,7 +408,7 @@ class BuyerController {
         const t = await models.Announcement.sequelize.transaction();
         try {
             const {buyerId} = req.params
-            const {paymentMethod} = req.body
+            const {paymentMethod, productId} = req.body
             let payment = {}
             let transactionPaymentType = ""
             if (paymentMethod.toLowerCase() === "bank") {
@@ -419,6 +450,7 @@ class BuyerController {
             const cartItems = await models.Cart.findAll({
                 where: {
                     userId: buyerId,
+                    productId: productId,
                     isDeleted: false
                 }
             })
@@ -426,15 +458,9 @@ class BuyerController {
                 await t.rollback();
                 return res.status(404).json({ error: 'No product in cart to proceed' });
             }
-            await models.Order.create({
+            const orderJustCreated = await models.Order.create({
                 buyerId: buyerId,
                 totalPrice: 0
-            })
-            const orderJustCreated = await models.Order.findOne({
-                where: {
-                    buyerId: buyerId,
-                },
-                order: [ [ 'createdAt', 'DESC' ]]
             })
             console.log("abcd")
             let priceTotal = 0
@@ -488,7 +514,8 @@ class BuyerController {
                     receiverName: user_shipping_info.receiverName,
                     address: user_shipping_info.address,
                     phone: user_shipping_info.phone
-                }
+                },
+                newTransaction
             })
         } catch (error) {
             await t.rollback();
@@ -496,7 +523,51 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
-    
+    viewAllOrderByStatus = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            const ordersStatus = req.params.status
+            const ordersList = await models.Order.findAll({
+                where: {
+                    buyerId: buyerId,
+                    status: ordersStatus
+                },
+            })
+            if (!ordersList) {
+                return res.status(404).json({ error: 'No orders found' });
+            }
+            
+            const orderList = []
+            for (const ordersItem of ordersList) {
+                const ordersDetail = await models.OrderDetail.findAll({where: {orderId: ordersItem.id}})
+                const productList = []
+                for (const order of ordersDetail) {
+                    const product = await models.Product.findByPk(order.productId)
+                    const shop = await models.Shop.findOne({ where: {id: order.shopId}})
+                    if (!product) {
+                        return res.status(404).json({ error: 'Not found product in orders'});
+                    }
+                    productList.push({
+                        ...product.toJSON(),
+                        quantity: order.quantity,
+                        shopName: shop.name,
+                    })
+                }
+                orderList.push({
+                    orderId: ordersItem.id,
+                    orderStatus: ordersItem.status,
+                    productList: productList,
+                    totalPrice: ordersItem.priceAtPurchase
+                })
+            }
+            return res.status(200).json({message: 'Successfully retrieve orders list', orderList})
+        }
+        catch (error) {
+            console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
     addShippingInfo = async (req, res) => {
         try {
             const {buyerId} = req.params
