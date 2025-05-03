@@ -385,11 +385,15 @@ class BuyerController {
                 if (!shop) {
                     return  res.status(400).json({ error: 'failed to find shop' });
                 }
+                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/');
                 const cartItem = {
                     shopName: shop.name,
+                    shopId: product.shopId,
                     userId: item.userId,
                     productId: item.productId,
                     productName: product.name,
+                    productthumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL }`,
+                    productPrice: product.salePrice,
                     quantity: item.quantity
                 }
                 cart[`product_${item_index}`] = cartItem
@@ -403,7 +407,6 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
-
     proceedWithCheckout = async (req, res) => {
         const t = await models.Announcement.sequelize.transaction();
         try {
