@@ -61,10 +61,41 @@ const ShopInformation = () => {
         }
     };
 
-    const handleSaveShopInfo = (updatedShopInfo) => {
-        setShopInfo(updatedShopInfo); // Update the shop info when saved
-        setIsEditDialogOpen(false); // Close the dialog after saving
+    // const handleSaveShopInfo = (updatedShopInfo) => {
+    //     setShopInfo(updatedShopInfo); // Update the shop info when saved
+    //     setIsEditDialogOpen(false); // Close the dialog after saving
+    // };
+    const handleSaveShopInfo = async (updatedShopInfo) => {
+        try {
+            const userId = getSellerId();
+            console.log(`Đang fetch shop cho user ID: ${userId}`);
+
+            const shopId = await getShopIdFromUserId(userId);
+            console.log(`Shop ID: ${shopId}`);
+
+            // Gửi POST request lên server
+            const response = await fetch(`http://localhost:8080/seller/${shopId}/updateInformation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedShopInfo),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Cập nhật thông tin thất bại');
+            }
+    
+            const result = await response.json();
+    
+            // Cập nhật lại UI
+            setShopInfo(result.shop);  // Hoặc updatedShopInfo nếu backend không trả về
+            setIsEditDialogOpen(false); // Đóng dialog
+        } catch (error) {
+            console.error("Lỗi khi cập nhật shop:", error);
+        }
     };
+    
 
     return (
         <div className="flex">
@@ -103,9 +134,14 @@ const ShopInformation = () => {
                                     <div>{shopInfo.address}</div>
                                 </div>
                                 <div className="flex">
-                                    <div className="w-40 text-[#666666] font-medium">Bank Account</div>
+                                    <div className="w-40 text-[#666666] font-medium">Bank Name</div>
                                     <div>
                                         <div>{shopInfo.bankName}</div>
+                                    </div>
+                                </div>
+                                <div className="flex">
+                                    <div className="w-40 text-[#666666] font-medium">Bank Account</div>
+                                    <div>
                                         <div>{shopInfo.bankAccount}</div>
                                     </div>
                                 </div>
