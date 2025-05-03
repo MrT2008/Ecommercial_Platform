@@ -1,6 +1,6 @@
 import "/src/styles/global.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart } from "@fortawesome/free-solid-svg-icons";
+import { faCartPlus } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,9 +33,9 @@ const ProductCard = ({
     navigate(`/product/${id}`);
   };
 
-  const handleWishlistClick = (e) => {
+  const handleAddToCart = (e) => {
     e.stopPropagation();
-    console.log("Added to wishlist");
+    alert("Successfully add to cart!");
   };
 
   return (
@@ -52,9 +52,9 @@ const ProductCard = ({
         )}
         <button
           className="absolute top-4 right-4 bg-white p-1 px-2 rounded-full"
-          onClick={handleWishlistClick}
+          onClick={handleAddToCart}
         >
-          <FontAwesomeIcon icon={faHeart} size="lg" className="text-gray-300" />
+          <FontAwesomeIcon icon={faCartPlus} size="lg" className="text-gray-300" />
         </button>
         <img
           src={imageUrl}
