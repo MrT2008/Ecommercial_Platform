@@ -8,6 +8,8 @@ router.get('/search/:keyword', GuestController.searchProducts);
 router.get('/product', GuestController.getAllProducts);
 router.get('/product/onSale', GuestController.getAllProductsOnSale);
 router.get('/product/:id', GuestController.getProductById);
+router.get('/product/category/:category', GuestController.getProductsByCategory);
+router.get('/product/categoryID/:id', GuestController.getProductByCategoryId);
 
 router.get('/promotions', GuestController.getAllPromotions);
 
