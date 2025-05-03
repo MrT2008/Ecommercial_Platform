@@ -33,7 +33,8 @@ class BuyerController {
     editProfileInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
-            const {fullName, email, phoneNumber, imageURL} = req.body
+            const {fullName, email} = req.body
+            imageURL = req.file ? req.file.path.replace(/^.*[\\\/]public[\\\/]/, '/') : null;
 
             const user = await models.User.findByPk(buyerId)
             if (!user) {
@@ -43,7 +44,7 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
-                imageURL: imageURL
+                imageURL: `${req.protocol}://${req.get('host')}/${imageUrl}`,
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
