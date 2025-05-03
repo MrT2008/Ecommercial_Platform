@@ -629,12 +629,12 @@ class BuyerController {
     editShippingInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
-            const {receiverName, address, phone, status} = req.body
-            let inUsed = status
+            const {receiverName, address, phone, status, id} = req.body
 
             const existingInfo  = await models.ShipInfo.findOne({
                 where: {
                     userId: buyerId,
+                    id: id,
                 }
             })
 
