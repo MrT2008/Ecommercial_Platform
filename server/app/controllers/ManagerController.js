@@ -452,8 +452,7 @@ class ManagerController {
     createModerator = async (req, res) => {
         const t = await models.User.sequelize.transaction();
         try {
-            const { email, fullName } = req.body;
-            const password = process.env.MODERATOR_DEFAULT_PASSWORD;
+            const { email, fullName, password } = req.body;
 
             const existingUser = await models.User.findOne({ where: { email } });
             if (existingUser) {
