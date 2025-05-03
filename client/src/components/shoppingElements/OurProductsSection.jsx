@@ -2,20 +2,21 @@ import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import SecondaryButton from "../shares/SecondaryButton";
 import TitleSection from "../shares/TitleSection";
-import axios from "axios";
-
+import { getAllProducts } from "../../api/guestAPI";
 const OurProductsSection = () => {
   const [products, setProducts] = useState([]);
 
+  const fetchProducts = async () => {
+    try {
+      const response = await getAllProducts();
+      console.log("Fetched products:", response);
+      setProducts(response.allProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  }
   useEffect(() => {
-    axios
-      .get("http://localhost:8080/seller/1/getProducts")
-      .then((res) => {
-        setProducts(res.data);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch products:", err);
-      });
+    fetchProducts();
   }, []);
 
   return (
@@ -29,15 +30,13 @@ const OurProductsSection = () => {
               key={product.id}
               id={product.id.toString()}
               productName={product.name}
-              // Giá xạo tó :v
-              salePrice={(Math.random() * 500 + 100).toFixed(0)}
-              originalPrice={(Math.random() * 800 + 500).toFixed(0)}
-              discountPercentage={Math.floor(Math.random() * 50) + 10}
-              rating={Math.floor(Math.random() * 5) + 1}
-              // Giá xạo tó :v
+              salePrice={product.salePrice}
+              originalPrice={product.price}
+              discountPercentage={product.saled}
+              rating={product.totalRating}
               reviewCount={Math.floor(Math.random() * 100)}
               imageUrl={product.thumbnailURL}
-              isNew={Math.random() > 0.5}
+              isNew={Date.now() - new Date(product.createdAt) < 7 * 24 * 60 * 60 * 1000} // New if created within the last week
             />
           ))}
         </div>

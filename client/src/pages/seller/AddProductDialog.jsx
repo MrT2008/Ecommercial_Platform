@@ -102,6 +102,7 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
       formData.append('quantity', quantity);
       formData.append('type', 'product'); // As seen in the API example
       formData.append('discount', discount);
+      formData.append('saled', discount);
 
       // Handle image upload
       if (image && image.startsWith('data:')) {

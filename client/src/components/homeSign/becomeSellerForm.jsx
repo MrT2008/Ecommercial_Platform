@@ -46,7 +46,7 @@ const BecomeSellerForm = () => {
             });
             // alert("Successfully create shop.");
             // navigate(`/shop/${buyerID}/${shopID}`);
-            navigate(`/shop`);
+            navigate(`/`);
         }
         else {
             alert("Failed to create shop. Please try again");

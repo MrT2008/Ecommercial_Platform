@@ -1,7 +1,7 @@
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import { useState, useEffect, use } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getShippingInfo } from "../../api/buyerAPI";
+import { getShippingInfo, proceedWithCheckout, getCartById } from "../../api/buyerAPI";
 import { useAuth } from "../../hooks/useAuth";
 import ShippingAddress from "../../components/buyer/ShippingAddress";
 const CheckOut = () => {
@@ -100,18 +100,26 @@ const CheckOut = () => {
         return acc;
     }, {});
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.productPrice * item.quantity, 0);
+    const subtotal = cartItems.reduce((acc, item) => acc + item.productSalePrice * item.quantity, 0);
 
-    const handlePlaceOrder = () => {
-        // Here you would typically send the order to your backend
-        alert("Order placed successfully!");
-
-        // Clear the checkout items from localStorage
-        localStorage.removeItem('checkoutItems');
-
-        // Redirect to a confirmation page or home
-        navigate.push('/user/order-confirmation');
+    const handlePlaceOrder = async () => {
+        try {
+            for (const item of cartItems) {
+                console.log("Proceeding with checkout for item:", item.productId);
+                await proceedWithCheckout(buyerID, paymentMethod, item.productId);
+            }
+    
+            // Clear checkout items from localStorage
+            localStorage.removeItem('checkoutItems');
+    
+            // Optionally redirect to order confirmation page
+            navigate('/account/pending');
+        } catch (error) {
+            console.error("Failed to place order:", error);
+            alert("An error occurred while placing the order. Please try again.");
+        }
     };
+    
 
     if (loading) {
         return <div className="p-8 text-center">Loading checkout information...</div>;
@@ -121,6 +129,9 @@ const CheckOut = () => {
         return <div className="p-8 text-center">No items selected for checkout.</div>;
     }
 
+    if (!shippingInfoDefault) {
+        return <div className="p-8 text-center">No shipping information available.</div>;
+    }
 
     return (
         <div className="min-h-screen flex flex-col justify-between">
@@ -151,13 +162,13 @@ const CheckOut = () => {
                                         Type: {item.type}
                                     </div>
                                     <div className="w-20 text-right">
-                                        ${item.productPrice}
+                                        ${item.productSalePrice}
                                     </div>
                                     <div className="w-10 text-center">
                                         {item.quantity}
                                     </div>
                                     <div className="w-24 text-right font-medium">
-                                        ${item.productPrice * item.quantity}
+                                        ${item.productSalePrice * item.quantity}
                                     </div>
                                 </div>
                             ))}
@@ -193,8 +204,8 @@ const CheckOut = () => {
                                         type="radio"
                                         className="form-radio"
                                         value="Bank"
-                                        checked={paymentMethod === 'Bank'}
-                                        onChange={() => setPaymentMethod('Bank')}
+                                        checked={paymentMethod === 'bank'}
+                                        onChange={() => setPaymentMethod("bank")}
                                     />
                                     <span className="ml-2">Bank</span>
                                 </label>
@@ -205,8 +216,8 @@ const CheckOut = () => {
                                         type="radio"
                                         className="form-radio"
                                         value="Cash on delivery"
-                                        checked={paymentMethod === 'Cash on delivery'}
-                                        onChange={() => setPaymentMethod('Cash on delivery')}
+                                        checked={paymentMethod === 'cash'}
+                                        onChange={() => setPaymentMethod("cash")}
                                     />
                                     <span className="ml-2">Cash on delivery</span>
                                 </label>
@@ -215,7 +226,7 @@ const CheckOut = () => {
 
                         {/* Place Order Button */}
                         <div className="pt-4">
-                            <SecondaryButton title="Place Order" href="#" align="left" onClick={handlePlaceOrder} />
+                            <SecondaryButton title="Place Order" align="left" onClick={handlePlaceOrder} />
                         </div>
                     </div>
                 </div>
