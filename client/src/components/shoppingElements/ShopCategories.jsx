@@ -1,14 +1,32 @@
 import { useState } from 'react';
 import TitleSection from '../shares/TitleSection';
+import { useEffect } from "react";
 
-const ShopCategories = () => {
-  const [categories] = useState([
-    { id: 1, name: "Clothes" },
-    { id: 2, name: "Shoes" },
-    { id: 3, name: "Electronics" },
-    { id: 4, name: "Books" },
-    { id: 5, name: "Home & Kitchen" }
-  ]);
+const ShopCategories = ({ shopId }) => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/seller/${shopId}/getCategory`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+
+        const data = await response.json();
+        const categories = data.categories.map((cat) => ({
+          id: cat.id,
+          name: cat.name,
+        }));
+
+        setCategories(categories); // hoặc xử lý theo logic app của bạn
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, [shopId]);
 
   return (
     <div className="container mx-auto px-4 py-4 mb-2">

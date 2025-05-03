@@ -4,14 +4,7 @@ import { faStar, faCommentDots, faExclamationTriangle } from '@fortawesome/free-
 import PropTypes from 'prop-types';
 
 const ShopHeaderShopPage = ({ shopId }) => {
-  const [shop, setShop] = useState({
-    // id: '12345678982',
-    // name: 'Miumiu Store',
-    // rating: 2,
-    // evaluation: '12.6k',
-    // products: 102,
-    // image: 'https://randomuser.me/api/portraits/cats/2.jpg', // Placeholder cat image
-  });
+  const [shop, setShop] = useState({});
   
   useEffect(() => {
     const fetchShopData = async () => {
@@ -21,7 +14,8 @@ const ShopHeaderShopPage = ({ shopId }) => {
           throw new Error('Failed to fetch shop data');
         }
         const data = await response.json();
-        setShop(data.shop);
+        setShop(data.shop[0]);
+
       } catch (error) {
         console.error('Error fetching shop data:', error);
       }
