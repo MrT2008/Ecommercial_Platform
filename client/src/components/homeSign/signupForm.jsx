@@ -7,7 +7,7 @@ import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 import Button from '../shares/Button';
-import React from 'react'
+// import React from 'react'
 
 const SignUpForm = () => {
 
@@ -42,15 +42,21 @@ const SignUpForm = () => {
             
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            try {
+            // try {
                 await login(userEmail, password);
                 setErrorMessage('');
-            } catch (error) {
-                setErrorMessage('Login failed. Please try again.');
-            }
+            // } catch (error) {
+            //     setErrorMessage('Login failed. Please try again.');
+            // }
         } catch (error) {
-            console.log('error is: ',error);
-        }
+          if (error?.response?.status === 409) {
+              setErrorMessage(error.response.data.error); // "Email already exists"
+          } else {
+              setErrorMessage('Sign up failed. Please try again later.');
+          }
+          console.log('Sign up error:', error);
+      }
+      
     }
 
     useEffect(() => {
