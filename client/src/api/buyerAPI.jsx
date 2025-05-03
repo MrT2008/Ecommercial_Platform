@@ -102,7 +102,7 @@ export const addShippingInfo = async (buyerID, payload) => {
 
 export const updateShippingInfo = async (buyerID, payload) => {
   // payload = { id, receiverName, phone, address, status }
-  const res = await api.put(`/buyer/${buyerID}/shippingInfo`, payload);
+  const res = await api.put(`/buyer/${buyerID}/shippingInfo/edit`, payload);
   return res.data;
 };
 
@@ -110,7 +110,7 @@ export const removeShippingInfo = async (buyerID, payload) => {
   // payload = { id }
   // Ở đây mình dùng PUT chính endpoint update để set status = 'inactive'
   const res = await api.put(
-    `/buyer/${buyerID}/shippingInfo`,
+    `/buyer/${buyerID}/shippingInfo/remove`,
     { id: payload.id, status: 'inactive' }
   );
   return res.data;

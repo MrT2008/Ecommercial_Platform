@@ -47,53 +47,46 @@ const AccountAddress = () => {
   };
 
   // 3. Xử lý lưu (Add hoặc Edit)
-  const handleSaveAddress = async formData => {
-    // build payload chung
+  const handleSaveAddress = async (formData) => {
+    // 1) Build chung payload cho cả add và edit
     const payload = {
       receiverName: formData.fullName,
-      phone:         formData.phoneNumber,
-      address:       formData.address,
-      status:        formData.isDefault ? 'active' : 'inactive',
+      phone:        formData.phoneNumber,
+      address:      formData.address,
+      status:       formData.isDefault ? 'active' : 'inactive',
     };
-
+  
     try {
       if (editingAddress) {
-        // EDIT
+        // 2a) EDIT: gọi API update với đúng id
         await updateShippingInfo(userId, { id: editingAddress.id, ...payload });
-        setAddresses(prev =>
-          prev.map(a =>
-            a.id === editingAddress.id
-              ? { ...a, ...payload, isDefault: formData.isDefault }
-              : formData.isDefault
-              ? { ...a, isDefault: false }
-              : a
-          )
-        );
       } else {
-        // ADD
-        const newItem = await addShippingInfo(userId, payload);
-        setAddresses(prev => [
-          // nếu add default thì reset hết isDefault khác
-          ...prev.map(a =>
-            formData.isDefault ? { ...a, isDefault: false } : a
-          ),
-          {
-            id:        newItem.id,
-            name:      newItem.receiverName,
-            phone:     newItem.phone,
-            address:   newItem.address,
-            status:    newItem.status,
-            isDefault: newItem.status === 'active',
-          },
-        ]);
+        // 2b) ADD: gọi API tạo mới
+        await addShippingInfo(userId, payload);
       }
+  
+      // 3) REFRESH: sau khi API chạy xong, fetch lại toàn bộ list
+      const fresh = await getShippingInfo(userId);
+      const formatted = fresh.map(item => ({
+        id:        item.id,
+        name:      item.receiverName,
+        phone:     item.phone,
+        address:   item.address,
+        status:    item.status,
+        isDefault: item.status === 'active',
+      }));
+      setAddresses(formatted);
+  
     } catch (err) {
       console.error('Save address failed:', err);
     } finally {
+      // 4) Đóng dialog
       setIsDialogOpen(false);
       setEditingAddress(null);
     }
   };
+  
+  
 
   // 4. Delete (chuyển thành inactive)
   const handleDelete = async index => {
