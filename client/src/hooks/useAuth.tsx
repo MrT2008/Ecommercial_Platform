@@ -8,10 +8,10 @@ import {jwtDecode} from 'jwt-decode';
 const api = 'http://localhost:8080/api';
 
 type AuthContextType = {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
   loginWithGoogle: (credential: string ,refreshToken: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string) => Promise<any>;
   user : any;
   session: boolean;
   loading: boolean;
@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  const signUp = async (email: string, password: string, fullName: string):Promise<void> => {
+  const signUp = async (email: string, password: string, fullName: string):Promise<any> => {
     setLoading(true);
     try {
       const response = await axios.post(`${api}/auth/register`, {
@@ -127,7 +127,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (!response.status) {
-        throw new Error('Sign up failed');
+        setError('Sign up failed');
+        return;
       }
 
       const data = response.data;

@@ -1,6 +1,6 @@
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import { useState, useEffect, use } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getShippingInfo, proceedWithCheckout, getCartById } from "../../api/buyerAPI";
 import { useAuth } from "../../hooks/useAuth";
 import ShippingAddress from "../../components/buyer/ShippingAddress";
@@ -12,7 +12,10 @@ const CheckOut = () => {
     const [shippingInfo, setShippingInfo] = useState(null);
     const [shippingInfoDefault, setShippingInfoDefault] = useState({});
     const { user } = useAuth()
+    const location = useLocation();
     const buyerID = user.id;
+
+    
 
     // Load checkout items from localStorage when component mounts
     useEffect(() => {
@@ -24,7 +27,11 @@ const CheckOut = () => {
                     setCartItems(parsedItems);
                 } else {
                     // If no items in checkout, redirect back to cart
-                    navigate('/user/cart');
+                    navigate('/buyer/cart');
+                }
+                return () => {
+                    // Cleanup function to clear localStorage if needed
+                    localStorage.removeItem('checkoutItems');
                 }
             } catch (error) {
                 console.error("Error loading checkout items:", error);
@@ -35,6 +42,7 @@ const CheckOut = () => {
 
         loadCheckoutItems();
     }, [navigate]);
+
 
     useEffect(() => {
         const fetchShippingInfo = async () => {

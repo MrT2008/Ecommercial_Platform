@@ -19,10 +19,10 @@ export const addToCart = async (buyerID, productID, quantity) => {
       quantity,
     });
     console.log("Response from addToCart:", response.data);
-    return true;
+    return response.data
   } catch (error) {
     console.error("Error adding to cart:", error);
-    return false;
+    return null;
   }
 }
 
