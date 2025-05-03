@@ -139,6 +139,7 @@ class SellerController {
                 thumbnailURL: thumbnailURL,
                 ownerId: shop.ownerId,
                 salePrice: salePrice || 0,
+                saled: discount || 0,
                 status: 'active',
                 stock: quantity || 0,
             });

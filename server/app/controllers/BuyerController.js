@@ -387,9 +387,13 @@ class BuyerController {
                 }
                 const cartItem = {
                     shopName: shop.name,
+                    shopId: shop.id,
                     userId: item.userId,
                     productId: item.productId,
                     productName: product.name,
+                    productSalePrice: product.salePrice,
+                    productImage: product.thumbnailURL,
+                    productPrice: product.price,
                     quantity: item.quantity
                 }
                 cart[`product_${item_index}`] = cartItem

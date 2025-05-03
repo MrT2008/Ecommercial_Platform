@@ -6,7 +6,7 @@ import { faStar, faStarHalfAlt, faTruck, faArrowRotateLeft } from '@fortawesome/
 import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
 import Button from '../components/shares/Button';
 import ReviewList from '../components/shoppingElements/ReviewList.jsx';
-import { getProductById } from '../api/guestAPI.jsx';
+import { getProductById, getShopById } from '../api/guestAPI.jsx';
 import { addToCart } from '../api/buyerAPI.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 
@@ -15,6 +15,7 @@ const ProductDetail = () => {
     const [quantity, setQuantity] = useState(1);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const { user, loading } = useAuth(); // Assuming you have a useAuth hook to get user info
+    const [shop, setShop] = useState({});
     const navigate = useNavigate();
 
     if (loading) return null; // Show loading state if needed
@@ -52,14 +53,20 @@ const ProductDetail = () => {
         }
     };
 
-    const shop = {
-        id: 1, // Add shop ID
-        name: 'Miumiu Shop',
-        rating: 5,
-        evaluation: '12.6k',
-        products: 102,
-        image: 'https://th.bing.com/th/id/R.3903470f5b74222bd2e2e09db1a0f2c3?rik=s%2fLEM7YUHQe2Zg&pid=ImgRaw&r=0',
-    };
+    useEffect(() => {
+        const fetchShop = async () => {
+            try {
+                const response = await getShopById(product?.shopId); // Assuming product has a shopId property
+                setShop(response.shop);
+            } catch (error) {
+                console.error('Error fetching shop:', error);
+            }
+        };
+        if (product) {
+            fetchShop();
+        }
+    }, [product]);
+
 
     const reviews = [
         {
@@ -118,6 +125,7 @@ const ProductDetail = () => {
     };
 
     if (!product) return <div className="p-10 text-center">Loading...</div>;
+    console.log(product);
 
     
 
@@ -151,7 +159,7 @@ const ProductDetail = () => {
                         <span className="text-green-500 ml-4">{product.stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
                     </div>
 
-                    <div className="text-2xl font-bold text-red-600 mb-4">${parseFloat(product.price).toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-red-600 mb-4">${parseFloat(product.salePrice).toFixed(2)}</div>
 
                     <p className="text-gray-700 mb-8">{product.description}</p>
 
