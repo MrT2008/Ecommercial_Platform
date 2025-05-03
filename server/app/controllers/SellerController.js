@@ -120,7 +120,6 @@ class SellerController {
             const { id } = req.params;
             const { name, price, description, quantity, category,discount} = req.body;
             const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg'; 
-            
             if (!id) {
                 return res.status(400).json({ error: 'Shop ID is required' });
             }
@@ -291,6 +290,8 @@ class SellerController {
                     return res.status(404).json({ error: 'Orders not found' });
 
                 }
+                const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
+                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
                 for (const order of orders) {
                     if(seenOrderIds.has(order.id)){
                         continue;
@@ -302,21 +303,13 @@ class SellerController {
                     seenOrderIds.add(order.id);
                     allOrders.push({
                         ...order.toJSON(),
+                        name: product.name,
+                        thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`,
                         buyerName:buyer.fullName,
                         transaction: transaction ? transaction.toJSON() : null,
                     });
                     
-                }
-                const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
-                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
-                if (product) {
-                    allProducts.push({
-                        name: product.name,
-                        thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`,
-                        orderId: orderDetail.orderId,
-                    });
-                }
-                            
+                }                     
             }
     
             return res.status(200).json({ allOrders, allProducts });

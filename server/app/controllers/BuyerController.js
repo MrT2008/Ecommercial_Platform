@@ -33,7 +33,8 @@ class BuyerController {
     editProfileInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
-            const {fullName, email, phoneNumber, imageURL} = req.body
+            const {fullName, email, phoneNumber} = req.body
+            const imageURL = req.file ? req.file.path.replace(/^.*[\\\/]public[\\\/]/, '/') : null
 
             const user = await models.User.findByPk(buyerId)
             if (!user) {
@@ -43,7 +44,7 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
-                imageURL: imageURL
+                imageURL: `${req.protocol}://${req.get('host')}/${imageURL}`,
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
@@ -94,7 +95,6 @@ class BuyerController {
             if (!allreadyHasDefault) {
                 usePaymentMethod = true
             }
-            // console.log("usePyament aaaaaaaaaaaaa", usePaymentMethod)
             const existingPaymentMethod = await models.PaymentMethod.findOne({
                 where: {
                     userId: buyerId,
@@ -126,7 +126,6 @@ class BuyerController {
                 }
             }
             if (inUsed) {
-                console.log("aaaaaaaaaaaaaaaaaaaa")
                 const previousDefaultMethod = await models.PaymentMethod.findOne({
                     where: {
                         userId: buyerId,
@@ -354,11 +353,15 @@ class BuyerController {
                 if (!shop) {
                     return  res.status(400).json({ error: 'failed to find shop' });
                 }
+                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/');
                 const cartItem = {
                     shopName: shop.name,
+                    shopId: product.shopId,
                     userId: item.userId,
                     productId: item.productId,
                     productName: product.name,
+                    productthumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL }`,
+                    productPrice: product.salePrice,
                     quantity: item.quantity
                 }
                 cart[`product_${item_index}`] = cartItem
@@ -492,6 +495,50 @@ class BuyerController {
             })
         } catch (error) {
             await t.rollback();
+            console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    viewAllOrderByStatus = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            const ordersStatus = req.params.status
+            const ordersList = await models.Order.findAll({
+                where: {
+                    buyerId: buyerId,
+                    status: ordersStatus
+                },
+            })
+            if (!ordersList) {
+                return res.status(404).json({ error: 'No orders found' });
+            }
+            
+            const orderList = []
+            for (const ordersItem of ordersList) {
+                const ordersDetail = await models.OrderDetail.findAll({where: {orderId: ordersItem.id}})
+                const productList = []
+                for (const order of ordersDetail) {
+                    const product = await models.Product.findByPk(order.productId)
+                    const shop = await models.Shop.findOne({ where: {id: order.shopId}})
+                    if (!product) {
+                        return res.status(404).json({ error: 'Not found product in orders'});
+                    }
+                    productList.push({
+                        ...product.toJSON(),
+                        quantity: order.quantity,
+                        shopName: shop.name,
+                    })
+                }
+                orderList.push({
+                    orderId: ordersItem.id,
+                    orderStatus: ordersItem.status,
+                    productList: productList,
+                    totalPrice: ordersItem.priceAtPurchase
+                })
+            }
+            return res.status(200).json({message: 'Successfully retrieve orders list', orderList})
+        }
+        catch (error) {
             console.log(error)
             res.status(500).json({ message: 'Internal Server Error' });
         }
