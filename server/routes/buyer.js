@@ -30,7 +30,7 @@ router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInform
 router.post('/:buyerId/shop/create', BuyerController.createNewShop) //.
 
 //Review
-router.post('/:buyerId/ ', BuyerController.addNewReview)
+router.post('/:buyerId/review/addReview', BuyerController.addNewReview)
 router.get('/:buyerId/review/', BuyerController.viewYourReviews) //.
 router.put('/:buyerId/review/editReview', BuyerController.editReview) //.
 router.put('/:buyerId/review/removeReview', BuyerController.removeReview) //.

@@ -428,7 +428,8 @@ class BuyerController {
             }
             await models.Order.create({
                 buyerId: buyerId,
-                totalPrice: 0
+                totalPrice: 0,
+                // status: "completed"
             })
             const orderJustCreated = await models.Order.findOne({
                 where: {
@@ -701,6 +702,7 @@ class BuyerController {
                 return res.status(400).json({ message: 'User not  found' });
             }
 
+
             const product = await models.Product.findByPk(productId)
             if (!product) {
                 return res.status(400).json({ message: 'Product not  found' });
@@ -732,19 +734,7 @@ class BuyerController {
             if (!haveBought) {
                 return res.status(400).json({ message: 'User need to purchase product first before leaving review' });
             }
-
-            /*Test thoi */
-            // const order = await models.Order.findOne({
-            //     where: {
-            //         buyerId: buyerId
-            //     }
-            // })
-            // if (!order) {
-            //     return res.status(400).json({ message: 'No order found' });
-            // }
-
             let userReview = {}
-
             const previousReview = await models.Review.findOne({
                 where: {
                     buyerId: buyerId,
@@ -755,7 +745,7 @@ class BuyerController {
             if (previousReview) {
                 const newReview = await previousReview.update({
                     buyerId: buyerId,
-                    orderId: order.id,
+                    orderId: validatedOrderId.id,
                     productId: product.id,
                     rating: rating,
                     comment: comment,
@@ -769,7 +759,7 @@ class BuyerController {
             } else {
                 const newReview = await models.Review.create({
                     buyerId: buyerId,
-                    orderId: order.id,
+                    orderId: validatedOrderId.id,
                     productId: product.id,
                     rating: rating,
                     comment: comment,
