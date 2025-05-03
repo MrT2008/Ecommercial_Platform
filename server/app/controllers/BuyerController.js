@@ -34,7 +34,7 @@ class BuyerController {
         try {
             const {buyerId} = req.params
             const {fullName, email} = req.body
-            imageURL = req.file ? req.file.path.replace(/^.*[\\\/]public[\\\/]/, '/') : null;
+            const imageURL = req.file ? req.file.path.replace(/^.*[\\\/]public[\\\/]/, '/') : null;
 
             const user = await models.User.findByPk(buyerId)
             if (!user) {
@@ -44,7 +44,7 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
-                imageURL: `${req.protocol}://${req.get('host')}/${imageUrl}`,
+                imageURL: `${req.protocol}://${req.get('host')}/${imageURL}`,
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
@@ -621,6 +621,37 @@ class BuyerController {
             }
 
             return res.status(200).json({message: "Shipping information successfully created"})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    editShippingInformation = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            const {receiverName, address, phone, status} = req.body
+            let inUsed = status
+
+            const existingInfo  = await models.ShipInfo.findOne({
+                where: {
+                    userId: buyerId,
+                }
+            })
+
+            if (!existingInfo) {
+                return res.status(400).json({ error: 'User have no shipping information' });
+            }
+
+            if (existingInfo) {
+                existingInfo.update({
+                    receiverName: receiverName || existingInfo.receiverName,
+                    address: address || existingInfo.address,
+                    phone: phone || existingInfo.phone,
+                    status: status || existingInfo.status
+                })
+            }
+
+            return res.status(200).json({message: "Shipping information successfully updated", existingInfo})
         } catch (error) {
             console.log(error)
             res.status(500).json({ message: 'Internal Server Error' });
