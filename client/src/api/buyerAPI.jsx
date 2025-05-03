@@ -88,36 +88,31 @@ export const updateProfile = async (buyerID, payload) => {
   return response.data;
 };
 
-///////////////////ship-in4
+//Account Address
 export const getShippingInfo = async (buyerID) => {
   const res = await api.get(`/buyer/${buyerID}/shippingInfo`);
   return res.data.userShippingInfo;
 };
 
 export const addShippingInfo = async (buyerID, payload) => {
-  // payload = { receiverName, phone, address, status }
   const res = await api.post(`/buyer/${buyerID}/shippingInfo`, payload);
   return res.data;
 };
 
 export const updateShippingInfo = async (buyerID, payload) => {
-  // payload = { id, receiverName, phone, address, status }
   const res = await api.put(`/buyer/${buyerID}/shippingInfo/edit`, payload);
   return res.data;
 };
 
 export const removeShippingInfo = async (buyerID, payload) => {
-  // payload = { id }
-  // Ở đây mình dùng PUT chính endpoint update để set status = 'inactive'
   const res = await api.put(
     `/buyer/${buyerID}/shippingInfo/remove`,
-    { id: payload.id, status: 'inactive' }
+    { id: payload.id }
   );
   return res.data;
 };
-// Đặt địa chỉ mặc định
+
 export const setDefaultShippingInfo = async (buyerID, payload) => {
-  // payload = { id }
   const res = await api.put(`/buyer/${buyerID}/shippingInfo/setdefault`, payload);
   return res.data;
 };
