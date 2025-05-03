@@ -58,7 +58,7 @@ const Navbar = () => {
                       ? 'active border-[var(--secondary)] text-[var(--secondary)]'
 
                       : 'border-transparent hover:text-[var(--button)]'
-                  } text-sm font-medium`}
+                  } text-base font-medium`}
                 >
                   {item.name}
                 </Link>

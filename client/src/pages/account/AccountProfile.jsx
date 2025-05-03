@@ -4,18 +4,16 @@ import SecondaryButton from "../../components/shares/SecondaryButton";
 import EditProfileDialog from "../account/EditProfileDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload} from "@fortawesome/free-solid-svg-icons";
-import { getBuyerId, updateProfile } from "../../api/buyerAPI"; 
-
+import { getBuyerId, updateProfile } from "../../api/buyerAPI";
 
 const AccountProfile = () => {
   const buyerId = getBuyerId();
   const [userInfo, setUserInfo] = useState({
     username: "",
     email: "",
-    image: "/images/cat-avatar.jpg",
+    image: "",
   });
-  const [previewImage, setPreviewImage] = useState("/images/cat-avatar.jpg");
-  const [imageFile, setImageFile] = useState(null);
+  const [image, setImage] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -25,7 +23,9 @@ const AccountProfile = () => {
     (async () => {
       if (!buyerId) return;
       try {
-        const res = await fetch(`http://localhost:8080/buyer/${buyerId}/viewProfile`);
+        const res = await fetch(
+          `http://localhost:8080/buyer/${buyerId}/viewProfile`
+        );
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         const user = data.data.User;
@@ -34,7 +34,7 @@ const AccountProfile = () => {
           email: user.email || "",
           image: user.imageURL || "/images/cat-avatar.jpg",
         });
-        setPreviewImage(user.imageURL || "/images/cat-avatar.jpg");
+        setImage(user.imageURL || "/images/cat-avatar.jpg");
       } catch (err) {
         console.error("Failed to fetch user data:", err);
         setError("Không thể tải dữ liệu người dùng");
@@ -42,37 +42,24 @@ const AccountProfile = () => {
     })();
   }, [buyerId]);
 
-  // Save profile
+  // Save updated profile
   const handleSaveProfile = async (updatedInfo) => {
     setIsSaving(true);
     setError(null);
     try {
-      const formData = new FormData();
-      formData.append("type", "user");
-      formData.append("fullName", updatedInfo.username);
-      formData.append("email", updatedInfo.email);
-      if (imageFile) {
-        formData.append("imageURL", imageFile);
-      }
-
-      const res = await fetch(`http://localhost:8080/buyer/${buyerId}/editProfile`, {
-        method: "PUT",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Update failed");
-
-      const data = await res.json();
-      console.log("Profile updated:", data);
-
-      const updatedUser = await fetch(`http://localhost:8080/buyer/${buyerId}/viewProfile`);
-
-      setUserInfo((prev) => ({
-        ...prev,
-        username: updatedInfo.username,
+      const payload = {
+        fullName: updatedInfo.username,
         email: updatedInfo.email,
-        image: updatedUser.imageURL || prev.image,
-      }));
+        imageURL: image,
+      };
+      // gọi API PUT
+      await updateProfile(buyerId, payload);
+      // cập nhật state
+      setUserInfo({
+        username: payload.fullName,
+        email: payload.email,
+        image: payload.imageURL,
+      });
       setIsEditDialogOpen(false);
     } catch (err) {
       console.error("Failed to update profile:", err);
@@ -85,10 +72,9 @@ const AccountProfile = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
+      reader.onload = (event) => {
+        setImage(event.target.result);
       };
       reader.readAsDataURL(file);
     }
