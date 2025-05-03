@@ -15,10 +15,6 @@ class BuyerController {
                     }
                     
                     const User = await models.User.findOne({ where: { id: buyerId } });
-                    if (User.imageURL){
-                        User.imageURL = User.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/');
-                        User.imageURL = `${req.protocol}://${req.get('host')}/${User.imageURL}`
-                    }
         
                     if (!User) {
                         return res.status(404).json({ error: 'User not found' });
@@ -38,7 +34,7 @@ class BuyerController {
         try {
             const {buyerId} = req.params
             const {fullName, email} = req.body
-            const imageURL = req.file ? req.file.path : null;
+            const imageURL = req.file ? req.file.path.replace(/^.*[\\\/]public[\\\/]/, '/') : null;
 
             const user = await models.User.findByPk(buyerId)
             if (!user) {
@@ -48,7 +44,7 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
-                imageURL: imageURL
+                imageURL: `${req.protocol}://${req.get('host')}/${imageURL}`,
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
@@ -63,8 +59,7 @@ class BuyerController {
 
             const paymentMethodList = await models.PaymentMethod.findAll({
                 where: {
-                    userId: buyerId,
-                    isDeleted: false
+                    userId: buyerId
                 }
             })
 
@@ -275,10 +270,7 @@ class BuyerController {
                     userId: existingCart.userId,
                     productId: existingCart.productId,
                     productName: product.name,
-                    quantity: existingCart.quantity,
-                    productSalePrice: product.salePrice,
-                    productImage: product.thumbnailURL,
-
+                    quantity: existingCart.quantity
                 }
                 cart = data
             } else {
@@ -294,10 +286,7 @@ class BuyerController {
                     userId: newCart.userId,
                     productId: newCart.productId,
                     productName: product.name,
-                    quantity: newCart.quantity,
-                    productSalePrice: product.salePrice,
-                    productImage: product.thumbnailURL,
-
+                    quantity: newCart.quantity
                 }
                 cart = data
             }
@@ -397,15 +386,15 @@ class BuyerController {
                 if (!shop) {
                     return  res.status(400).json({ error: 'failed to find shop' });
                 }
+                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/');
                 const cartItem = {
                     shopName: shop.name,
-                    shopId: shop.id,
+                    shopId: product.shopId,
                     userId: item.userId,
                     productId: item.productId,
                     productName: product.name,
-                    productSalePrice: product.salePrice,
-                    productImage: product.thumbnailURL,
-                    productPrice: product.price,
+                    productthumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL }`,
+                    productPrice: product.salePrice,
                     quantity: item.quantity
                 }
                 cart[`product_${item_index}`] = cartItem
@@ -419,7 +408,6 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
-
     proceedWithCheckout = async (req, res) => {
         const t = await models.Announcement.sequelize.transaction();
         try {
@@ -476,7 +464,8 @@ class BuyerController {
             }
             const orderJustCreated = await models.Order.create({
                 buyerId: buyerId,
-                totalPrice: 0
+                totalPrice: 0,
+                // status: "completed"
             })
             console.log("abcd")
             let priceTotal = 0
@@ -641,12 +630,12 @@ class BuyerController {
     editShippingInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
-            const {receiverName, address, phone, status, id} = req.body
+            const {receiverName, address, phone, status} = req.body
+            let inUsed = status
 
             const existingInfo  = await models.ShipInfo.findOne({
                 where: {
                     userId: buyerId,
-                    id: id,
                 }
             })
 
@@ -802,6 +791,199 @@ class BuyerController {
             }
 
             return res.status(200).json({ message: 'Shop created successfully', newShop });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    addNewReview = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            const {productId, comment, rating, imageUrl} = req.body
+            let validatedOrderId = null
+
+            const user = await models.User.findByPk(buyerId)
+            if (!user) {
+                return res.status(400).json({ message: 'User not  found' });
+            }
+
+
+            const product = await models.Product.findByPk(productId)
+            if (!product) {
+                return res.status(400).json({ message: 'Product not  found' });
+            }
+
+            const allCompletedOrder = await models.Order.findAll({
+                where: {
+                    buyerId: buyerId,
+                    status: "completed"
+                }
+            })
+            if (!allCompletedOrder) {
+                return res.status(400).json({ message: 'User have not place any order yet' });
+            }
+            let haveBought = false
+            for (const userOrder of allCompletedOrder) {
+                const existInCard = await models.OrderDetail.findOne({
+                    where: {
+                        orderId: userOrder.id,
+                        productId: productId
+                    }
+                })
+                if (existInCard) {
+                    haveBought = true
+                    validatedOrderId = userOrder.id
+                    break
+                }
+            }
+            if (!haveBought) {
+                return res.status(400).json({ message: 'User need to purchase product first before leaving review' });
+            }
+            let userReview = {}
+            const previousReview = await models.Review.findOne({
+                where: {
+                    buyerId: buyerId,
+                    productId: productId
+                }
+            })
+
+            if (previousReview) {
+                const newReview = await previousReview.update({
+                    buyerId: buyerId,
+                    orderId: validatedOrderId.id,
+                    productId: product.id,
+                    rating: rating,
+                    comment: comment,
+                    imageUrl: imageUrl,
+                    isDeleted: false
+                })
+                if (!newReview) {
+                    return res.status(400).json({ message: 'Failed to create new reiview' });
+                }
+                userReview = newReview
+            } else {
+                const newReview = await models.Review.create({
+                    buyerId: buyerId,
+                    orderId: validatedOrderId.id,
+                    productId: product.id,
+                    rating: rating,
+                    comment: comment,
+                    imageUrl: imageUrl
+                })
+                if (!newReview) {
+                    return res.status(400).json({ message: 'Failed to create new reiview' });
+                }
+                userReview = newReview
+            }
+
+            return res.status(200).json({ message: 'New review created successfully', userReview }); 
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    viewYourReviews = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            // const {productId} = req.body
+
+            const user = await models.User.findByPk(buyerId)
+            if (!user) {
+                return res.status(400).json({ message: 'User not  found' });
+            }
+
+            const itemReviews = await models.Review.findAll({
+                where: {
+                    buyerId: buyerId,
+                    // productId: productId,
+                    isDeleted: false
+                }
+            })
+
+            const resMessage = itemReviews.length === 0 
+                                ? "User have not leave any review for this product" 
+                                : "Review found successfully"
+            let reviews = {}
+            let reviewIndex = 0
+
+            for (const review of itemReviews) {
+                const reviewEntry = {
+                    reviewId: review.id,
+                    buyerId: user.id,
+                    buyerName: user.fullName,
+                    rating: review.rating,
+                    comment: review.comment,
+                    imageURL: review.imageURL,
+                    productId: review.productId,
+                }
+                reviews[`review_${reviewIndex}`] = reviewEntry
+                reviewIndex++
+            }
+
+            return res.status(200).json({ message: resMessage, reviews});
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    editReview = async (req, res) => {
+        try {
+            // const {buyerId} = req.params
+            const {reviewId, comment, rating, imageUrl} = req.body
+
+            const reviewToBeUpdated = await models.Review.findOne({
+                where: {
+                    id: reviewId,
+                    isDeleted: false
+                }
+            })
+
+            if (!reviewToBeUpdated) {
+                res.status(400).json({ message: 'No Review found' });
+            }
+
+            const updatedReview = await reviewToBeUpdated.update({
+                comment: comment !== null ? comment : reviewToBeUpdated.comment,
+                rating: rating !== null ? rating : reviewToBeUpdated.rating,
+                imageUrl: imageUrl !== null ? imageUrl : reviewToBeUpdated.imageUrl
+            })
+
+            if (!updatedReview) {
+                res.status(400).json({ message: 'Failed to update Review' });
+            }
+            return res.status(200).json({ message: 'Update review successfully', updatedReview});
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    removeReview = async (req, res) => {
+        try {
+            const {reviewId} = req.body
+
+            const reviewTobeDeleted = await models.Review.findOne({
+                where: {
+                    id: reviewId,
+                    isDeleted: false
+                }
+            })
+
+            if (!reviewTobeDeleted) {
+                res.status(400).json({ message: 'No Review found' });
+            }
+
+            const deletedReview = await reviewTobeDeleted.update({
+                isDeleted: true
+            })
+
+            if (!reviewTobeDeleted) {
+                res.status(400).json({ message: 'Failed to delete review' });
+            }
+            return res.status(200).json({ message: 'Delete review successfully', deletedReview});
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal Server Error' });
