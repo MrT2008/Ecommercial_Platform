@@ -54,7 +54,7 @@ const loginForm = () => {
         onSubmit={handleLogin}
         >
             <label className="w-full">Enter your details below</label>
-            {(errorMessage || error ) && <p className="text-red-500 w-full">{error}</p>}
+            {errorMessage && <p className="text-red-500 w-full">{errorMessage}</p>}
             <input 
             type="text"
             placeholder='Email' 
