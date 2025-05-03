@@ -117,41 +117,6 @@ export const setDefaultShippingInfo = async (buyerID, payload) => {
   return res.data;
 };
 
-export const updateCart = async (buyerID, productID, quantity) => {
-  try {
-    const response = await api.put(`/buyer/${buyerID}/cart/update`, {
-      productId: productID,
-      quantity,
-    });
-    return true;
-  } catch (error) {
-    console.error("Error updating cart:", error);
-    return false;
-  }
-}
-
-export const removeFromCart = async (buyerID, productID) => {
-  try {
-    const response = await api.put(`/buyer/${buyerID}/cart/remove`, {
-      productId: productID,
-    });
-    return true;
-  } catch (error) {
-    console.error("Error removing from cart:", error);
-    return false;
-  }
-}
-
-export const getShippingInfo = async (buyerID) => {
-  try {
-    const response = await api.get(`/buyer/${buyerID}/shippingInfo`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching shipping info:", error);
-    return null;
-  }
-}
-
 export const proceedWithCheckout = async (buyerID, paymentMethod, productId) => {
   try {
     const response = await api.post(`/buyer/${buyerID}/checkout`, {
