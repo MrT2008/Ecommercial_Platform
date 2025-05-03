@@ -59,7 +59,8 @@ class BuyerController {
 
             const paymentMethodList = await models.PaymentMethod.findAll({
                 where: {
-                    userId: buyerId
+                    userId: buyerId,
+                    isDeleted: false
                 }
             })
 

@@ -5,8 +5,8 @@ import AddNewCardDialog from "../../pages/account/AddNewCardDialog";
 
 const AccountAddress = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
-// Nếu API cần userId là số
-const userId = storedUser?.id;
+  // Nếu API cần userId là số
+  const userId = storedUser?.id;
   const [cards, setCards] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
@@ -18,7 +18,6 @@ const userId = storedUser?.id;
       .then((data) => {
         const serverCards = data.paymentMethodList.map((item) => ({
           id: item.id,
-          name: "Card Holder", // Không có từ API nên có thể cho nhập sau
           number: item.bankAccountNumber,
           bank: item.bankName,
           isDefault: item.inUsed,
@@ -98,7 +97,6 @@ const userId = storedUser?.id;
 
         if (editingCard && editingCard.index !== undefined) {
           const newCard = {
-            name: formData.name,
             number: formData.number,
             bank: formData.bank,
             isDefault: formData.isDefault
@@ -109,7 +107,6 @@ const userId = storedUser?.id;
           return [
             ...updated, 
             {
-              name: formData.name,
               number: formData.number,
               bank: formData.bank,
               isDefault: formData.isDefault
@@ -126,7 +123,6 @@ const userId = storedUser?.id;
             console.log("Refreshed payment data:", data);
             const serverCards = data.paymentMethodList.map((item) => ({
               id: item.id,
-              name: "Card Holder",
               number: item.bankAccountNumber,
               bank: item.bankName,
               isDefault: item.inUsed,
@@ -177,7 +173,6 @@ const userId = storedUser?.id;
               console.log("Refreshed payment data after delete:", data);
               const serverCards = data.paymentMethodList.map((item) => ({
                 id: item.id,
-                name: "Card Holder",
                 number: item.bankAccountNumber,
                 bank: item.bankName,
                 isDefault: item.inUsed,
@@ -230,7 +225,6 @@ const userId = storedUser?.id;
             console.log("Refreshed payment data after set default:", data);
             const serverCards = data.paymentMethodList.map((item) => ({
               id: item.id,
-              name: "Card Holder",
               number: item.bankAccountNumber,
               bank: item.bankName,
               isDefault: item.inUsed,
@@ -265,7 +259,7 @@ const userId = storedUser?.id;
             >
               <div>
                 <p className="font-bold flex items-center gap-2">
-                  {card.name}
+                  {card.bank}
                   {card.isDefault && (
                     <span className="text-sm text-orange-500 font-semibold">
                       default
@@ -273,7 +267,6 @@ const userId = storedUser?.id;
                   )}
                 </p>
                 <p>{card.number}</p>
-                <p>{card.bank}</p>
               </div>
 
               <div className="flex items-center gap-4">
