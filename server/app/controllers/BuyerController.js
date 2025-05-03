@@ -37,20 +37,9 @@ class BuyerController {
     editProfileInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            const {fullName, email, phoneNumber, imageURL} = req.body
+            const {fullName, email} = req.body
+            const imageURL = req.file ? req.file.path : null;
 
-=======
-            const {fullName, email} = req.body
-            const imageURL = req.file ? req.file.path : null;
-            console.log("imageURL", imageURL)
->>>>>>> Stashed changes
-=======
-            const {fullName, email} = req.body
-            const imageURL = req.file ? req.file.path : null;
-            console.log("imageURL", imageURL)
->>>>>>> Stashed changes
             const user = await models.User.findByPk(buyerId)
             if (!user) {
                 return res.status(404).json({ error: 'User not found' }); 
@@ -59,15 +48,7 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
                 imageURL: imageURL
-=======
-                imageURL: imageURL,
->>>>>>> Stashed changes
-=======
-                imageURL: imageURL,
->>>>>>> Stashed changes
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
@@ -293,7 +274,10 @@ class BuyerController {
                     userId: existingCart.userId,
                     productId: existingCart.productId,
                     productName: product.name,
-                    quantity: existingCart.quantity
+                    quantity: existingCart.quantity,
+                    productSalePrice: product.salePrice,
+                    productImage: product.thumbnailURL,
+
                 }
                 cart = data
             } else {
@@ -309,7 +293,10 @@ class BuyerController {
                     userId: newCart.userId,
                     productId: newCart.productId,
                     productName: product.name,
-                    quantity: newCart.quantity
+                    quantity: newCart.quantity,
+                    productSalePrice: product.salePrice,
+                    productImage: product.thumbnailURL,
+
                 }
                 cart = data
             }
