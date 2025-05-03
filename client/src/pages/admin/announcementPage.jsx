@@ -14,6 +14,7 @@ const AnnouncementsPage = () => {
   const fetchAnnouncements = async () => {
     try {
       const response = await getAllAnouncements();
+      console.log("Fetched announcements:", response);
       const sortedAnnouncements = response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setAnnouncements(sortedAnnouncements);
     } catch (error) {

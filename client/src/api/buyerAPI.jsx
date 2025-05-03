@@ -35,3 +35,26 @@ export const getCartById = async (buyerID) => {
     return null;
   }
 }
+
+export const removeFromCart = async (buyerID, productID) => {
+  try {
+    const response = await api.put(`/buyer/${buyerID}/cart/remove`, {
+      productId: productID,
+    });
+    return true;
+  } catch (error) {
+    console.error("Error removing from cart:", error);
+    return false;
+  }
+}
+
+export const getShippingInfo = async (buyerID) => {
+  try {
+    const response = await api.get(`/buyer/${buyerID}/shippingInfo`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching shipping info:", error);
+    return null;
+  }
+}
+

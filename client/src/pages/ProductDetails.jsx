@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const { user, loading } = useAuth(); // Assuming you have a useAuth hook to get user info
     const navigate = useNavigate();
 
@@ -38,7 +39,10 @@ const ProductDetail = () => {
         try {
             const response = await addToCart(user.id, productId, quantity);
             if (response) {
-                navigate('/buyer/cart'); 
+                setShowSuccessMessage(true);
+                setTimeout(() => {
+                    setShowSuccessMessage(false);
+                }, 2000); // Hide message after 2 seconds
             } else {
                 alert('Failed to add product to cart. Please try again.');
             }
@@ -165,6 +169,28 @@ const ProductDetail = () => {
                         <Button onClick={handleAddToCart} text='Add to cart' otherClassName='yellow' type='button'  />
                         <Button text='Buy Now' otherClassName='blue' type='button' href='' />
                     </div>
+
+                    {showSuccessMessage && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                            <div className="bg-white w-11/12 max-w-md p-6 rounded-xl shadow-lg text-center">
+                                <h2 className="text-xl font-semibold text-gray-800">Product Added to Cart</h2>
+                                <p className="mt-3 text-gray-600">
+                                    You have successfully added {quantity} {product.name} to your cart.
+                                </p>
+                                <div className="mt-6 flex justify-center gap-3">
+                                    <Button onClick={
+                                        () => {
+                                            navigate('/buyer/cart');
+                                            setShowSuccessMessage(false);
+                                        }
+                                    } text="Go to Cart" otherClassName="blue" type="button" />
+                                    <Button text="Continue Shopping" otherClassName="gray" type="button" onClick={() => setShowSuccess(false)} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+
 
                     <div className="border border-gray-200 rounded mb-6">
                         <div className="p-4 flex items-start">
