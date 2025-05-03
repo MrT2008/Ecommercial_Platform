@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import AddProductDialog from "../../pages/seller/AddProductDialog";
-import { getSellerId } from "../../api/sellerAPI";
+import { getSellerId, getShopIdFromUserId } from "../../api/sellerAPI";
 
 const AllProduct = () => {
   const [products, setProducts] = useState([]);

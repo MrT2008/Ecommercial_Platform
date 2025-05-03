@@ -7,7 +7,7 @@ import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
 import Button from '../components/shares/Button';
 import ReviewList from '../components/shoppingElements/ReviewList.jsx';
 import { getProductById, getShopById } from '../api/guestAPI.jsx';
-import { addToCart } from '../api/buyerAPI.jsx';
+import { addToCart, proceedWithCheckout } from '../api/buyerAPI.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 
 const ProductDetail = () => {
@@ -16,6 +16,7 @@ const ProductDetail = () => {
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const { user, loading } = useAuth(); // Assuming you have a useAuth hook to get user info
     const [shop, setShop] = useState({});
+    const [selectItem, setSelectItem] = useState(null);
     const navigate = useNavigate();
 
     if (loading) return null; // Show loading state if needed
@@ -49,6 +50,27 @@ const ProductDetail = () => {
                 alert('Failed to add product to cart. Please try again.');
             }
         } catch (error) {
+            console.error('Error adding product to cart:', error);
+        }
+    };
+
+    const handleBuyNow = async () => {
+        if (!user) {
+            navigate('/login'); // Redirect to login if user is not authenticated
+            return;
+        }
+        try {
+            const response = await addToCart(user.id, productId, quantity);
+            if (response) {
+                const arrayCart = [response.cart]
+                localStorage.setItem('checkoutItems', JSON.stringify(arrayCart)); // Save cart items to local storage
+                navigate('/buyer/check-out'); 
+            } else {    
+                
+                alert('Failed to add product to cart. Please try again.');
+            }
+        } catch (error) {
+
             console.error('Error adding product to cart:', error);
         }
     };
@@ -177,7 +199,7 @@ const ProductDetail = () => {
                             <button onClick={increaseQuantity} className="px-3 py-2 border-l border-gray-300 hover:bg-gray-100">+</button>
                         </div>
                         <Button onClick={handleAddToCart} text='Add to cart' otherClassName='yellow' type='button'  />
-                        <Button text='Buy Now' otherClassName='blue' type='button' href='' />
+                        <Button onClick={handleBuyNow} text='Buy Now' otherClassName='blue' type='button' href='' />
                     </div>
 
                     {showSuccessMessage && (
