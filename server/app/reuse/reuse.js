@@ -5,6 +5,7 @@ const sequelize = require('sequelize');
 const OrderDetail = require('../models/OrderDetail');
 const { error } = require('console');
 const { get } = require('http');
+const { all } = require('../../routes/buyer');
 
 // FEATURES MANAGEMENT
 const sentAnnouncement = async (senderId, title, imageURL, script, options = {}) => {
@@ -72,12 +73,66 @@ const getAnnouncementsBySenderId = async (senderId) => {
 };
 
 // SHOP MANAGEMENT
-const getAllShops = async () => {
-    return await models.Shop.findAll();
+const getAllShops = async (req) => {
+    const shops= await models.Shop.findAll();
+    const allShops = []
+    for (const shop of shops) {
+        if (shop.avatarUrl) {
+            shop.avatarUrl = shop.avatarUrl.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
+            shop.avatarUrl = `${req.protocol}://${req.get('host')}/${shop.avatarUrl}`;
+        }
+        if (shop.backgroundUrl){
+            shop.backgroundUrl = shop.backgroundUrl.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
+            shop.backgroundUrl = `${req.protocol}://${req.get('host')}/${shop.backgroundUrl}`;
+        }
+        const orderDetails = await models.OrderDetail.findAll({
+            where: { shopId: shop.id },
+            include: {
+                model: models.Review,
+                as: 'reviewProduct',
+                attributes: ['rating'],
+                required: true,
+            },
+        });
+        allShops.push({
+            ...shop.toJSON(),
+            totalRating: orderDetails.reduce((acc, item) => acc + item.reviewProduct.rating, 0) / orderDetails.length || 0,
+            totalEvaluations: orderDetails.length,
+            totalProducts: await models.Product.count({ where: { shopId: shop.id } }),
+        });
+
+    }
+    return allShops;
 }
 
-const getShopById = async (id) => {
-    return await models.Shop.findByPk(id);
+const getShopById = async (id, req) => {
+    const shop = await models.Shop.findByPk(id)
+    const shopDetails = []
+    if (shop.avatarUrl) {
+        shop.avatarUrl = shop.avatarUrl.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
+        shop.avatarUrl = `${req.protocol}://${req.get('host')}/${shop.avatarUrl}`;
+    }
+    if (shop.backgroundUrl){
+        shop.backgroundUrl = shop.backgroundUrl.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
+        shop.backgroundUrl = `${req.protocol}://${req.get('host')}/${shop.backgroundUrl}`;
+    }
+    const orderDetails = await models.OrderDetail.findAll({
+        where: { shopId: shop.id },
+        include: {
+            model: models.Review,
+            as: 'reviewProduct',
+            attributes: ['rating'],
+            required: true,
+        },
+    });
+    shopDetails.push({
+        ...shop.toJSON(),
+        totalRating: orderDetails.reduce((acc, item) => acc + item.reviewProduct.rating, 0) / orderDetails.length || 0,
+        totalEvaluations: orderDetails.length,
+        totalProducts: await models.Product.count({ where: { shopId: shop.id } }),
+    });
+
+    return shopDetails;
 }
 
 const getAllActiveShops = async () => {

@@ -51,6 +51,10 @@ Review.init({
     imageUrl: {
         type: DataTypes.STRING,
     },
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
 }, {
     sequelize,
     modelName: 'Review',

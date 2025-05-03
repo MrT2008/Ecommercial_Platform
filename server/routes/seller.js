@@ -4,6 +4,7 @@ const sellerController = require("../app/controllers/SellerController");
 const upload = require('../app/middlewares/uploadFile');
 
 
+
 //shop
 router.get("/getShop/:id", sellerController.getShop);
 router.get("/getAllShop", sellerController.getAllShop);
@@ -32,13 +33,7 @@ router.get("/:id/getDashboard", sellerController.getDashboard);
 
 // //Information
 router.get("/:id/getInformation", sellerController.getInformation);
-router.put("/:id/updateInformation", sellerController.updateInformation);
+router.put("/:id/updateInformation",upload.array('images', 5), sellerController.updateInformation);
 
-// //Review
-// router.post('/:id/postReview', sellerController.postReview);
-// router.get('/:id/getReview', sellerController.getReview);
-// router.get('/:id/getReview/:reviewId', sellerController.getReviewById);
-// router.put('/:id/updateReview/:reviewId', sellerController.updateReview);
-// router.delete('/:id/deleteReview/:reviewId', sellerController.deleteReview);
 
 module.exports = router;
