@@ -155,6 +155,9 @@ const AccountProfile = () => {
       <Sidebar />
       <div className="w-4/5 p-6 py-12 px-8">
         <h2 className="text-2xl font-bold text-[#FFA50B] mb-4">Edit Your Profile</h2>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
     return (

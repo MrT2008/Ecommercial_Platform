@@ -38,8 +38,14 @@ class BuyerController {
         try {
             const {buyerId} = req.params
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             const {fullName, email, phoneNumber, imageURL} = req.body
 
+=======
+            const {fullName, email} = req.body
+            const imageURL = req.file ? req.file.path : null;
+            console.log("imageURL", imageURL)
+>>>>>>> Stashed changes
 =======
             const {fullName, email} = req.body
             const imageURL = req.file ? req.file.path : null;
@@ -54,7 +60,11 @@ class BuyerController {
                 fullName: fullName,
                 email: email,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 imageURL: imageURL
+=======
+                imageURL: imageURL,
+>>>>>>> Stashed changes
 =======
                 imageURL: imageURL,
 >>>>>>> Stashed changes
