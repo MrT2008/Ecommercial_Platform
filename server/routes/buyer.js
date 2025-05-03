@@ -23,6 +23,7 @@ router.post('/:buyerId/checkout', BuyerController.proceedWithCheckout) //.
 //Shipping Information
 router.post('/:buyerId/shippingInfo', BuyerController.addShippingInfo) //. 
 router.get('/:buyerId/shippingInfo', BuyerController.getAllShippingInfo) //.
+router.put('/:buyerId/shippingInfo/:shippingInfoId', BuyerController.editShippingInformation) //.
 router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippingInformation) //.
 router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
 

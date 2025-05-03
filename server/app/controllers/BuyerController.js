@@ -572,6 +572,37 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
+    editShippingInformation = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            const {receiverName, address, phone, status} = req.body
+            let inUsed = status
+
+            const existingInfo  = await models.ShipInfo.findOne({
+                where: {
+                    userId: buyerId,
+                }
+            })
+
+            if (!existingInfo) {
+                return res.status(400).json({ error: 'User have no shipping information' });
+            }
+
+            if (existingInfo) {
+                existingInfo.update({
+                    receiverName: receiverName || existingInfo.receiverName,
+                    address: address || existingInfo.address,
+                    phone: phone || existingInfo.phone,
+                    status: status || existingInfo.status
+                })
+            }
+
+            return res.status(200).json({message: "Shipping information successfully updated", existingInfo})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
 
     setDefaultShippingInformation = async (req, res) =>{
         try {
