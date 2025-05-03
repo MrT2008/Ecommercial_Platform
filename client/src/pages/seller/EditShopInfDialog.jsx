@@ -8,6 +8,7 @@ const EditInfShopDialog = ({ isOpen, onClose, onSave, shop }) => {
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
+  const [bankName, setBankName] = useState('');
   const [bankAccount, setBankAccount] = useState('');
 
   useEffect(() => {
@@ -16,7 +17,8 @@ const EditInfShopDialog = ({ isOpen, onClose, onSave, shop }) => {
       setEmail(shop.email || '');
       setPhoneNumber(shop.phone || '');
       setAddress(shop.address || '');
-      setBankAccount(shop.bank || '');
+      setBankName(shop.bankName || '');
+      setBankAccount(shop.bankAccount || '');
     }
   }, [shop]);
 
@@ -26,7 +28,8 @@ const EditInfShopDialog = ({ isOpen, onClose, onSave, shop }) => {
       email,
       phone: phoneNumber,
       address,
-      bank: bankAccount,
+      bankName: bankName,
+      bankAccount: bankAccount,
     };
 
     onSave(updatedShopInfo); // Pass updated info back to parent component
@@ -57,6 +60,11 @@ const EditInfShopDialog = ({ isOpen, onClose, onSave, shop }) => {
         <div className="my-4">
           <label className="block mb-1">Address</label>
           <input className="w-full p-2 bg-gray-100 rounded" value={address} onChange={(e) => setAddress(e.target.value)} />
+        </div>
+
+        <div className="my-4">
+          <label className="block mb-1">Bank Name</label>
+          <input className="w-full p-2 bg-gray-100 rounded" value={bankName} onChange={(e) => setBankAccount(e.target.value)} />
         </div>
 
         <div className="my-4">
