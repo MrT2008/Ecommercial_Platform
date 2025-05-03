@@ -1,5 +1,7 @@
 import { useAuth } from '../../hooks/useAuth';
 import { Link, useLocation } from 'react-router-dom';
+import { getSellerId } from "../../api/sellerAPI";
+import { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const { user } = useAuth();
@@ -9,10 +11,30 @@ const Navbar = () => {
 
   const isSeller = roles.includes('seller');
   const isAdmin = roles.includes('admin');
+  const [shopId, setShopId] = useState(null);
+
+  useEffect(() => {
+    const fetchShopId = async () => {
+      try {
+        const userId = getSellerId();
+        const res = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
+        const data = await res.json();
+        setShopId(data.data.shop.id);
+      } catch (err) {
+        console.error("Lỗi khi lấy shopId:", err);
+      }
+    };
+
+    if (isSeller) {
+      fetchShopId();
+    }
+  }, [isSeller]);
+
 
   const menuItems = [
     { name: 'Home', path: '/' },
-    isSeller && { name: 'My Shop', path: '/shop/:id' },
+    // isSeller && { name: 'My Shop', path: '/guest/shop/${shopid}' },
+    isSeller && shopId && { name: 'My Shop', path: `/guest/shop/${shopId}` },
     !isSeller && !isAdmin && { name: 'Become Seller', path: '/become-seller' },
     isAdmin && { name: 'Admin Dashboard', path: '/admin/admin-dashboard' },
   ].filter(Boolean);
