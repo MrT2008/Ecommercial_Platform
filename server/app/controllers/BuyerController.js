@@ -523,7 +523,51 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
-    
+    viewAllOrderByStatus = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            const ordersStatus = req.params.status
+            const ordersList = await models.Order.findAll({
+                where: {
+                    buyerId: buyerId,
+                    status: ordersStatus
+                },
+            })
+            if (!ordersList) {
+                return res.status(404).json({ error: 'No orders found' });
+            }
+            
+            const orderList = []
+            for (const ordersItem of ordersList) {
+                const ordersDetail = await models.OrderDetail.findAll({where: {orderId: ordersItem.id}})
+                const productList = []
+                for (const order of ordersDetail) {
+                    const product = await models.Product.findByPk(order.productId)
+                    const shop = await models.Shop.findOne({ where: {id: order.shopId}})
+                    if (!product) {
+                        return res.status(404).json({ error: 'Not found product in orders'});
+                    }
+                    productList.push({
+                        ...product.toJSON(),
+                        quantity: order.quantity,
+                        shopName: shop.name,
+                    })
+                }
+                orderList.push({
+                    orderId: ordersItem.id,
+                    orderStatus: ordersItem.status,
+                    productList: productList,
+                    totalPrice: ordersItem.priceAtPurchase
+                })
+            }
+            return res.status(200).json({message: 'Successfully retrieve orders list', orderList})
+        }
+        catch (error) {
+            console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
     addShippingInfo = async (req, res) => {
         try {
             const {buyerId} = req.params

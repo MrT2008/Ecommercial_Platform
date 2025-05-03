@@ -20,6 +20,7 @@ router.put('/:buyerId/cart/remove/', BuyerController.removeProductFromCart) //.
 
 //Checkout
 router.post('/:buyerId/checkout', BuyerController.proceedWithCheckout) //.
+router.get('/:buyerId/order/:status', BuyerController.viewAllOrderByStatus) //.
 
 //Shipping Information
 router.post('/:buyerId/shippingInfo', BuyerController.addShippingInfo) //. 
