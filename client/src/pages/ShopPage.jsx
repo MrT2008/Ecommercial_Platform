@@ -10,7 +10,7 @@ function ShopPage() {
   return (
     <div className="mx-auto p-8">
       {/* Shop Header */}
-      <ShopHeaderShopPage />
+      <ShopHeaderShopPage shopId={id}/>
       
       {/* Shop Banner/Carousel */}
       <Carousel />
