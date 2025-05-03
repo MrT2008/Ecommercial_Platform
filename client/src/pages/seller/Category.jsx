@@ -30,12 +30,30 @@ const Category = () => {
       fetchCategories();
     }, []);
   
-    const handleAddCategory = () => {
-      if (newCategory.trim()) {
-        setCategories([...categories, newCategory]);
-        setNewCategory("");
+    const handleAddCategory = async () => {
+      if (!newCategory.trim() || !shopId) return;
+    
+      try {
+        const response = await fetch(`http://localhost:8080/seller/${shopId}/postCategory`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: newCategory }),
+        });
+    
+        if (!response.ok) throw new Error("Failed to add category");
+    
+        const result = await response.json();
+    
+        // Có thể thêm thẳng category vừa tạo hoặc gọi lại API để lấy list mới
+        setCategories([...categories, result.category]);  // Nếu API trả về category vừa tạo
+        setNewCategory("");  // Reset input
+      } catch (err) {
+        console.error("Lỗi khi thêm category:", err);
       }
     };
+    
   
     const handleDelete = (index) => {
       const updated = [...categories];
