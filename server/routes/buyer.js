@@ -29,7 +29,14 @@ router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippi
 router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
 router.put('/:buyerId/shippingInfo/:shippingInfoId', BuyerController.editShippingInformation) //
 
-router.post('/:buyerId/shop/create', BuyerController.createNewShop)
+//Shop
+router.post('/:buyerId/shop/create', BuyerController.createNewShop) //.
+
+//Review
+router.post('/:buyerId/review/addReview', BuyerController.addNewReview)
+router.get('/:buyerId/review/', BuyerController.viewYourReviews) //.
+router.put('/:buyerId/review/editReview', BuyerController.editReview) //.
+router.put('/:buyerId/review/removeReview', BuyerController.removeReview) //.
 
 
 module.exports = router;
