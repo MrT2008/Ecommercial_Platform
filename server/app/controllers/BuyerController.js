@@ -33,7 +33,8 @@ class BuyerController {
     editProfileInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
-            const {fullName, email, phoneNumber, imageURL} = req.body
+            const {fullName, email} = req.body
+            imageURL = req.file ? req.file.path.replace(/^.*[\\\/]public[\\\/]/, '/') : null;
 
             const user = await models.User.findByPk(buyerId)
             if (!user) {
@@ -43,7 +44,7 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
-                imageURL: imageURL
+                imageURL: `${req.protocol}://${req.get('host')}/${imageUrl}`,
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
@@ -385,11 +386,15 @@ class BuyerController {
                 if (!shop) {
                     return  res.status(400).json({ error: 'failed to find shop' });
                 }
+                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/');
                 const cartItem = {
                     shopName: shop.name,
+                    shopId: product.shopId,
                     userId: item.userId,
                     productId: item.productId,
                     productName: product.name,
+                    productthumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL }`,
+                    productPrice: product.salePrice,
                     quantity: item.quantity
                 }
                 cart[`product_${item_index}`] = cartItem
@@ -403,7 +408,6 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
-
     proceedWithCheckout = async (req, res) => {
         const t = await models.Announcement.sequelize.transaction();
         try {
