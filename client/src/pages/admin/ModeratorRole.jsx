@@ -6,7 +6,7 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const ModeratorRole = () => {
   const [moderators, setModerators] = useState([]);
-  
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -19,31 +19,70 @@ const ModeratorRole = () => {
         const response = await fetch('http://localhost:8080/manager/moderators/');
         const data = await response.json();
         if (data.moderators) {
-          setModerators(data.moderators);
+          const activeModerators = data.moderators.filter(mod => mod.isActive === true);
+          setModerators(activeModerators);
         }
       } catch (error) {
         console.error("Lỗi khi lấy danh sách moderator:", error);
       }
     };
-  
+
     fetchModerators();
   }, []);
 
-  const handleAddModerator = () => {
-    if (formData.fullName && formData.email && formData.password) {
-      setModerators([...moderators, {
-        fullName: formData.fullName,
-        email: formData.email,
-      }]);
-      setFormData({ fullName: "", email: "", password: "" });
+  const handleAddModerator = async () => {
+    const { fullName, email, password } = formData;
+  
+    if (fullName && email && password) {
+      try {
+        const response = await fetch('http://localhost:8080/manager/moderators/new', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ fullName, email, password })
+        });
+  
+        if (response.ok) {
+          const newModerator = await response.json();
+  
+          const fullMod = {
+            fullName: newModerator.fullName || fullName,
+            email: newModerator.email || email,
+            id: newModerator.id, // nếu có id
+          };
+  
+          setModerators(prev => [...prev, fullMod]);
+          setFormData({ fullName: "", email: "", password: "" });
+        } else if (response.status === 409) {
+          alert("Email existed! Please use another email.");
+        } else {
+          const errorData = await response.json();
+          console.error("Failed to add moderator:", errorData.message || response.statusText);
+        }
+      } catch (error) {
+        console.error("Error while adding moderator:", error);
+      }
+    }
+  };
+  
+  const handleDelete = async (modId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/manager/moderators/delete/${modId}`, {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        setModerators(prev => prev.filter(mod => mod.id !== modId));
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to delete moderator:", errorData.message || response.statusText);
+      }
+    } catch (error) {
+      console.error("Error while deleting moderator:", error);
     }
   };
 
-  const handleDelete = (index) => {
-    const updated = [...moderators];
-    updated.splice(index, 1);
-    setModerators(updated);
-  };
 
   return (
     <div className="flex">
