@@ -100,7 +100,7 @@ const CheckOut = () => {
         return acc;
     }, {});
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.productPrice * item.quantity, 0);
+    const subtotal = cartItems.reduce((acc, item) => acc + item.productSalePrice * item.quantity, 0);
 
     const handlePlaceOrder = async () => {
         try {
@@ -162,13 +162,13 @@ const CheckOut = () => {
                                         Type: {item.type}
                                     </div>
                                     <div className="w-20 text-right">
-                                        ${item.productPrice}
+                                        ${item.productSalePrice}
                                     </div>
                                     <div className="w-10 text-center">
                                         {item.quantity}
                                     </div>
                                     <div className="w-24 text-right font-medium">
-                                        ${item.productPrice * item.quantity}
+                                        ${item.productSalePrice * item.quantity}
                                     </div>
                                 </div>
                             ))}

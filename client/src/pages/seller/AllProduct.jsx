@@ -13,28 +13,22 @@ const AllProduct = () => {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [sellerId, setSellerId] = useState(null);
+  const [reloadProducts, setReloadProducts] = useState(false); // State to trigger reload
 
   // Fetch products when component mounts
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Lấy seller (user) ID
         const userId = getSellerId();
-        setSellerId(userId);
-        console.log(`Đang fetch shop cho user ID: ${userId}`);
-  
         const shopId = await getShopIdFromUserId(userId);
-        console.log(`Shop ID: ${shopId}`);
-
-        // Gọi API để lấy danh sách sản phẩm từ shop ID
+  
         const productRes = await fetch(`http://localhost:8080/seller/${shopId}/getProducts`);
         if (!productRes.ok) {
           throw new Error(`Error: ${productRes.status}`);
         }
   
         const products = await productRes.json();
-        console.log(`Đã nhận được ${products.length} sản phẩm từ API`);
         setProducts(products);
         setError(null);
       } catch (err) {
@@ -47,7 +41,8 @@ const AllProduct = () => {
     };
   
     fetchProducts();
-  }, []);
+  }, [reloadProducts]); 
+  
   
   const handleSaveProduct = async (product) => {
     try {
@@ -64,6 +59,7 @@ const AllProduct = () => {
         }
         shopId = shopData.data.shop.id;
         console.log("Found shop ID:", shopId);
+        setReloadProducts(prev => !prev);
       } catch (err) {
         console.error("Error getting shop ID:", err);
         alert("Failed to find your shop. Please check if you're logged in properly.");
@@ -176,6 +172,8 @@ const AllProduct = () => {
     }
   };
 
+  console.log("Products:", products);
+
   return (
     <div className="flex">
       <Sidebar />
@@ -240,9 +238,9 @@ const AllProduct = () => {
                     )}
                     <span>{p.name}</span>
                   </td>
-                  <td className="p-2">{p.quantity}</td>
+                  <td className="p-2">{p.stock}</td>
                   <td className="p-2">${typeof p.price === 'number' ? p.price.toFixed(2) : p.price}</td>
-                  <td className="p-2">{p.discount || '0%'}</td>
+                  <td className="p-2">{p.saled + "%"|| '0%'}</td>
                   <td className="p-2">
                     <span
                       className={`px-2 py-1 rounded text-sm font-medium ${
@@ -300,7 +298,8 @@ const AllProduct = () => {
           isOpen={isDialogOpen}
           onClose={() => {
             setDialogOpen(false);
-            setEditingProduct(null); 
+            setEditingProduct(null);
+            setReloadProducts(prev => !prev); 
           }}
           onSave={handleSaveProduct}
           product={editingProduct} 

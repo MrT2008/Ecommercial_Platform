@@ -177,7 +177,7 @@ const Cart = () => {
     const getSelectedSubtotal = () => {
         return cartItems
             .filter(item => selectedItems[item.productId])
-            .reduce((acc, item) => acc + item.productPrice * item.quantity, 0);
+            .reduce((acc, item) => acc + item.productSalePrice * item.quantity, 0);
     };
     
     // function to handle checkout
@@ -267,7 +267,7 @@ const Cart = () => {
                                 </div>
 
                                 {/* Price */}
-                                <div>${item.productPrice}</div>
+                                <div>${item.productSalePrice}</div>
 
                                 {/* Quantity Control */}
                                 <div className="flex justify-center">
@@ -289,7 +289,7 @@ const Cart = () => {
                                 </div>
 
                                 {/* Subtotal */}
-                                <div>${item.productPrice * item.quantity}</div>
+                                <div>${item.productSalePrice * item.quantity}</div>
 
                                 {/* Remove Button */}
                                 <div className="flex justify-center">
