@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+// src/pages/AccountAddress.jsx
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/account/accountSidebar';
 import SecondaryButton from '../../components/shares/SecondaryButton';
 import AddNewAddressDialog from './AddNewAddressDialog';
@@ -17,26 +18,32 @@ const AccountAddress = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
 
-  // 1. Fetch danh sách
+  // 1) Hàm chung để load + filter ra chỉ status !== 'delete'
+  const fetchActiveAddresses = async () => {
+    try {
+      const data = await getShippingInfo(userId);
+      const active = data
+        .filter(item => item.status !== 'delete')
+        .map(item => ({
+          id:        item.id,
+          name:      item.receiverName,
+          phone:     item.phone,
+          address:   item.address,
+          status:    item.status,
+          isDefault: item.status === 'active',
+        }));
+      setAddresses(active);
+    } catch (err) {
+      console.error('Fetch addresses failed:', err);
+    }
+  };
+
+  // 2) Fetch lần đầu
   useEffect(() => {
-    if (!userId) return;
-    getShippingInfo(userId)
-      .then(data => {
-        setAddresses(
-          data.map(item => ({
-            id:         item.id,
-            name:       item.receiverName,
-            phone:      item.phone,
-            address:    item.address,
-            status:     item.status,
-            isDefault:  item.status === 'active',
-          }))
-        );
-      })
-      .catch(err => console.error('Fetch shipping info failed:', err));
+    if (userId) fetchActiveAddresses();
   }, [userId]);
 
-  // 2. Mở dialog Add / Edit
+  // 3) Mở dialog Add / Edit
   const openAddDialog = () => {
     setEditingAddress(null);
     setIsDialogOpen(true);
@@ -46,62 +53,45 @@ const AccountAddress = () => {
     setIsDialogOpen(true);
   };
 
-  // 3. Xử lý lưu (Add hoặc Edit)
+  // 4) Xử lý lưu (Add hoặc Edit), rồi refetch
   const handleSaveAddress = async (formData) => {
-    // 1) Build chung payload cho cả add và edit
     const payload = {
       receiverName: formData.fullName,
       phone:        formData.phoneNumber,
       address:      formData.address,
       status:       formData.isDefault ? 'active' : 'inactive',
     };
-  
+
     try {
       if (editingAddress) {
-        // 2a) EDIT: gọi API update với đúng id
         await updateShippingInfo(userId, { id: editingAddress.id, ...payload });
       } else {
-        // 2b) ADD: gọi API tạo mới
         await addShippingInfo(userId, payload);
       }
-  
-      // 3) REFRESH: sau khi API chạy xong, fetch lại toàn bộ list
-      const fresh = await getShippingInfo(userId);
-      const formatted = fresh.map(item => ({
-        id:        item.id,
-        name:      item.receiverName,
-        phone:     item.phone,
-        address:   item.address,
-        status:    item.status,
-        isDefault: item.status === 'active',
-      }));
-      setAddresses(formatted);
-  
+      await fetchActiveAddresses();
     } catch (err) {
       console.error('Save address failed:', err);
     } finally {
-      // 4) Đóng dialog
       setIsDialogOpen(false);
       setEditingAddress(null);
     }
   };
-  
-  
 
-  // 4. Delete (chuyển thành inactive)
-  const handleDelete = async index => {
+  // 5) Delete ⇒ gọi API rồi refetch
+  const handleDelete = async (index) => {
     const addr = addresses[index];
-    if (!window.confirm('Bạn có chắc muốn xóa địa chỉ này?')) return;
+    if (!window.confirm('Are you sure you want to delete this address?')) return;
+
     try {
       await removeShippingInfo(userId, { id: addr.id });
-      setAddresses(prev => prev.filter(a => a.id !== addr.id));
+      await fetchActiveAddresses();
     } catch (err) {
       console.error('Delete failed:', err);
     }
   };
 
-  // 5. Set default
-  const handleSetDefault = async index => {
+  // 6) Set default ⇒ gọi API rồi update UI
+  const handleSetDefault = async (index) => {
     const addr = addresses[index];
     try {
       await setDefaultShippingInfo(userId, { id: addr.id });
