@@ -3,9 +3,8 @@ import SecondaryButton from "../../components/shares/SecondaryButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
-import { getCartById, removeFromCart } from "../../api/buyerAPI";
+import { getCartById, removeFromCart, updateCart } from "../../api/buyerAPI";
 import { useAuth } from "../../hooks/useAuth";
-import { object } from "prop-types";
 
 const Cart = () => {
     const navigate = useNavigate();
@@ -51,22 +50,40 @@ const Cart = () => {
     }, {});
 
     const increaseQuantity = (id) => {
-        setCartItems(prev =>
-            prev.map(item =>
-                item.productId === id ? { ...item, quantity: item.quantity + 1 } : item
-            )
-        );
+        setCartItems(prev => {
+            const updatedCart = prev.map(item =>
+                item.productId === id
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+            );
+    
+            const targetItem = prev.find(item => item.productId === id);
+            if (targetItem) {
+                updateCart(userId, id, targetItem.quantity + 1);
+            }
+    
+            return updatedCart;
+        });
     };
+    
 
     const decreaseQuantity = (id) => {
-        setCartItems(prev =>
-            prev.map(item =>
+        setCartItems(prev => {
+            const updatedCart = prev.map(item =>
                 item.productId === id && item.quantity > 1
                     ? { ...item, quantity: item.quantity - 1 }
                     : item
-            )
-        );
+            );
+    
+            const targetItem = prev.find(item => item.productId === id);
+            if (targetItem && targetItem.quantity > 1) {
+                updateCart(userId, id, targetItem.quantity - 1);
+            }
+    
+            return updatedCart;
+        });
     };
+    
 
     const removeItem = (id) => {
         setCartItems(prev => prev.filter(item => item.productId !== id));
