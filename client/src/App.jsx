@@ -52,10 +52,10 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<MainLayout />} >
           <Route index element={<HomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/shop/:id" element={<ShopPage />} /> {/* New route for shop page with ID parameter */}
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="product/:id" element={<ProductDetails />} />
+          <Route path="guest/shop/:id" element={<ShopPage />} />
         </Route>
           
         <Route path="/buyer" element={<MainLayout />}>
