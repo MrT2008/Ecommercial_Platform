@@ -82,7 +82,7 @@ class GuestController {
         }
     getAllShops = async (req, res) => {
         try {
-            const shops = await reuse.getAllShops();
+            const shops = await reuse.getAllShops(req);
 
             res.status(200).json({ message: 'Shops retrieved successfully', shops });
         } catch (error) {
@@ -93,7 +93,7 @@ class GuestController {
     getShopById = async (req, res) => {
         try {
             const { id } = req.params;
-            const shop = await reuse.getShopById(id);
+            const shop = await reuse.getShopById(id,req);
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
