@@ -28,6 +28,13 @@ router.get('/:buyerId/shippingInfo', BuyerController.getAllShippingInfo) //.
 router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippingInformation) //.
 router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
 
+// Chat box
+router.post("/:id/createChat", BuyerController.createChat);
+router.get("/:id/getAllChat", BuyerController.getAllChat);
+router.get("/:id/getChat/:chatId", BuyerController.getChatById);
+router.post("/:id/postMessage", BuyerController.postMessage);
+
+
 
 router.post('/:buyerId/shop/create', BuyerController.createNewShop)
 

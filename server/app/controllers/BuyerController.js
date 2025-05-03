@@ -737,6 +737,98 @@ class BuyerController {
         }
     }
 
+    //Chat box
+    createChat = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { shopId } = req.body;
+            const chatBox = await models.ChatBox.create({
+                sellerId: shopId,
+                buyerId: id,
+            });
+            return res.status(200).json({ message: 'Chat box created successfully', chatBox });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    getAllChat = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const chatBoxes = await models.ChatBox.findAll({where: {buyerId: id,},
+                include: [
+                    {
+                        model: models.User,
+                        as: 'seller',
+                        attributes: ['id', 'fullName', 'imageURL'],
+                    },
+                    {
+                        model: models.Message,
+                        as: 'messages',
+                        include: [
+                            {
+                                model: models.User,
+                                as: 'sender',
+                                attributes: ['id', 'fullName', 'imageURL'],
+                            },
+                        ],
+                    },
+                ],
+            });
+            const sender = await models.User.findOne({ where: { id: id } });
+            return res.status(200).json({ message: 'Chat boxes retrieved successfully', chatBoxes, sender });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    getChatById = async (req, res) => {
+        try {
+            const { id, chatId } = req.params;
+            const chatBox = await models.ChatBox.findOne({
+                where: {
+                    id: chatId,
+                    buyerId: id,
+                },
+                include: [
+                    {
+                        model: models.Message,
+                        as: 'messages',
+                        include: [
+                            {
+                                model: models.User,
+                                as: 'sender',
+                                attributes: ['id', 'fullName', 'imageURL'],
+                            },
+                        ],
+                    },
+                ],
+            });
+            return res.status(200).json({ message: 'Chat box retrieved successfully', chatBox });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    postMessage = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { chatId, message } = req.body;
+            const newMessage = await models.Message.create({
+                chatBoxId: chatId,
+                senderId: id,
+                message: message,
+            });
+            return res.status(200).json({ message: 'Message sent successfully', newMessage });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
 }
 
 module.exports = new BuyerController();

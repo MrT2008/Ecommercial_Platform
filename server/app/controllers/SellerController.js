@@ -492,6 +492,75 @@ class SellerController {
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+    //Chat box
+    createChat = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { buyerId } = req.body;
+            if (!buyerId) {
+                return res.status(400).json({ error: 'Buyer ID is required' });
+            }
+            const chatBox = await models.ChatBox.create({
+                sellerId: id,
+                buyerId: buyerId
+            });
+            return res.status(201).json({ chatBox });
+        } catch (error) {
+            console.error('Error creating chat box:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    getAllChat = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const chatBoxes = await models.ChatBox.findAll({ where: { sellerId: id },
+                include: [
+                    { model: models.User, as: 'buyer', attributes: ['id', 'fullName'] },
+                    { model: models.Message, as: 'messages', attributes: ['id', 'content', 'createdAt'] }
+                ]
+            });
+            const sender = await models.User.findOne({ where: { id: id } });
+            if (!chatBoxes) {
+                return res.status(404).json({ error: 'Chat boxes not found' });
+            }
+            return res.status(200).json({ chatBoxes, sender });
+        } catch (error) {
+            console.error('Error fetching chat boxes:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    getChatById = async (req, res) => {
+        try {
+            const { id, chatId } = req.params;
+            const chatBox = await models.ChatBox.findOne({ where: { id: chatId, sellerId: id }});
+            if (!chatBox) {
+                return res.status(404).json({ error: 'Chat box not found' });
+            }
+            const messages = await models.Message.findAll({ where: { chatBoxId: chatId }});
+            return res.status(200).json({ chatBox, messages });
+        } catch (error) {
+            console.error('Error fetching chat box:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
+    postMessage = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { chatBoxId, content } = req.body;
+            if (!chatBoxId || !content) {
+                return res.status(400).json({ error: 'Chat box ID and content are required' });
+            }
+            const message = await models.Message.create({
+                chatBoxId,
+                senderId: id,
+                content
+            });
+            return res.status(201).json({ message });
+        } catch (error) {
+            console.error('Error posting message:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
 
 
 }
