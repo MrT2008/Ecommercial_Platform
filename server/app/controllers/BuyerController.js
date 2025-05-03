@@ -15,6 +15,10 @@ class BuyerController {
                     }
                     
                     const User = await models.User.findOne({ where: { id: buyerId } });
+                    if (User.imageURL){
+                        User.imageURL = User.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/');
+                        User.imageURL = `${req.protocol}://${req.get('host')}/${User.imageURL}`
+                    }
         
                     if (!User) {
                         return res.status(404).json({ error: 'User not found' });
@@ -33,8 +37,14 @@ class BuyerController {
     editProfileInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
+<<<<<<< Updated upstream
             const {fullName, email, phoneNumber, imageURL} = req.body
 
+=======
+            const {fullName, email} = req.body
+            const imageURL = req.file ? req.file.path : null;
+            console.log("imageURL", imageURL)
+>>>>>>> Stashed changes
             const user = await models.User.findByPk(buyerId)
             if (!user) {
                 return res.status(404).json({ error: 'User not found' }); 
@@ -43,7 +53,11 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
+<<<<<<< Updated upstream
                 imageURL: imageURL
+=======
+                imageURL: imageURL,
+>>>>>>> Stashed changes
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
