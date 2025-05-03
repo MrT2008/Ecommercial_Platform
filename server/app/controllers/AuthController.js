@@ -16,7 +16,7 @@ class AuthController {
             const existingUser = await models.User.findOne({ where: { email } });
             if (existingUser) {
                 await t.rollback();
-                return res.status(409).json({ error: 'This email is available!' });
+                return res.status(409).json({ error: 'This email is already registered!' });
             }
 
             const newUser = await models.User.create({ email, password, fullName }, { transaction: t });
@@ -42,6 +42,7 @@ class AuthController {
                 imageURL: newUser.imageURL,
                 roles: ['buyer'],
             };
+            
     
             res.status(201).json({ message: 'User registered successfully', user: userResponse });
         } catch (error) {

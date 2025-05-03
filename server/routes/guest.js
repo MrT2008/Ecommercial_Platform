@@ -8,6 +8,7 @@ router.get('/search/:keyword', GuestController.searchProducts);
 router.get('/product', GuestController.getAllProducts);
 router.get('/product/onSale', GuestController.getAllProductsOnSale);
 router.get('/product/:id', GuestController.getProductById);
+router.get('/product/:id/reviews', GuestController.getAllProductReview);
 
 router.get('/promotions', GuestController.getAllPromotions);
 
@@ -17,9 +18,5 @@ router.get('/shop/:id/products', GuestController.getProductsByShopId);
 
 router.get('/shop/:id/categories', GuestController.getCategoriesByShopId);
 router.get('/shop/:id/products/:cId', GuestController.getProductsByCategoryId);
-
-
-
-
 
 module.exports = router;
