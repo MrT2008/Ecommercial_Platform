@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 const images = [
   "https://cdn.memorykings.pe/files/2023/01/10/346060-MK033431GRANDE.jpg",
-  "https://mwallpaper.ir/wp-content/uploads/2022/04/%D9%88%D8%A7%D9%84%D9%BE%DB%8C%D9%BE%D8%B1-%D8%AF%D8%AE%D8%AA%D8%B1%D9%88%D9%86%D9%87-%D8%A7%D9%86%DB%8C%D9%85%D9%87-%D8%A8%D8%A7-%D9%85%D9%88%D9%87%D8%A7%DB%8C-%D8%A8%D9%84%D9%86%D8%AF-%D9%88-%DA%A9%DB%8C%D9%81%DB%8C%D8%AA-4k.jpg",
+  "https://truyenthongdps.com/wp-content/uploads/2021/09/banner-5.png",
   "https://wallpaperaccess.com/full/659962.jpg",
   "https://i.pinimg.com/originals/53/73/91/537391efba4fef0628870aeb9e30dc62.jpg",
   "https://www.jigsawplanet.com/princesslexi/Anime03?rc=face",
@@ -40,7 +40,7 @@ const Carousel = () => {
         <img
           src={images[currentIndex]}
           alt="carousel"
-          className="w-full h-64 object-cover transition duration-500 ease-in-out transform scale-100"
+          className="w-full h-96 object-cover transition duration-500 ease-in-out transform scale-100"
         />
       </div>
 
