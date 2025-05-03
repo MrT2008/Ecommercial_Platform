@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 
 const images = [
   "https://cdn.memorykings.pe/files/2023/01/10/346060-MK033431GRANDE.jpg",
-  "https://truyenthongdps.com/wp-content/uploads/2021/09/banner-5.png",
-  "https://wallpaperaccess.com/full/659962.jpg",
-  "https://i.pinimg.com/originals/53/73/91/537391efba4fef0628870aeb9e30dc62.jpg",
-  "https://www.jigsawplanet.com/princesslexi/Anime03?rc=face",
+  "https://img.freepik.com/premium-vector/summer-sale-banner-template-with-frame-blue-floral-leaf_90661-594.jpg?w=996",
+  "https://reallyree.com/wp-content/uploads/2018/07/charlotte-tilbury-summer-sale-2018.jpg",
+  "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/864a19202871479.668d766568781.jpg",
+  "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/2bbcfa99737217.5ef9be3dbb9a9.jpg",
 ];
 
 const Carousel = () => {
