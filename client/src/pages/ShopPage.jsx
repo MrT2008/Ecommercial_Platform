@@ -16,7 +16,7 @@ function ShopPage() {
       <Carousel />
       
       {/* Categories - now full width above products */}
-      <ShopCategories />
+      <ShopCategories shopId={id}/>
       
       {/* Main content with products - now full width */}
       <ShopProducts shopId={id} />

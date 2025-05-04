@@ -272,7 +272,7 @@ const ProductDetail = () => {
                         Chat Now
                     </button>
                     <Link 
-                        to={`/guest/shop/${shop.id}`} 
+                        to={`/guest/shop/${product.shopId}`} 
                         className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 flex items-center justify-center"
                     >
                         View Shop
