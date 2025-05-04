@@ -36,7 +36,9 @@ const loginForm = () => {
                 navigate('/');
             } else if (user?.roles?.length === undefined) { //handle case when user has no role
                 setErrorMessage('');
-            } 
+            } else if (user?.roles?.includes('moderator')) {
+                navigate('/admin/admin-dashboard'); 
+            }
             else {
                 setErrorMessage('Invalid role. Please contact support.');
             }
