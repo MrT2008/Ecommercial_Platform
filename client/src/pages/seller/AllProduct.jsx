@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import AddProductDialog from "../../pages/seller/AddProductDialog";
-import { getSellerId, getShopIdFromUserId } from "../../api/sellerAPI";
+import { getSellerId } from "../../api/sellerAPI";
 
 const AllProduct = () => {
   const [products, setProducts] = useState([]);
@@ -12,30 +12,30 @@ const AllProduct = () => {
   const [error, setError] = useState(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [sellerId, setSellerId] = useState(null);
-
+  const [shopId, setShopId] = useState(null);
   // Fetch products when component mounts
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Lấy seller (user) ID
         const userId = getSellerId();
-        setSellerId(userId);
-        console.log(`Đang fetch shop cho user ID: ${userId}`);
-  
-        const shopId = await getShopIdFromUserId(userId);
-        console.log(`Shop ID: ${shopId}`);
+        const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
+        const shopData = await shopRes.json();
+        const shopId = shopData.data.shop.id;
+        setShopId(shopId);
 
         // Gọi API để lấy danh sách sản phẩm từ shop ID
         const productRes = await fetch(`http://localhost:8080/seller/${shopId}/getProducts`);
         if (!productRes.ok) {
           throw new Error(`Error: ${productRes.status}`);
         }
-  
+
         const products = await productRes.json();
-        console.log(`Đã nhận được ${products.length} sản phẩm từ API`);
-        setProducts(products);
+        // Lọc chỉ giữ những sản phẩm có status là "active"
+        const activeProducts = products.filter((product) => product.status !== "isdeleted");
+
+        console.log(`Đã nhận được ${activeProducts.length} sản phẩm từ API`);
+        setProducts(activeProducts);
         setError(null);
       } catch (err) {
         console.error("Không thể fetch sản phẩm:", err);
@@ -45,45 +45,45 @@ const AllProduct = () => {
         setIsLoading(false);
       }
     };
-  
+
     fetchProducts();
   }, []);
-  
+
   const handleSaveProduct = async (product) => {
     try {
       // Get the shop ID first
-      const userId = getSellerId(); // Make sure you have this function or replace with appropriate way to get userId
+      const userId = getSellerId();
       let shopId;
-      
+
       try {
         // Fetch the shop ID first
         const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
         const shopData = await shopRes.json();
-        if (!shopData.data?.shop?.id) {
+        shopId = shopData.data.shop.id;
+        if (!shopId) {
           throw new Error("Shop ID not found in response");
         }
-        shopId = shopData.data.shop.id;
         console.log("Found shop ID:", shopId);
       } catch (err) {
         console.error("Error getting shop ID:", err);
         alert("Failed to find your shop. Please check if you're logged in properly.");
         return;
       }
-      
-      const url = `http://localhost:8080/seller/${shopId}/postProduct`; 
+
+      const url = `http://localhost:8080/seller/${shopId}/postProduct`;
       const method = editingProduct ? 'PUT' : 'POST';
       const endpoint = editingProduct ? `${url}/${editingProduct.id}` : url;
-      
+
       console.log("Sending request to:", endpoint);
-      
+
       // Create FormData object instead of JSON
       const formData = new FormData();
-      
+
       // Add all fields with null checks
       formData.append('name', product.name || '');
       formData.append('price', product.price?.toString() || '0');
       formData.append('description', product.description || '');
-      
+
       // Handle categories
       if (Array.isArray(product.categories) && product.categories.length > 0) {
         product.categories.forEach((cat, index) => {
@@ -93,11 +93,11 @@ const AllProduct = () => {
         // Add a default category if none provided
         formData.append('categories[0]', 'uncategorized');
       }
-      
+
       formData.append('quantity', product.quantity?.toString() || '0');
       formData.append('type', 'product');
       formData.append('discount', product.discount?.toString() || '0');
-      
+
       // Handle image upload
       if (product.image) {
         if (typeof product.image === 'string' && product.image.startsWith('data:')) {
@@ -113,7 +113,7 @@ const AllProduct = () => {
           formData.append('thumbnailURL', product.image);
         }
       }
-  
+
       // Log what we're sending
       console.log('Sending product data to:', endpoint);
       const formDataEntries = {};
@@ -121,7 +121,7 @@ const AllProduct = () => {
         formDataEntries[key] = value instanceof Blob ? 'Blob/File data' : value;
       }
       console.log('Form data:', formDataEntries);
-      
+
       const response = await fetch(endpoint, {
         method: method,
         // Don't set Content-Type header when using FormData
@@ -129,20 +129,11 @@ const AllProduct = () => {
         credentials: 'include',
         body: formData,
       });
-  
+
       if (!response.ok) {
         const errorData = await response.text();
         console.error('Server error response:', errorData);
         throw new Error(`Failed to save product: ${response.status} ${response.statusText}`);
-      }
-  
-      // Refresh products list after saving
-      const updatedProductsResponse = await fetch(`http://localhost:8080/seller/${sellerId}/getProducts`);
-      if (updatedProductsResponse.ok) {
-        const updatedProducts = await updatedProductsResponse.json();
-        setProducts(updatedProducts);
-      } else {
-        console.warn('Failed to refresh products list');
       }
       
       // Show success message
@@ -159,8 +150,9 @@ const AllProduct = () => {
   const handleDeleteProduct = async (productId) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        const response = await fetch(`http://localhost:8080/seller/${sellerId}/products/${productId}`, {
-          method: 'DELETE',
+        const response = await fetch(`http://localhost:8080/seller/${shopId}/deleteProduct/${productId}`, {
+          method: 'PUT',
+          credentials: 'include',
         });
 
         if (!response.ok) {
@@ -245,11 +237,10 @@ const AllProduct = () => {
                   <td className="p-2">{p.discount || '0%'}</td>
                   <td className="p-2">
                     <span
-                      className={`px-2 py-1 rounded text-sm font-medium ${
-                        p.status === 'Active'
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-red-100 text-red-600'
-                      }`}
+                      className={`px-2 py-1 rounded text-sm font-medium ${p.status === 'Active'
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-red-100 text-red-600'
+                        }`}
                     >
                       {p.status}
                     </span>
@@ -285,6 +276,7 @@ const AllProduct = () => {
                         className="text-[#EA4335]"
                         title="Delete"
                         onClick={() => handleDeleteProduct(p.id)}>
+                        {p.id}
                         <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </div>
@@ -300,10 +292,10 @@ const AllProduct = () => {
           isOpen={isDialogOpen}
           onClose={() => {
             setDialogOpen(false);
-            setEditingProduct(null); 
+            setEditingProduct(null);
           }}
           onSave={handleSaveProduct}
-          product={editingProduct} 
+          product={editingProduct}
         />
       </div>
     </div>

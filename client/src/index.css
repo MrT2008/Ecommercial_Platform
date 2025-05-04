@@ -17,10 +17,6 @@
   --secondary: #FFA50B;
   --main: #000144;
 }
-main {
-  transform: scale(0.7);
-  transform-origin: top center; 
-}
 a {
   font-weight: 500;
   color: #999999;

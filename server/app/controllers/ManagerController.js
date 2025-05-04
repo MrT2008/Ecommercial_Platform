@@ -3,12 +3,34 @@ const reuse = require('../reuse/reuse');
 const { Sequelize } = require('sequelize');
 
 class ManagerController {
+    getDashboardData = async (req, res) => {
+        try {
+            const totalUsers = await reuse.getTotalActiveUsers();
+            const totalShops = await reuse.getTotalActiveShops();
+            const totalSales = await reuse.getTotalSales();
+            const totalProductsSold = await reuse.getTotalProductsSold();
+
+            res.status(200).json({
+                message: 'Dashboard data retrieved successfully',
+                data: {
+                    totalUsers,
+                    totalShops,
+                    totalSales,
+                    totalProductsSold
+                }
+            })
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
     // Featured Announcement Management
     sendAnnouncement = async (req, res) => {
         const t = await models.Announcement.sequelize.transaction();
         try {
             const { title, script } = req.body;
-            const imageURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Annoucement.jpg'; 
+            const imageURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\default\Annoucement.jpg'; 
             const senderId = req.user.id;
 
             const announcement = await reuse.sentAnnouncement(senderId, title, imageURL, script, { transaction: t });
@@ -31,7 +53,7 @@ class ManagerController {
         try {
             const announcements = await reuse.getAllAnnouncements();
             for (const announcement of announcements) {
-                if (announcement.imageURL) {
+                if (announcement.imageURL && !announcement.imageURL.startsWith('http')) {
                     // Normalize the image path
                     announcement.imageURL = announcement.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/');
                     // Prepend the full URL
@@ -452,8 +474,7 @@ class ManagerController {
     createModerator = async (req, res) => {
         const t = await models.User.sequelize.transaction();
         try {
-            const { email, fullName } = req.body;
-            const password = process.env.MODERATOR_DEFAULT_PASSWORD;
+            const { email, fullName, password } = req.body;
 
             const existingUser = await models.User.findOne({ where: { email } });
             if (existingUser) {

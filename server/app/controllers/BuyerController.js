@@ -15,6 +15,10 @@ class BuyerController {
                     }
                     
                     const User = await models.User.findOne({ where: { id: buyerId } });
+                    if (User.imageURL && !User.imageURL.startsWith('http')){
+                        User.imageURL = User.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/');
+                        User.imageURL = `${req.protocol}://${req.get('host')}/${User.imageURL}`
+                    }
         
                     if (!User) {
                         return res.status(404).json({ error: 'User not found' });
@@ -33,7 +37,9 @@ class BuyerController {
     editProfileInformation = async (req, res) => {
         try {
             const {buyerId} = req.params
-            const {fullName, email, phoneNumber, imageURL} = req.body
+            const {fullName, email} = req.body
+            const imageURL = req.file ? req.file.path : null;
+
 
             const user = await models.User.findByPk(buyerId)
             if (!user) {
@@ -43,7 +49,7 @@ class BuyerController {
             await user.update({
                 fullName: fullName,
                 email: email,
-                imageURL: imageURL
+                imageURL: imageURL,
             })
             return res.status(200).json({ message: 'Update user sucessfully' });
         } catch (error) {
@@ -58,7 +64,8 @@ class BuyerController {
 
             const paymentMethodList = await models.PaymentMethod.findAll({
                 where: {
-                    userId: buyerId
+                    userId: buyerId,
+                    isDeleted: false
                 }
             })
 
@@ -94,7 +101,6 @@ class BuyerController {
             if (!allreadyHasDefault) {
                 usePaymentMethod = true
             }
-            // console.log("usePyament aaaaaaaaaaaaa", usePaymentMethod)
             const existingPaymentMethod = await models.PaymentMethod.findOne({
                 where: {
                     userId: buyerId,
@@ -126,7 +132,6 @@ class BuyerController {
                 }
             }
             if (inUsed) {
-                console.log("aaaaaaaaaaaaaaaaaaaa")
                 const previousDefaultMethod = await models.PaymentMethod.findOne({
                     where: {
                         userId: buyerId,
@@ -269,7 +274,10 @@ class BuyerController {
                     userId: existingCart.userId,
                     productId: existingCart.productId,
                     productName: product.name,
-                    quantity: existingCart.quantity
+                    quantity: existingCart.quantity,
+                    productSalePrice: product.salePrice,
+                    productImage: product.thumbnailURL,
+
                 }
                 cart = data
             } else {
@@ -285,7 +293,10 @@ class BuyerController {
                     userId: newCart.userId,
                     productId: newCart.productId,
                     productName: product.name,
-                    quantity: newCart.quantity
+                    quantity: newCart.quantity,
+                    productSalePrice: product.salePrice,
+                    productImage: product.thumbnailURL,
+
                 }
                 cart = data
             }
@@ -387,9 +398,13 @@ class BuyerController {
                 }
                 const cartItem = {
                     shopName: shop.name,
+                    shopId: shop.id,
                     userId: item.userId,
                     productId: item.productId,
                     productName: product.name,
+                    productSalePrice: product.salePrice,
+                    productImage: product.thumbnailURL,
+                    productPrice: product.price,
                     quantity: item.quantity
                 }
                 cart[`product_${item_index}`] = cartItem
@@ -567,7 +582,6 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
-
     addShippingInfo = async (req, res) => {
         try {
             const {buyerId} = req.params
@@ -617,6 +631,37 @@ class BuyerController {
             }
 
             return res.status(200).json({message: "Shipping information successfully created"})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    editShippingInformation = async (req, res) => {
+        try {
+            const {buyerId} = req.params
+            const {receiverName, address, phone, status, id} = req.body
+
+            const existingInfo  = await models.ShipInfo.findOne({
+                where: {
+                    userId: buyerId,
+                    id: id,
+                }
+            })
+
+            if (!existingInfo) {
+                return res.status(400).json({ error: 'User have no shipping information' });
+            }
+
+            if (existingInfo) {
+                existingInfo.update({
+                    receiverName: receiverName || existingInfo.receiverName,
+                    address: address || existingInfo.address,
+                    phone: phone || existingInfo.phone,
+                    status: status || existingInfo.status
+                })
+            }
+
+            return res.status(200).json({message: "Shipping information successfully updated", existingInfo})
         } catch (error) {
             console.log(error)
             res.status(500).json({ message: 'Internal Server Error' });
@@ -760,6 +805,98 @@ class BuyerController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
+
+    //Chat box
+    createChat = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { shopId } = req.body;
+            const chatBox = await models.ChatBox.create({
+                sellerId: shopId,
+                buyerId: id,
+            });
+            return res.status(200).json({ message: 'Chat box created successfully', chatBox });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    getAllChat = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const chatBoxes = await models.ChatBox.findAll({where: {buyerId: id,},
+                include: [
+                    {
+                        model: models.User,
+                        as: 'seller',
+                        attributes: ['id', 'fullName', 'imageURL'],
+                    },
+                    {
+                        model: models.Message,
+                        as: 'messages',
+                        include: [
+                            {
+                                model: models.User,
+                                as: 'sender',
+                                attributes: ['id', 'fullName', 'imageURL'],
+                            },
+                        ],
+                    },
+                ],
+            });
+            const sender = await models.User.findOne({ where: { id: id } });
+            return res.status(200).json({ message: 'Chat boxes retrieved successfully', chatBoxes, sender });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    getChatById = async (req, res) => {
+        try {
+            const { id, chatId } = req.params;
+            const chatBox = await models.ChatBox.findOne({
+                where: {
+                    id: chatId,
+                    buyerId: id,
+                },
+                include: [
+                    {
+                        model: models.Message,
+                        as: 'messages',
+                        include: [
+                            {
+                                model: models.User,
+                                as: 'sender',
+                                attributes: ['id', 'fullName', 'imageURL'],
+                            },
+                        ],
+                    },
+                ],
+            });
+            return res.status(200).json({ message: 'Chat box retrieved successfully', chatBox });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    postMessage = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { chatId, message } = req.body;
+            const newMessage = await models.Message.create({
+                chatBoxId: chatId,
+                senderId: id,
+                message: message,
+            });
+            return res.status(200).json({ message: 'Message sent successfully', newMessage });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
 
 }
 

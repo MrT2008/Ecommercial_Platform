@@ -7,7 +7,7 @@ import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 import Button from '../shares/Button';
-import React from 'react'
+// import React from 'react'
 
 const SignUpForm = () => {
 
@@ -38,25 +38,33 @@ const SignUpForm = () => {
         }
     
         try {
-            await signUp(userEmail, password, fullName);
-            
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            try {
-                await login(userEmail, password);
-                setErrorMessage('');
-            } catch (error) {
-                setErrorMessage('Login failed. Please try again.');
+            const success = await signUp(userEmail, password, fullName);
+            if (success) {
+                const loginSuccess = await login(userEmail, password);
+                if (loginSuccess) {
+                    navigate('/');
+                } else {
+                    setErrorMessage('Login failed. Please try again.');
+                }
+            }
+            else {
+                setErrorMessage('Sign up failed. Due to your email is in use.');
             }
         } catch (error) {
-            console.log('error is: ',error);
-        }
+          if (error?.response?.status === 409) {
+              setErrorMessage(error.response.data.error); // "Email already exists"
+          } else {
+              setErrorMessage('Sign up failed. Please try again later.');
+          }
+          console.log('Sign up error:', error);
+      }
+      
     }
 
     useEffect(() => {
         if (session) {
             if (user?.roles.includes('manager')) {
-                navigate('/manager'); // just an example, we don't have the admin page yet
+                navigate('/admin/admin-dashboard'); // just an example, we don't have the admin page yet
             } else if (user?.roles.includes('buyer')) {
                 navigate('/');
             } else if (user?.roles.length === 0) {

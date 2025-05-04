@@ -4,6 +4,7 @@ const sellerController = require("../app/controllers/SellerController");
 const upload = require('../app/middlewares/uploadFile');
 
 
+
 //shop
 router.get("/getShop/:id", sellerController.getShop);
 router.get("/getAllShop", sellerController.getAllShop);
@@ -33,6 +34,14 @@ router.get("/:id/getDashboard", sellerController.getDashboard);
 // //Information
 router.get("/:id/getInformation", sellerController.getInformation);
 router.put("/:id/updateInformation", sellerController.updateInformation);
+
+// Chat box
+router.post("/:id/createChat", sellerController.createChat);
+router.get("/:id/getAllChat", sellerController.getAllChat);
+router.get("/:id/getChat/:chatId", sellerController.getChatById);
+router.post("/:id/postMessage", sellerController.postMessage);
+
+
 
 // //Review
 // router.post('/:id/postReview', sellerController.postReview);

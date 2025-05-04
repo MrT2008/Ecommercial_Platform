@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const BuyerController = require('../app/controllers/BuyerController');
+const upload = require('../app/middlewares/uploadFile');
 
 //Profile
 router.get('/:buyerId/viewProfile', BuyerController.viewProfileInformation) //.
-router.put('/:buyerId/editProfile', BuyerController.editProfileInformation) //.
+router.put('/:buyerId/editProfile',upload.single('imageURL'), BuyerController.editProfileInformation) //.
 
 //PaymentMethod
 router.post('/:buyerId/payment/', BuyerController.addPaymentMethod) //.
@@ -27,8 +28,22 @@ router.post('/:buyerId/shippingInfo', BuyerController.addShippingInfo) //.
 router.get('/:buyerId/shippingInfo', BuyerController.getAllShippingInfo) //.
 router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippingInformation) //.
 router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
+router.put('/:buyerId/shippingInfo/edit', BuyerController.editShippingInformation) //
 
-router.post('/:buyerId/shop/create', BuyerController.createNewShop)
+// Chat box
+router.post("/:id/createChat", BuyerController.createChat);
+router.get("/:id/getAllChat", BuyerController.getAllChat);
+router.get("/:id/getChat/:chatId", BuyerController.getChatById);
+router.post("/:id/postMessage", BuyerController.postMessage);
+
+//Shop
+router.post('/:buyerId/shop/create', BuyerController.createNewShop) //.
+
+//Review
+// router.post('/:buyerId/review/addReview', BuyerController.addNewReview)
+// router.get('/:buyerId/review/', BuyerController.viewYourReviews) //.
+// router.put('/:buyerId/review/editReview', BuyerController.editReview) //.
+// router.put('/:buyerId/review/removeReview', BuyerController.removeReview) //.
 
 
 module.exports = router;
