@@ -40,10 +40,10 @@ router.post("/:id/postMessage", BuyerController.postMessage);
 router.post('/:buyerId/shop/create', BuyerController.createNewShop) //.
 
 //Review
-router.post('/:buyerId/review/addReview', BuyerController.addNewReview)
-router.get('/:buyerId/review/', BuyerController.viewYourReviews) //.
-router.put('/:buyerId/review/editReview', BuyerController.editReview) //.
-router.put('/:buyerId/review/removeReview', BuyerController.removeReview) //.
+// router.post('/:buyerId/review/addReview', BuyerController.addNewReview)
+// router.get('/:buyerId/review/', BuyerController.viewYourReviews) //.
+// router.put('/:buyerId/review/editReview', BuyerController.editReview) //.
+// router.put('/:buyerId/review/removeReview', BuyerController.removeReview) //.
 
 
 module.exports = router;

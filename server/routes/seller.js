@@ -44,10 +44,10 @@ router.post("/:id/postMessage", sellerController.postMessage);
 
 
 // //Review
-router.post('/:id/postReview', sellerController.postReview);
-router.get('/:id/getReview', sellerController.getReview);
-router.get('/:id/getReview/:reviewId', sellerController.getReviewById);
-router.put('/:id/updateReview/:reviewId', sellerController.updateReview);
-router.delete('/:id/deleteReview/:reviewId', sellerController.deleteReview);
+// router.post('/:id/postReview', sellerController.postReview);
+// router.get('/:id/getReview', sellerController.getReview);
+// router.get('/:id/getReview/:reviewId', sellerController.getReviewById);
+// router.put('/:id/updateReview/:reviewId', sellerController.updateReview);
+// router.delete('/:id/deleteReview/:reviewId', sellerController.deleteReview);
 
 module.exports = router;

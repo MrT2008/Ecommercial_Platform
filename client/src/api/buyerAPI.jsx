@@ -142,15 +142,15 @@ export const removeFromCart = async (buyerID, productID) => {
   }
 }
 
-export const getShippingInfo = async (buyerID) => {
-  try {
-    const response = await api.get(`/buyer/${buyerID}/shippingInfo`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching shipping info:", error);
-    return null;
-  }
-}
+// export const getShippingInfo = async (buyerID) => {
+//   try {
+//     const response = await api.get(`/buyer/${buyerID}/shippingInfo`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching shipping info:", error);
+//     return null;
+//   }
+// }
 
 export const proceedWithCheckout = async (buyerID, paymentMethod, productId) => {
   try {
@@ -176,14 +176,14 @@ export const getAllOrdersByStatus = async (buyerID, status) => {
 }
 
 //Manage account
-export function getBuyerId() {
-  try {
-    const raw = localStorage.getItem("user");  // key bạn dùng khi login
-    if (!raw) return null;
-    const user = JSON.parse(raw);
-    return user.id || user.buyerId || null;
-  } catch (err) {
-    console.error("buyerAPI.getBuyerId error:", err);
-    return null;
-  }
-}
+// export function getBuyerId() {
+//   try {
+//     const raw = localStorage.getItem("user");  // key bạn dùng khi login
+//     if (!raw) return null;
+//     const user = JSON.parse(raw);
+//     return user.id || user.buyerId || null;
+//   } catch (err) {
+//     console.error("buyerAPI.getBuyerId error:", err);
+//     return null;
+//   }
+// }

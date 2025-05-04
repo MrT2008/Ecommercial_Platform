@@ -11,10 +11,9 @@ const AccountProfile = () => {
   const [userInfo, setUserInfo] = useState({
     username: "",
     email: "",
-    image: "/images/cat-avatar.jpg",
+    image: "",
   });
-  const [previewImage, setPreviewImage] = useState("/images/cat-avatar.jpg");
-  const [imageFile, setImageFile] = useState(null);
+  const [image, setImage] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
