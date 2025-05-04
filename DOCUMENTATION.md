@@ -158,7 +158,18 @@ npm run dev
 
 ### 9. (Optional) Add mock data
 
-To create mock data, you can run the `CreateDataScript.sql` file in MySQL Workbench to add mock data to the database
+> **Important:** Before running the mock data script, make sure to unlock all tables in your MySQL Workbench session to prevent errors.
+
+To create mock data, follow these steps:
+
+1. **Create the database** (see step 3 above).
+2. **Start the backend server:**
+   ```sh
+   cd server
+   npm start
+   ```
+3. **Unlock tables in MySQL Workbench** before running the script.
+4. **Run the `CreateDataScript.sql` file** in MySQL Workbench to add mock data to the database.
 
 ---
 
