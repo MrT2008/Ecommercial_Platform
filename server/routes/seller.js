@@ -35,15 +35,12 @@ router.get("/:id/getDashboard", sellerController.getDashboard);
 router.get("/:id/getInformation", sellerController.getInformation);
 router.put("/:id/updateInformation",upload.array('images', 5), sellerController.updateInformation);
 
-<<<<<<< HEAD
 // Chat box
 router.post("/:id/createChat", sellerController.createChat);
 router.get("/:id/getAllChat", sellerController.getAllChat);
 router.get("/:id/getChat/:chatId", sellerController.getChatById);
 router.post("/:id/postMessage", sellerController.postMessage);
 
-=======
->>>>>>> parent of a2fa6fb (Merge branch 'dev1' into merge-dev1)
 router.put("/:id/updateInformation",upload.array('images', 5), sellerController.updateInformation);
 
 
