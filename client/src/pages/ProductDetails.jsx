@@ -19,45 +19,20 @@ const ProductDetail = () => {
     const [selectItem, setSelectItem] = useState(null);
     const navigate = useNavigate();
 
+    if (loading) return null; // Show loading state if needed
 
     const productId = window.location.pathname.split('/').pop(); 
-    // useEffect(() => {
-    //     const fetchProduct = async () => {
-    //         try {
-    //             const response = await getProductById(productId);
-    //             setProduct(response.product);
-    //         } catch (error) {
-    //             console.error('Error fetching product:', error);
-    //         }
-    //     };
-    //     fetchProduct();
-    // }, [productId]);
     useEffect(() => {
-        const fetchProductAndShop = async () => {
-          try {
-            // Lấy productId từ URL
-            const productId = window.location.pathname.split('/').pop();
-      
-            // Gọi API để lấy product
-            const productRes = await axios.get(`http://localhost:8080/guest/product/${productId}`);
-            const fetchedProduct = productRes.data.product;
-            setProduct(fetchedProduct);
-      
-            // Sau khi có shopId từ product, gọi API để lấy shop
-            if (fetchedProduct?.shopId) {
-              const shopRes = await axios.get(`http://localhost:8080/guest/shop/${fetchedProduct.shopId}`);
-              const shopData = shopRes.data.shop?.[0]; // vì shop trả về dưới dạng array
-              setShop(shopData);
+        const fetchProduct = async () => {
+            try {
+                const response = await getProductById(productId);
+                setProduct(response.product);
+            } catch (error) {
+                console.error('Error fetching product:', error);
             }
-          } catch (error) {
-            console.error('Error fetching product or shop:', error);
-          }
         };
-      
-        fetchProductAndShop();
-      }, []);
-      
-    if (loading) return null; // Show loading state if needed
+        fetchProduct();
+    }, [productId]);
 
     const handleAddToCart = async () => {
         if (!user) {
@@ -100,19 +75,19 @@ const ProductDetail = () => {
         }
     };
 
-    // useEffect(() => {
-    //     const fetchShop = async () => {
-    //         try {
-    //             const response = await getShopById(product?.shopId); // Assuming product has a shopId property
-    //             setShop(response.shop);
-    //         } catch (error) {
-    //             console.error('Error fetching shop:', error);
-    //         }
-    //     };
-    //     if (product) {
-    //         fetchShop();
-    //     }
-    // }, [product]);
+    useEffect(() => {
+        const fetchShop = async () => {
+            try {
+                const response = await getShopById(product?.shopId); // Assuming product has a shopId property
+                setShop(response.shop);
+            } catch (error) {
+                console.error('Error fetching shop:', error);
+            }
+        };
+        if (product) {
+            fetchShop();
+        }
+    }, [product]);
 
 
     const reviews = [
@@ -177,14 +152,14 @@ const ProductDetail = () => {
     
 
     return (
-        <div style={{ zoom: "90%" }}  className="container mx-auto px-4 py-8">
-            {/* <div className="flex items-center text-sm text-gray-500 mb-6">
+        <div className="container mx-auto px-16 py-8">
+            <div className="flex items-center text-sm text-gray-500 mb-6">
                 <a href="/account" className="hover:text-blue-600">Account</a>
                 <span className="mx-2">/</span>
                 <a href="/furniture" className="hover:text-blue-600">Furniture</a>
                 <span className="mx-2">/</span>
                 <span className="text-gray-700">{product.name}</span>
-            </div> */}
+            </div>
 
             <div className="flex flex-col md:flex-row gap-8 mb-12">
                 <div className="w-full md:w-1/2 bg-gray-100 p-8 rounded-lg">
@@ -249,7 +224,7 @@ const ProductDetail = () => {
 
 
 
-                    <div className="border border-gray-200 rounded mb-6">
+                    <div className="border-1 border-gray-500 rounded mb-6">
                         <div className="p-4 flex items-start">
                             <FontAwesomeIcon icon={faTruck} className="text-gray-700 mt-1 mr-3" />
                             <div>
@@ -270,38 +245,46 @@ const ProductDetail = () => {
             </div>
 
             {/* Shop Section */}
-            <div className="flex items-center justify-between border-t border-b py-6 mb-8">
-                <div className="flex items-center">
-                    <img src={shop.avatarUrl} alt={shop.name} className="w-16 h-16 rounded-full object-cover mr-4" />
+            <div className="border-1 border-gray-400 rounded mb-8">
+                <div className="p-6 flex items-center justify-between">
+                    <div className="flex items-center">
+                    <img
+                        src={shop.image}
+                        alt={shop.name}
+                        className="w-16 h-16 rounded-full object-cover mr-4"
+                    />
                     <div>
                         <h3 className="font-medium text-lg">{shop.name}</h3>
                         <div className="flex text-yellow-400">
-                            {Array(5).fill().map((_, i) => (
-                                <FontAwesomeIcon key={i} icon={faStar} />
-                            ))}
+                        {Array(5).fill().map((_, i) => (
+                            <FontAwesomeIcon key={i} icon={faStar} />
+                        ))}
                         </div>
                     </div>
-                </div>
-                <div className="flex gap-4">
+                    </div>
+
+                    <div className="flex gap-8">
                     <div className="text-center">
-                        <div className="font-medium text-blue-600">{shop.totalEvaluations}</div>
+                        <div className="font-medium text-blue-600">{shop.evaluation}</div>
                         <div className="text-sm text-gray-500">Evaluate</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-medium">{shop.totalProducts}</div>
+                        <div className="font-medium">{shop.products}</div>
                         <div className="text-sm text-gray-500">Product</div>
                     </div>
-                </div>
-                <div className="flex gap-2">
-                    <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50">
+                    </div>
+
+                    <div className="flex gap-2">
+                    <button className="border border-[#000282] text-[#000282] px-4 py-2 rounded hover:bg-blue-50">
                         Chat Now
                     </button>
-                    <Link 
-                        to={`/guest/shop/${shop.id}`} 
+                    <Link
+                        to={`/guest/shop/${product.shopId}`}
                         className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 flex items-center justify-center"
                     >
                         View Shop
                     </Link>
+                    </div>
                 </div>
             </div>
 
