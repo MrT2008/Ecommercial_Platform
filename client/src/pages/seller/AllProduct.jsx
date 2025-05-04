@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import AddProductDialog from "../../pages/seller/AddProductDialog";
-import { getSellerId, getShopIdFromUserId } from "../../api/sellerAPI";
+import { getSellerId } from "../../api/sellerAPI";
 
 const AllProduct = () => {
   const [products, setProducts] = useState([]);
@@ -12,24 +12,30 @@ const AllProduct = () => {
   const [error, setError] = useState(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [shopId] = useState(null);
-  const [reloadProducts, setReloadProducts] = useState(false); // State to trigger reload
-
+  const [shopId, setShopId] = useState(null);
   // Fetch products when component mounts
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
         const userId = getSellerId();
-        const shopId = await getShopIdFromUserId(userId);
-        
+        const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
+        const shopData = await shopRes.json();
+        const shopId = shopData.data.shop.id;
+        setShopId(shopId);
+
+        // Gọi API để lấy danh sách sản phẩm từ shop ID
         const productRes = await fetch(`http://localhost:8080/seller/${shopId}/getProducts`);
         if (!productRes.ok) {
           throw new Error(`Error: ${productRes.status}`);
         }
 
         const products = await productRes.json();
-        setProducts(products);
+        // Lọc chỉ giữ những sản phẩm có status là "active"
+        const activeProducts = products.filter((product) => product.status !== "isdeleted");
+
+        console.log(`Đã nhận được ${activeProducts.length} sản phẩm từ API`);
+        setProducts(activeProducts);
         setError(null);
       } catch (err) {
         console.error("Không thể fetch sản phẩm:", err);
@@ -41,9 +47,8 @@ const AllProduct = () => {
     };
 
     fetchProducts();
-  }, [reloadProducts]); 
-  
-  
+  }, []);
+
   const handleSaveProduct = async (product) => {
     try {
       // Get the shop ID first
@@ -59,7 +64,6 @@ const AllProduct = () => {
           throw new Error("Shop ID not found in response");
         }
         console.log("Found shop ID:", shopId);
-        setReloadProducts(prev => !prev);
       } catch (err) {
         console.error("Error getting shop ID:", err);
         alert("Failed to find your shop. Please check if you're logged in properly.");
@@ -164,8 +168,6 @@ const AllProduct = () => {
     }
   };
 
-  console.log("Products:", products);
-
   return (
     <div className="flex">
       <Sidebar />
@@ -230,9 +232,9 @@ const AllProduct = () => {
                     )}
                     <span>{p.name}</span>
                   </td>
-                  <td className="p-2">{p.stock}</td>
+                  <td className="p-2">{p.quantity}</td>
                   <td className="p-2">${typeof p.price === 'number' ? p.price.toFixed(2) : p.price}</td>
-                  <td className="p-2">{p.saled + "%"|| '0%'}</td>
+                  <td className="p-2">{p.discount || '0%'}</td>
                   <td className="p-2">
                     <span
                       className={`px-2 py-1 rounded text-sm font-medium ${p.status === 'Active'
@@ -291,7 +293,6 @@ const AllProduct = () => {
           onClose={() => {
             setDialogOpen(false);
             setEditingProduct(null);
-            setReloadProducts(prev => !prev); 
           }}
           onSave={handleSaveProduct}
           product={editingProduct}
