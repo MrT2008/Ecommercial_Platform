@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react"; 
+import { useState,useEffect } from "react"; 
 import Sidebar from "../../components/account/accountSidebar";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import EditProfileDialog from "../account/EditProfileDialog"; 
