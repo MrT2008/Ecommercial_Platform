@@ -19,20 +19,45 @@ const ProductDetail = () => {
     const [selectItem, setSelectItem] = useState(null);
     const navigate = useNavigate();
 
-    if (loading) return null; // Show loading state if needed
 
     const productId = window.location.pathname.split('/').pop(); 
+    // useEffect(() => {
+    //     const fetchProduct = async () => {
+    //         try {
+    //             const response = await getProductById(productId);
+    //             setProduct(response.product);
+    //         } catch (error) {
+    //             console.error('Error fetching product:', error);
+    //         }
+    //     };
+    //     fetchProduct();
+    // }, [productId]);
     useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                const response = await getProductById(productId);
-                setProduct(response.product);
-            } catch (error) {
-                console.error('Error fetching product:', error);
+        const fetchProductAndShop = async () => {
+          try {
+            // Lấy productId từ URL
+            const productId = window.location.pathname.split('/').pop();
+      
+            // Gọi API để lấy product
+            const productRes = await axios.get(`http://localhost:8080/guest/product/${productId}`);
+            const fetchedProduct = productRes.data.product;
+            setProduct(fetchedProduct);
+      
+            // Sau khi có shopId từ product, gọi API để lấy shop
+            if (fetchedProduct?.shopId) {
+              const shopRes = await axios.get(`http://localhost:8080/guest/shop/${fetchedProduct.shopId}`);
+              const shopData = shopRes.data.shop?.[0]; // vì shop trả về dưới dạng array
+              setShop(shopData);
             }
+          } catch (error) {
+            console.error('Error fetching product or shop:', error);
+          }
         };
-        fetchProduct();
-    }, [productId]);
+      
+        fetchProductAndShop();
+      }, []);
+      
+    if (loading) return null; // Show loading state if needed
 
     const handleAddToCart = async () => {
         if (!user) {
@@ -75,19 +100,19 @@ const ProductDetail = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchShop = async () => {
-            try {
-                const response = await getShopById(product?.shopId); // Assuming product has a shopId property
-                setShop(response.shop);
-            } catch (error) {
-                console.error('Error fetching shop:', error);
-            }
-        };
-        if (product) {
-            fetchShop();
-        }
-    }, [product]);
+    // useEffect(() => {
+    //     const fetchShop = async () => {
+    //         try {
+    //             const response = await getShopById(product?.shopId); // Assuming product has a shopId property
+    //             setShop(response.shop);
+    //         } catch (error) {
+    //             console.error('Error fetching shop:', error);
+    //         }
+    //     };
+    //     if (product) {
+    //         fetchShop();
+    //     }
+    // }, [product]);
 
 
     const reviews = [
@@ -152,7 +177,7 @@ const ProductDetail = () => {
     
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div style={{ zoom: "90%" }}  className="container mx-auto px-4 py-8">
             <div className="flex items-center text-sm text-gray-500 mb-6">
                 <a href="/account" className="hover:text-blue-600">Account</a>
                 <span className="mx-2">/</span>
@@ -247,7 +272,7 @@ const ProductDetail = () => {
             {/* Shop Section */}
             <div className="flex items-center justify-between border-t border-b py-6 mb-8">
                 <div className="flex items-center">
-                    <img src={shop.image} alt={shop.name} className="w-16 h-16 rounded-full object-cover mr-4" />
+                    <img src={shop.avatarUrl} alt={shop.name} className="w-16 h-16 rounded-full object-cover mr-4" />
                     <div>
                         <h3 className="font-medium text-lg">{shop.name}</h3>
                         <div className="flex text-yellow-400">
@@ -259,11 +284,11 @@ const ProductDetail = () => {
                 </div>
                 <div className="flex gap-4">
                     <div className="text-center">
-                        <div className="font-medium text-blue-600">{shop.evaluation}</div>
+                        <div className="font-medium text-blue-600">{shop.totalEvaluations}</div>
                         <div className="text-sm text-gray-500">Evaluate</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-medium">{shop.products}</div>
+                        <div className="font-medium">{shop.totalProducts}</div>
                         <div className="text-sm text-gray-500">Product</div>
                     </div>
                 </div>
