@@ -152,7 +152,7 @@ const ProductDetail = () => {
     
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-16 py-8">
             <div className="flex items-center text-sm text-gray-500 mb-6">
                 <a href="/account" className="hover:text-blue-600">Account</a>
                 <span className="mx-2">/</span>
@@ -224,7 +224,7 @@ const ProductDetail = () => {
 
 
 
-                    <div className="border border-gray-200 rounded mb-6">
+                    <div className="border-1 border-gray-500 rounded mb-6">
                         <div className="p-4 flex items-start">
                             <FontAwesomeIcon icon={faTruck} className="text-gray-700 mt-1 mr-3" />
                             <div>
@@ -245,19 +245,25 @@ const ProductDetail = () => {
             </div>
 
             {/* Shop Section */}
-            <div className="flex items-center justify-between border-t border-b py-6 mb-8">
-                <div className="flex items-center">
-                    <img src={shop.image} alt={shop.name} className="w-16 h-16 rounded-full object-cover mr-4" />
+            <div className="border-1 border-gray-400 rounded mb-8">
+                <div className="p-6 flex items-center justify-between">
+                    <div className="flex items-center">
+                    <img
+                        src={shop.image}
+                        alt={shop.name}
+                        className="w-16 h-16 rounded-full object-cover mr-4"
+                    />
                     <div>
                         <h3 className="font-medium text-lg">{shop.name}</h3>
                         <div className="flex text-yellow-400">
-                            {Array(5).fill().map((_, i) => (
-                                <FontAwesomeIcon key={i} icon={faStar} />
-                            ))}
+                        {Array(5).fill().map((_, i) => (
+                            <FontAwesomeIcon key={i} icon={faStar} />
+                        ))}
                         </div>
                     </div>
-                </div>
-                <div className="flex gap-4">
+                    </div>
+
+                    <div className="flex gap-8">
                     <div className="text-center">
                         <div className="font-medium text-blue-600">{shop.evaluation}</div>
                         <div className="text-sm text-gray-500">Evaluate</div>
@@ -266,17 +272,19 @@ const ProductDetail = () => {
                         <div className="font-medium">{shop.products}</div>
                         <div className="text-sm text-gray-500">Product</div>
                     </div>
-                </div>
-                <div className="flex gap-2">
-                    <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50">
+                    </div>
+
+                    <div className="flex gap-2">
+                    <button className="border border-[#000282] text-[#000282] px-4 py-2 rounded hover:bg-blue-50">
                         Chat Now
                     </button>
-                    <Link 
-                        to={`/guest/shop/${product.shopId}`} 
+                    <Link
+                        to={`/guest/shop/${product.shopId}`}
                         className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 flex items-center justify-center"
                     >
                         View Shop
                     </Link>
+                    </div>
                 </div>
             </div>
 
