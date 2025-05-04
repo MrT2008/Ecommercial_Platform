@@ -437,6 +437,10 @@ const getAllUserByRole = async (role) => {
     }
 }
 
+const getAllActiveUsers = async () => {
+    return await models.User.findAll({ where: { isActive: true } });
+}
+
 const banUserById = async (id, reason, options = {}) => {
     try {
         const user = await models.User.findByPk(id, options);
@@ -536,6 +540,35 @@ const deletePromotionById = async (id, reason) => {
     }
 };
 
+// PRODUCT MANAGEMENT
+const getAllActiveProducts = async () => {
+    return await models.Product.findAll({ where: { status: 'active' } });
+}
+
+const getTotalSales = async () => {
+    try {
+        const totalSales = await models.OrderDetail.sum('totalPrice', {
+            where: { status: 'completed' },
+        });
+        return totalSales || 0;
+    } catch (error) {
+        console.error('Error fetching total sales:', error);
+        return 0;
+    }
+}
+
+const totalProductsSold = async () => {
+    try {
+        const totalProductsSold = await models.OrderDetail.sum('quantity', {
+            where: { status: 'completed' },
+        });
+        return totalProductsSold || 0;
+    } catch (error) {
+        console.error('Error fetching total products sold:', error);
+        return 0;
+    }
+}
+
 module.exports = {
     sentAnnouncement,
     getAllAnnouncements,
@@ -560,6 +593,7 @@ module.exports = {
     banProductById,
     unbanProductById,
     getAllUserByRole,
+    getAllActiveUsers,
     banUserById,
     updateUserPassword,
     refreshUserPassworkById,
@@ -567,6 +601,18 @@ module.exports = {
     getAllPromotions,
     getPromotionById,
     createPromotion,
-    deletePromotionById
-    
+    deletePromotionById,
+    getAllActiveProducts,
+    getTotalSales,
+    totalProductsSold,
+    getAllAnnouncements,
+    getAllActiveShops,
+    getAllPendingShops,
+    getAllBannedShops,
+    getAllActiveUsers,
+    getAllPromotions,
+    getAllActiveProducts,
+    getTotalSales,
+    totalProductsSold,
+    getProducts,
 }

@@ -5,6 +5,7 @@ import AddNewCardDialog from "../../pages/account/AddNewCardDialog";
 
 const AccountAddress = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
+  // Nếu API cần userId là số
   const userId = storedUser?.id;
   const [cards, setCards] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -16,7 +17,7 @@ const AccountAddress = () => {
       .then((res) => res.json())
       .then((data) => {
         const serverCards = data.paymentMethodList.map((item) => ({
-          name: "Card Holder", // Không có từ API nên có thể cho nhập sau
+          id: item.id,
           number: item.bankAccountNumber,
           bank: item.bankName,
           isDefault: item.inUsed,
@@ -41,47 +42,203 @@ const AccountAddress = () => {
   };
 
   // Lưu thẻ mới hoặc cập nhật thẻ cũ
-  const handleSaveCard = (formData) => {
-    const newCard = {
-      name: formData.name,
-      number: formData.number,
-      bank: formData.bank,
-      isDefault: formData.isDefault,
-    };
-
-    setCards((prev) => {
-      const updated = prev.map((card) => ({
-        ...card,
-        isDefault: formData.isDefault ? false : card.isDefault,
-      }));
-
+  const handleSaveCard = async (formData) => {
+    try {
+      console.log("Saving card with data:", formData);
+      console.log("User ID:", userId);
+      
       if (editingCard && editingCard.index !== undefined) {
-        updated[editingCard.index] = newCard;
-        return updated;
+        // Xử lý chỉnh sửa thẻ
+        console.log("Editing card:", editingCard);
+        await fetch(`http://localhost:8080/buyer/${userId}/payment/remove`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentId: cards[editingCard.index].id
+          })
+        });
+        
+        await fetch(`http://localhost:8080/buyer/${userId}/payment/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bankName: formData.bank,
+            bankAccountNumber: formData.number,
+            inUsed: formData.isDefault
+          })
+        });
       } else {
-        return [...updated, newCard];
+        // Thêm thẻ mới
+        console.log("Adding new card");
+        const response = await fetch(`http://localhost:8080/buyer/${userId}/payment/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bankName: formData.bank,
+            bankAccountNumber: formData.number,
+            inUsed: formData.isDefault
+          })
+        });
+        
+        const result = await response.json();
+        console.log("API response:", result);
+        
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to add payment method');
+        }
       }
-    });
+      
+      // Cập nhật UI tạm thời
+      setCards((prev) => {
+        const updated = prev.map((card) => ({
+          ...card,
+          isDefault: formData.isDefault ? false : card.isDefault,
+        }));
 
+        if (editingCard && editingCard.index !== undefined) {
+          const newCard = {
+            number: formData.number,
+            bank: formData.bank,
+            isDefault: formData.isDefault
+          };
+          updated[editingCard.index] = newCard;
+          return updated;
+        } else {
+          return [
+            ...updated, 
+            {
+              number: formData.number,
+              bank: formData.bank,
+              isDefault: formData.isDefault
+            }
+          ];
+        }
+      });
+      
+      // Fetch lại dữ liệu từ server sau khi thêm/sửa
+      setTimeout(() => {
+        fetch(`http://localhost:8080/buyer/${userId}/payment/`)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("Refreshed payment data:", data);
+            const serverCards = data.paymentMethodList.map((item) => ({
+              id: item.id,
+              number: item.bankAccountNumber,
+              bank: item.bankName,
+              isDefault: item.inUsed,
+            }));
+            setCards(serverCards);
+          })
+          .catch((err) => {
+            console.error("Failed to refresh payment methods:", err);
+          });
+      }, 500); // Đợi 500ms để đảm bảo API đã xử lý xong
+    } catch (error) {
+      console.error("Error saving payment method:", error);
+      alert("Không thể lưu thẻ thanh toán: " + error.message);
+    }
+    
     setIsDialogOpen(false);
     setEditingCard(null);
   };
 
   // Xóa thẻ
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
     if (window.confirm("Are you sure you want to delete this card?")) {
-      setCards((prev) => prev.filter((_, i) => i !== index));
+      try {
+        console.log("Deleting card:", cards[index]);
+        const response = await fetch(`http://localhost:8080/buyer/${userId}/payment/remove`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentId: cards[index].id
+          })
+        });
+        
+        const result = await response.json();
+        console.log("Delete API response:", result);
+        
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to delete payment method');
+        }
+        
+        // Cập nhật UI tạm thời
+        setCards((prev) => prev.filter((_, i) => i !== index));
+        
+        // Fetch lại dữ liệu từ server sau khi xóa
+        setTimeout(() => {
+          fetch(`http://localhost:8080/buyer/${userId}/payment/`)
+            .then((res) => res.json())
+            .then((data) => {
+              console.log("Refreshed payment data after delete:", data);
+              const serverCards = data.paymentMethodList.map((item) => ({
+                id: item.id,
+                number: item.bankAccountNumber,
+                bank: item.bankName,
+                isDefault: item.inUsed,
+              }));
+              setCards(serverCards);
+            })
+            .catch((err) => {
+              console.error("Failed to refresh payment methods after delete:", err);
+            });
+        }, 500);
+      } catch (error) {
+        console.error("Error deleting payment method:", error);
+        alert("Không thể xóa thẻ thanh toán: " + error.message);
+      }
     }
   };
 
   // Đặt làm default
-  const handleSetDefault = (index) => {
-    setCards((prev) =>
-      prev.map((card, i) => ({
-        ...card,
-        isDefault: i === index,
-      }))
-    );
+  const handleSetDefault = async (index) => {
+    try {
+      console.log("Setting card as default:", cards[index]);
+      const response = await fetch(`http://localhost:8080/buyer/${userId}/payment/setdefault`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentId: cards[index].id
+        })
+      });
+      
+      const result = await response.json();
+      console.log("Set default API response:", result);
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to set default payment method');
+      }
+      
+      // Cập nhật UI tạm thời
+      setCards((prev) =>
+        prev.map((card, i) => ({
+          ...card,
+          isDefault: i === index,
+        }))
+      );
+      
+      // Fetch lại dữ liệu từ server sau khi đặt default
+      setTimeout(() => {
+        fetch(`http://localhost:8080/buyer/${userId}/payment/`)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("Refreshed payment data after set default:", data);
+            const serverCards = data.paymentMethodList.map((item) => ({
+              id: item.id,
+              number: item.bankAccountNumber,
+              bank: item.bankName,
+              isDefault: item.inUsed,
+            }));
+            setCards(serverCards);
+          })
+          .catch((err) => {
+            console.error("Failed to refresh payment methods after set default:", err);
+          });
+      }, 500);
+    } catch (error) {
+      console.error("Error setting default payment method:", error);
+      alert("Không thể đặt thẻ thanh toán làm mặc định: " + error.message);
+    }
   };
 
   return (
@@ -102,7 +259,7 @@ const AccountAddress = () => {
             >
               <div>
                 <p className="font-bold flex items-center gap-2">
-                  {card.name}
+                  {card.bank}
                   {card.isDefault && (
                     <span className="text-sm text-orange-500 font-semibold">
                       default
@@ -110,7 +267,6 @@ const AccountAddress = () => {
                   )}
                 </p>
                 <p>{card.number}</p>
-                <p>{card.bank}</p>
               </div>
 
               <div className="flex items-center gap-4">

@@ -3,6 +3,28 @@ const reuse = require('../reuse/reuse');
 const { Sequelize } = require('sequelize');
 
 class ManagerController {
+    getDashboardData = async (req, res) => {
+        try {
+            const totalUsers = await reuse.getTotalActiveUsers();
+            const totalShops = await reuse.getTotalActiveShops();
+            const totalSales = await reuse.getTotalSales();
+            const totalProductsSold = await reuse.getTotalProductsSold();
+
+            res.status(200).json({
+                message: 'Dashboard data retrieved successfully',
+                data: {
+                    totalUsers,
+                    totalShops,
+                    totalSales,
+                    totalProductsSold
+                }
+            })
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
     // Featured Announcement Management
     sendAnnouncement = async (req, res) => {
         const t = await models.Announcement.sequelize.transaction();
