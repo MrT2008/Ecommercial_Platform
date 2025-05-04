@@ -15,7 +15,7 @@ class BuyerController {
                     }
                     
                     const User = await models.User.findOne({ where: { id: buyerId } });
-                    if (User.imageURL){
+                    if (User.imageURL && !User.imageURL.startsWith('http')){
                         User.imageURL = User.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/');
                         User.imageURL = `${req.protocol}://${req.get('host')}/${User.imageURL}`
                     }
