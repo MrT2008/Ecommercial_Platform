@@ -503,7 +503,7 @@ class SellerController {
     updateInformation = async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, address, phoneNumber, email, bankAccount, bankName } = req.body;
+            const { name, address, phoneNumber, email, bankAccount, bankName} = req.body;
             const images = req.files || [];
             const avatarUrl = images.length > 0 ? images[0].path : null; // Get the path of the uploaded file
             const backgroundUrl = images.length > 1 ? images[1].path : null; // Get the path of the uploaded file
@@ -513,14 +513,14 @@ class SellerController {
             }
 
             await shop.update({
-                name: name || shop.name,
-                avatarUrl: avatarUrl || shop.avatarUrl,
-                address: address || shop.address,
-                phone: phoneNumber || shop.phoneNumber,
-                email: email || shop.email,
-                bankAccount: bankAccount || shop.bankAccount,
-                bankName: bankName || shop.bankName,
-                backgroundUrl: backgroundUrl || shop.backgroundUrl,
+                name : name || shop.name,
+                avatarUrl : avatarUrl || shop.avatarUrl,
+                address : address || shop.address,
+                phone : phoneNumber || shop.phoneNumber,
+                email : email || shop.email,
+                bankAccount : bankAccount || shop.bankAccount,
+                bankName : bankName || shop.bankName,
+                backgroundUrl : backgroundUrl || shop.backgroundUrl,
             });
 
             return res.status(200).json({ shop });
