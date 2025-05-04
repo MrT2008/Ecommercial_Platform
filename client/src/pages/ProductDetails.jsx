@@ -6,14 +6,17 @@ import { faStar, faStarHalfAlt, faTruck, faArrowRotateLeft } from '@fortawesome/
 import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
 import Button from '../components/shares/Button';
 import ReviewList from '../components/shoppingElements/ReviewList.jsx';
-import { getProductById } from '../api/guestAPI.jsx';
-import { addToCart } from '../api/buyerAPI.jsx';
+import { getProductById, getShopById } from '../api/guestAPI.jsx';
+import { addToCart, proceedWithCheckout } from '../api/buyerAPI.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 
 const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const { user, loading } = useAuth(); // Assuming you have a useAuth hook to get user info
+    const [shop, setShop] = useState({});
+    const [selectItem, setSelectItem] = useState(null);
     const navigate = useNavigate();
 
     if (loading) return null; // Show loading state if needed
@@ -39,7 +42,10 @@ const ProductDetail = () => {
         try {
             const response = await addToCart(user.id, productId, quantity);
             if (response) {
-                navigate('/buyer/cart'); 
+                setShowSuccessMessage(true);
+                setTimeout(() => {
+                    setShowSuccessMessage(false);
+                }, 2000); // Hide message after 2 seconds
             } else {
                 alert('Failed to add product to cart. Please try again.');
             }
@@ -48,14 +54,41 @@ const ProductDetail = () => {
         }
     };
 
-    const shop = {
-        id: 1, // Add shop ID
-        name: 'Miumiu Shop',
-        rating: 5,
-        evaluation: '12.6k',
-        products: 102,
-        image: 'https://th.bing.com/th/id/R.3903470f5b74222bd2e2e09db1a0f2c3?rik=s%2fLEM7YUHQe2Zg&pid=ImgRaw&r=0',
+    const handleBuyNow = async () => {
+        if (!user) {
+            navigate('/login'); // Redirect to login if user is not authenticated
+            return;
+        }
+        try {
+            const response = await addToCart(user.id, productId, quantity);
+            if (response) {
+                const arrayCart = [response.cart]
+                localStorage.setItem('checkoutItems', JSON.stringify(arrayCart)); // Save cart items to local storage
+                navigate('/buyer/check-out'); 
+            } else {    
+                
+                alert('Failed to add product to cart. Please try again.');
+            }
+        } catch (error) {
+
+            console.error('Error adding product to cart:', error);
+        }
     };
+
+    useEffect(() => {
+        const fetchShop = async () => {
+            try {
+                const response = await getShopById(product?.shopId); // Assuming product has a shopId property
+                setShop(response.shop);
+            } catch (error) {
+                console.error('Error fetching shop:', error);
+            }
+        };
+        if (product) {
+            fetchShop();
+        }
+    }, [product]);
+
 
     const reviews = [
         {
@@ -114,6 +147,7 @@ const ProductDetail = () => {
     };
 
     if (!product) return <div className="p-10 text-center">Loading...</div>;
+    console.log(product);
 
     
 
@@ -147,7 +181,7 @@ const ProductDetail = () => {
                         <span className="text-green-500 ml-4">{product.stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
                     </div>
 
-                    <div className="text-2xl font-bold text-red-600 mb-4">${parseFloat(product.price).toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-red-600 mb-4">${parseFloat(product.salePrice).toFixed(2)}</div>
 
                     <p className="text-gray-700 mb-8">{product.description}</p>
 
@@ -165,8 +199,30 @@ const ProductDetail = () => {
                             <button onClick={increaseQuantity} className="px-3 py-2 border-l border-gray-300 hover:bg-gray-100">+</button>
                         </div>
                         <Button onClick={handleAddToCart} text='Add to cart' otherClassName='yellow' type='button'  />
-                        <Button text='Buy Now' otherClassName='blue' type='button' href='' />
+                        <Button onClick={handleBuyNow} text='Buy Now' otherClassName='blue' type='button' href='' />
                     </div>
+
+                    {showSuccessMessage && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                            <div className="bg-white w-11/12 max-w-md p-6 rounded-xl shadow-lg text-center">
+                                <h2 className="text-xl font-semibold text-gray-800">Product Added to Cart</h2>
+                                <p className="mt-3 text-gray-600">
+                                    You have successfully added {quantity} {product.name} to your cart.
+                                </p>
+                                <div className="mt-6 flex justify-center gap-3">
+                                    <Button onClick={
+                                        () => {
+                                            navigate('/buyer/cart');
+                                            setShowSuccessMessage(false);
+                                        }
+                                    } text="Go to Cart" otherClassName="blue" type="button" />
+                                    <Button text="Continue Shopping" otherClassName="gray" type="button" onClick={() => setShowSuccess(false)} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+
 
                     <div className="border border-gray-200 rounded mb-6">
                         <div className="p-4 flex items-start">
@@ -216,7 +272,7 @@ const ProductDetail = () => {
                         Chat Now
                     </button>
                     <Link 
-                        to={`/shop/${shop.id}`} 
+                        to={`/guest/shop/${product.shopId}`} 
                         className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 flex items-center justify-center"
                     >
                         View Shop

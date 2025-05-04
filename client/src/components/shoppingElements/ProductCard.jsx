@@ -1,8 +1,11 @@
 import "/src/styles/global.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart } from "@fortawesome/free-solid-svg-icons";
+import { faCartPlus } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { addToCart } from "../../api/buyerAPI";
+import { useAuth } from "../../hooks/useAuth";
 
 const ProductCard = ({
   id = "1",
@@ -13,9 +16,11 @@ const ProductCard = ({
   isNew = false,
   rating = 4,
   reviewCount = 75,
-  imageUrl = "/api/placeholder/400/320"
+  imageUrl = "/api/placeholder/400/320", 
+  onAddToCartSuccess = () => {},
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get user from context
 
   const renderStars = () => {
     const stars = [];
@@ -33,10 +38,23 @@ const ProductCard = ({
     navigate(`/product/${id}`);
   };
 
-  const handleWishlistClick = (e) => {
-    e.stopPropagation();
-    console.log("Added to wishlist");
-  };
+  const handleAddToCart = async (e) => {
+    e.stopPropagation(); // Prevent triggering the card click event
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    try {
+      const response = await addToCart(user.id, id, 1); // Assuming quantity is 1 for simplicity
+      if (response) {
+        onAddToCartSuccess(); // Call the success callback
+      } else {
+        alert("Failed to add product to cart. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+    }
+  }
 
   return (
     <div
@@ -52,9 +70,9 @@ const ProductCard = ({
         )}
         <button
           className="absolute top-4 right-4 bg-white p-1 px-2 rounded-full"
-          onClick={handleWishlistClick}
+          onClick={handleAddToCart}
         >
-          <FontAwesomeIcon icon={faHeart} size="lg" className="text-gray-300" />
+          <FontAwesomeIcon icon={faCartPlus} size="lg" className="text-gray-300" />
         </button>
         <img
           src={imageUrl}
@@ -91,7 +109,8 @@ ProductCard.propTypes = {
   isNew: PropTypes.bool,
   rating: PropTypes.number,
   reviewCount: PropTypes.number,
-  imageUrl: PropTypes.string
+  imageUrl: PropTypes.string, 
+  onAddToCartSuccess: PropTypes.func,
 };
 
 export default ProductCard;

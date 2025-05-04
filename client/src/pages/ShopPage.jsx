@@ -10,13 +10,13 @@ function ShopPage() {
   return (
     <div className="mx-auto p-8">
       {/* Shop Header */}
-      <ShopHeaderShopPage />
+      <ShopHeaderShopPage shopId={id}/>
       
       {/* Shop Banner/Carousel */}
       <Carousel />
       
       {/* Categories - now full width above products */}
-      <ShopCategories />
+      <ShopCategories shopId={id}/>
       
       {/* Main content with products - now full width */}
       <ShopProducts shopId={id} />

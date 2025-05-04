@@ -1,53 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
+import { getCartById, removeFromCart, updateCart } from "../../api/buyerAPI";
+import { useAuth } from "../../hooks/useAuth";
 
 const Cart = () => {
     const navigate = useNavigate();
-    const [cartItems, setCartItems] = useState([
-        {
-            id: 1,
-            shopId: 1,
-            shopName: "Shop's name",
-            name: "LCD Monitor",
-            price: 650,
-            quantity: 1,
-            image: "https://sieuviet.vn/hm_content/uploads/anh-san-pham/linh-kien/man-hinh/dell/49922_u3419w__2_.jpg"
-        },
-        {
-            id: 2,
-            shopId: 1,
-            shopName: "Shop's name",
-            name: "H1 Gamepad",
-            price: 550,
-            quantity: 2,
-            variant: "Red",
-            variantLabel: "Phân loại hàng:",
-            image: "https://th.bing.com/th/id/OIP.UuZW7V5dfCpSo_VoBzAMpgHaHa?rs=1&pid=ImgDetMain"
-        },
-        {
-            id: 3,
-            shopId: 2,
-            shopName: "Shop's name",
-            name: "LCD Monitor",
-            price: 650,
-            quantity: 1,
-            image: "https://sieuviet.vn/hm_content/uploads/anh-san-pham/linh-kien/man-hinh/dell/49922_u3419w__2_.jpg"
-        },
-        {
-            id: 4,
-            shopId: 2,
-            shopName: "Shop's name",
-            name: "H1 Gamepad",
-            price: 550,
-            quantity: 2,
-            variant: "Red",
-            variantLabel: "Phân loại hàng:",
-            image: "https://th.bing.com/th/id/OIP.UuZW7V5dfCpSo_VoBzAMpgHaHa?rs=1&pid=ImgDetMain"
-        }
-    ]);
+    const [cartItems, setCartItems] = useState([]);
+
+    const { user, loading } = useAuth();
+    if (loading) return null; // or a loading spinner
+    
+    if (!user) {
+        navigate('/login');
+        return null;
+    }
+    const userId = user.id;
+    // Fetch cart items from API
+    useEffect(() => {
+        const fetchCartItems = async () => {
+            try {
+                const response = await getCartById(userId);
+                const cartItemsArray = Object.values(response.cart);
+                setCartItems(cartItemsArray);
+            } catch (error) {
+                console.error("Error fetching cart items:", error);
+            }
+        };
+        fetchCartItems();
+    }, [userId]);
+
 
     const [selectedItems, setSelectedItems] = useState({});
     const [selectAll, setSelectAll] = useState(false);
@@ -60,68 +44,99 @@ const Cart = () => {
                 shopName: item.shopName,
                 items: []
             };
-        }
+        }     
         acc[item.shopId].items.push(item);
         return acc;
     }, {});
 
     const increaseQuantity = (id) => {
-        setCartItems(prev =>
-            prev.map(item =>
-                item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-            )
-        );
+        setCartItems(prev => {
+            const updatedCart = prev.map(item =>
+                item.productId === id
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+            );
+    
+            const targetItem = prev.find(item => item.productId === id);
+            if (targetItem) {
+                updateCart(userId, id, targetItem.quantity + 1);
+            }
+    
+            return updatedCart;
+        });
     };
+    
 
     const decreaseQuantity = (id) => {
-        setCartItems(prev =>
-            prev.map(item =>
-                item.id === id && item.quantity > 1
+        setCartItems(prev => {
+            const updatedCart = prev.map(item =>
+                item.productId === id && item.quantity > 1
                     ? { ...item, quantity: item.quantity - 1 }
                     : item
-            )
-        );
+            );
+    
+            const targetItem = prev.find(item => item.productId === id);
+            if (targetItem && targetItem.quantity > 1) {
+                updateCart(userId, id, targetItem.quantity - 1);
+            }
+    
+            return updatedCart;
+        });
     };
+    
 
     const removeItem = (id) => {
-        setCartItems(prev => prev.filter(item => item.id !== id));
-        // Also remove from selected items
-        const newSelectedItems = { ...selectedItems };
-        delete newSelectedItems[id];
-        setSelectedItems(newSelectedItems);
+        setCartItems(prev => prev.filter(item => item.productId !== id));
+        setSelectedItems(prev => {
+            const newSelectedItems = { ...prev };
+            delete newSelectedItems[id];
+            return newSelectedItems;
+        });
+        removeFromCart(userId, id);
     };
 
     const toggleSelectItem = (id) => {
-        setSelectedItems(prev => ({
-            ...prev,
-            [id]: !prev[id]
-        }));
-
-        // Update shop selection status
-        updateShopSelections();
-        // Update select all status
-        updateSelectAllStatus();
+        const newSelections = {
+            ...selectedItems,
+            [id]: !selectedItems[id],
+        };
+    
+        // Compute updated shopSelections
+        const newShopSelections = {};
+        Object.keys(itemsByShop).forEach(shopId => {
+            const shopItems = cartItems.filter(item => item.shopId === parseInt(shopId));
+            newShopSelections[shopId] = shopItems.every(item => newSelections[item.productId]);
+        });
+    
+        // Compute updated selectAll status
+        const allSelected = cartItems.every(item => newSelections[item.productId]);
+    
+        setSelectedItems(newSelections);
+        setShopSelections(newShopSelections);
+        setSelectAll(allSelected);
     };
+    
 
     const toggleSelectShop = (shopId) => {
         const shopItems = cartItems.filter(item => item.shopId === shopId);
-        const allSelected = shopItems.every(item => selectedItems[item.id]);
-
-        // Create new selection state for this shop's items
+        const allSelected = shopItems.every(item => selectedItems[item.productId]);
+    
         const newSelections = { ...selectedItems };
         shopItems.forEach(item => {
-            newSelections[item.id] = !allSelected;
+            newSelections[item.productId] = !allSelected;
         });
-
+    
+        // Update all states in one go using the computed values
+        const allItemsSelected = cartItems.every(item => newSelections[item.productId]);
+    
         setSelectedItems(newSelections);
         setShopSelections(prev => ({
             ...prev,
             [shopId]: !allSelected
         }));
-
-        // Check if all items are now selected to update the selectAll state
-        updateSelectAllStatus();
+        setSelectAll(allItemsSelected);
     };
+    
 
     const toggleSelectAll = () => {
         const newSelectAll = !selectAll;
@@ -130,7 +145,7 @@ const Cart = () => {
 
         // Select or deselect all items
         cartItems.forEach(item => {
-            newSelections[item.id] = newSelectAll;
+            newSelections[item.productId] = newSelectAll;
         });
 
         // Update shop selections
@@ -148,27 +163,27 @@ const Cart = () => {
 
         Object.keys(itemsByShop).forEach(shopId => {
             const shopItems = cartItems.filter(item => item.shopId === parseInt(shopId));
-            newShopSelections[shopId] = shopItems.every(item => selectedItems[item.id]);
+            newShopSelections[shopId] = shopItems.every(item => selectedItems[item.productId]);
         });
 
         setShopSelections(newShopSelections);
     };
 
     const updateSelectAllStatus = () => {
-        const allSelected = cartItems.every(item => selectedItems[item.id]);
+        const allSelected = cartItems.every(item => selectedItems[item.productId]);
         setSelectAll(allSelected);
     };
 
     const getSelectedSubtotal = () => {
         return cartItems
-            .filter(item => selectedItems[item.id])
-            .reduce((acc, item) => acc + item.price * item.quantity, 0);
+            .filter(item => selectedItems[item.productId])
+            .reduce((acc, item) => acc + item.productSalePrice * item.quantity, 0);
     };
     
     // function to handle checkout
     const handleCheckout = () => {
         // const selectedCartItems = getSelectedItems();
-        const selectedCartItems = cartItems.filter(item => selectedItems[item.id]);
+        const selectedCartItems = cartItems.filter(item => selectedItems[item.productId]);
 
         if (selectedCartItems.length === 0) {
             alert("Please select at least one item to checkout.");
@@ -226,41 +241,39 @@ const Cart = () => {
 
                         {/* Shop Items */}
                         {itemsByShop[shopId].items.map((item) => (
-                            <div key={item.id} className="grid grid-cols-6 gap-4 items-center border-b py-4">
-                                <div className="flex items-center col-span-2">
-                                    {/* Checkbox */}
-                                    <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedItems[item.id] || false}
-                                            onChange={() => toggleSelectItem(item.id)}
-                                            className="mx-2"
-                                        />
-                                    </div>
+                            <div key={item.productId} className="grid grid-cols-6 gap-4 items-center border-b py-4">
+                                {/* Checkbox */}
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedItems[item.productId] || false}
+                                        onChange={() => toggleSelectItem(item.productId)}
+                                        className="mx-2"
+                                    />
+                                </div>
 
-                                    {/* Product Info */}
-                                    <div className="flex items-center gap-4">
-                                        <img src={item.image} alt={item.name} className="w-16 h-16 object-cover" />
-                                        <div>
-                                            <div className="font-medium">{item.name}</div>
-                                            {item.variant && (
-                                                <div className="text-sm text-gray-500">
-                                                    <span>{item.variantLabel} </span>
-                                                    <span>{item.variant}</span>
-                                                </div>
-                                            )}
-                                        </div>
+                                {/* Product Info */}
+                                <div className="flex items-center gap-4">
+                                    <img src={item.productImage} alt={item.productName} className="w-16 h-16 object-cover" />
+                                    <div>
+                                        <div className="font-medium">{item.productName}</div>
+                                        {item.variant && (
+                                            <div className="text-sm text-gray-500">
+                                                <span>{item.variantLabel} </span>
+                                                <span>{item.variant}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
                                 {/* Price */}
-                                <div className="text-center">${item.price}</div>
+                                <div>${item.productSalePrice}</div>
 
                                 {/* Quantity Control */}
                                 <div className="flex justify-center">
                                     <button
                                         className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
-                                        onClick={() => decreaseQuantity(item.id)}
+                                        onClick={() => decreaseQuantity(item.productId)}
                                     >
                                         -
                                     </button>
@@ -269,20 +282,20 @@ const Cart = () => {
                                     </div>
                                     <button
                                         className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-r"
-                                        onClick={() => increaseQuantity(item.id)}
+                                        onClick={() => increaseQuantity(item.productId)}
                                     >
                                         +
                                     </button>
                                 </div>
 
                                 {/* Subtotal */}
-                                <div className="text-center">${item.price * item.quantity}</div>
+                                <div>${item.productSalePrice * item.quantity}</div>
 
                                 {/* Remove Button */}
                                 <div className="flex justify-center">
                                     <button
-                                        onClick={() => removeItem(item.id)}
-                                        className="text-[#EA4335] "
+                                        onClick={() => removeItem(item.productId)}
+                                        className="text-gray-500 hover:text-gray-700"
                                         title="Remove item"
                                     >
                                         {/* <i className="fas fa-trash"></i> */}

@@ -1,6 +1,11 @@
 import { useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 const Sidebar = () => {
   const location = useLocation();
+  const { user, loading } = useAuth();
+  if (loading) return null; // or a loading spinner
+  const isAdmin = user?.roles?.includes('manager');
+  const isModerator = user?.roles?.includes('moderator');
   const currentPath = location.pathname;
   const isActive = (path) => currentPath === path;
     return (
@@ -44,14 +49,30 @@ const Sidebar = () => {
             </Link>
           </li>
         </ul>
-        <h2 className="text-lg font-bold mb-4">Role Management</h2>
+        {/* <h2 className="text-lg font-bold mb-4">Role Management</h2>
         <ul className="mb-6">
           <li className="mb-2">
             <a href="/admin/moderator-role" className={`${isActive('/admin/moderator-role') ? 'active' : ''} hover:text-[#FFA50B] px-4`}>
               Moderator Role
             </a>
           </li>
-        </ul>
+        </ul> */}
+
+        {
+          isAdmin && (
+            <div>
+              <h2 className="text-lg font-bold mb-4">Role Management</h2>
+              <ul className="mb-6">
+                <li className="mb-2">
+                  <a href="/admin/moderator-role" className={`${isActive('/admin/moderator-role') ? 'active' : ''} hover:text-[#FFA50B] px-4`}>
+                    Moderator Role
+                  </a>
+                </li>
+              </ul>
+            </div>
+          )
+        }
+
       </div>
     );
   };

@@ -4,6 +4,7 @@ const sellerController = require("../app/controllers/SellerController");
 const upload = require('../app/middlewares/uploadFile');
 
 
+
 //shop
 router.get("/getShop/:id", sellerController.getShop);
 router.get("/getAllShop", sellerController.getAllShop);
@@ -32,7 +33,16 @@ router.get("/:id/getDashboard", sellerController.getDashboard);
 
 // //Information
 router.get("/:id/getInformation", sellerController.getInformation);
-router.put("/:id/updateInformation", sellerController.updateInformation);
+router.put("/:id/updateInformation",upload.array('images', 5), sellerController.updateInformation);
+
+<<<<<<< HEAD
+// Chat box
+router.post("/:id/createChat", sellerController.createChat);
+router.get("/:id/getAllChat", sellerController.getAllChat);
+router.get("/:id/getChat/:chatId", sellerController.getChatById);
+router.post("/:id/postMessage", sellerController.postMessage);
+
+
 
 // //Review
 // router.post('/:id/postReview', sellerController.postReview);
@@ -40,5 +50,7 @@ router.put("/:id/updateInformation", sellerController.updateInformation);
 // router.get('/:id/getReview/:reviewId', sellerController.getReviewById);
 // router.put('/:id/updateReview/:reviewId', sellerController.updateReview);
 // router.delete('/:id/deleteReview/:reviewId', sellerController.deleteReview);
+=======
+>>>>>>> parent of a2fa6fb (Merge branch 'dev1' into merge-dev1)
 
 module.exports = router;

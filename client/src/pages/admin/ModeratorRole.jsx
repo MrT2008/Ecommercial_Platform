@@ -1,38 +1,88 @@
 import Sidebar from '../../components/admin/adminSidebar';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const ModeratorRole = () => {
-  const [moderators, setModerators] = useState([
-    { name: "Nguyễn Văn A", email: "123thnh@gmail.com" },
-    { name: "Nguyễn Văn A", email: "123thnh@gmail.com" },
-    { name: "Nguyễn Văn A", email: "123thnh@gmail.com" },
-    { name: "Nguyễn Văn A", email: "123thnh@gmail.com" },
-  ]);
+  const [moderators, setModerators] = useState([]);
 
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     password: "",
   });
 
-  const handleAddModerator = () => {
-    if (formData.name && formData.email && formData.password) {
-      setModerators([...moderators, {
-        name: formData.name,
-        email: formData.email,
-      }]);
-      setFormData({ name: "", email: "", password: "" });
+  useEffect(() => {
+    const fetchModerators = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/manager/moderators/');
+        const data = await response.json();
+        if (data.moderators) {
+          const activeModerators = data.moderators.filter(mod => mod.isActive === true);
+          setModerators(activeModerators);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách moderator:", error);
+      }
+    };
+
+    fetchModerators();
+  }, []);
+
+  const handleAddModerator = async () => {
+    const { fullName, email, password } = formData;
+  
+    if (fullName && email && password) {
+      try {
+        const response = await fetch('http://localhost:8080/manager/moderators/new', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ fullName, email, password })
+        });
+  
+        if (response.ok) {
+          const newModerator = await response.json();
+  
+          const fullMod = {
+            fullName: newModerator.fullName || fullName,
+            email: newModerator.email || email,
+            id: newModerator.id, // nếu có id
+          };
+  
+          setModerators(prev => [...prev, fullMod]);
+          setFormData({ fullName: "", email: "", password: "" });
+        } else if (response.status === 409) {
+          alert("Email existed! Please use another email.");
+        } else {
+          const errorData = await response.json();
+          console.error("Failed to add moderator:", errorData.message || response.statusText);
+        }
+      } catch (error) {
+        console.error("Error while adding moderator:", error);
+      }
+    }
+  };
+  
+  const handleDelete = async (modId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/manager/moderators/delete/${modId}`, {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        setModerators(prev => prev.filter(mod => mod.id !== modId));
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to delete moderator:", errorData.message || response.statusText);
+      }
+    } catch (error) {
+      console.error("Error while deleting moderator:", error);
     }
   };
 
-  const handleDelete = (index) => {
-    const updated = [...moderators];
-    updated.splice(index, 1);
-    setModerators(updated);
-  };
 
   return (
     <div className="flex">
@@ -46,8 +96,8 @@ const ModeratorRole = () => {
             <input
               type="text"
               placeholder="Nguyễn Văn A"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               className="w-full p-3 border rounded mb-2"
             />
             <input
@@ -76,7 +126,7 @@ const ModeratorRole = () => {
               <thead>
                 <tr className="text-center">
                   <th className="p-2">No.</th>
-                  <th className="p-2">Name</th>
+                  <th className="p-2">Full Name</th>
                   <th className="p-2">Email</th>
                   <th className="p-2">Action</th>
                 </tr>
@@ -88,7 +138,7 @@ const ModeratorRole = () => {
                     className={`${index % 2 === 0 ? "bg-[#F7F6FF]" : "bg-white"} text-center`}
                   >
                     <td className="p-2">{index + 1}</td>
-                    <td className="p-2">{mod.name}</td>
+                    <td className="p-2">{mod.fullName}</td>
                     <td className="p-2">{mod.email}</td>
                     <td className="p-2">
                       <button

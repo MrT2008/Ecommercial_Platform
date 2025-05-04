@@ -8,7 +8,7 @@ class ManagerController {
         const t = await models.Announcement.sequelize.transaction();
         try {
             const { title, script } = req.body;
-            const imageURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Annoucement.jpg'; 
+            const imageURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\default\Annoucement.jpg'; 
             const senderId = req.user.id;
 
             const announcement = await reuse.sentAnnouncement(senderId, title, imageURL, script, { transaction: t });
@@ -31,7 +31,7 @@ class ManagerController {
         try {
             const announcements = await reuse.getAllAnnouncements();
             for (const announcement of announcements) {
-                if (announcement.imageURL) {
+                if (announcement.imageURL && !announcement.imageURL.startsWith('http')) {
                     // Normalize the image path
                     announcement.imageURL = announcement.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/');
                     // Prepend the full URL
@@ -452,8 +452,7 @@ class ManagerController {
     createModerator = async (req, res) => {
         const t = await models.User.sequelize.transaction();
         try {
-            const { email, fullName } = req.body;
-            const password = process.env.MODERATOR_DEFAULT_PASSWORD;
+            const { email, fullName, password } = req.body;
 
             const existingUser = await models.User.findOne({ where: { email } });
             if (existingUser) {

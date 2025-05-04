@@ -20,3 +20,13 @@ export const getProductById = async (id) => {
     return null;
   }
 }
+
+export const getShopById = async (id) => {
+  try {
+    const response = await api.get(`/guest/shop/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching shop by ID:", error);
+    return null;
+  }
+}
