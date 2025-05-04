@@ -1,110 +1,141 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/account/accountSidebar";
 import OutlineButton from "../../components/shares/OutlineButton";
 import SecondaryButton from "../../components/shares/SecondaryButton";
-import { viewCancelledOrders } from "../../api/buyerAPI";
+import { useAuth } from "../../hooks/useAuth";
+import { getAllOrdersByStatus } from "../../api/buyerAPI";
 
 const Cancellations = () => {
-  const [orders, setOrders]     = useState([]);
-  const [isLoading, setLoading] = useState(true);
-  const [error, setError]       = useState(null);
+  const { user, loading } = useAuth();
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    (async () => {
+    const fetchOrders = async () => {
       try {
-        const list = await viewCancelledOrders();
-        setOrders(list);
-      } catch (err) {
-        console.error(err);
-        setError("Không thể tải danh sách đơn đã hủy");
-      } finally {
-        setLoading(false);
+        const response = await getAllOrdersByStatus(user.id, "cancelled");
+        const ordersData = response.orderList;
+        console.log("Orders data:", ordersData);
+        setOrders(ordersData);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
       }
-    })();
-  }, []);
+    };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex">
-        <Sidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
+    if (!loading && user) {
+      fetchOrders();
+    }
+  }, [user, loading]);
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex">
-        <Sidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-red-500">{error}</p>
-        </div>
-      </div>
-    );
-  }
+  // Calculate order total from product list considering price and quantity
+  const calculateTotal = (products) => {
+    if (!products || products.length === 0) return "0.00";
+
+    return products.reduce((sum, product) => {
+      // Check if price is a string and convert to number if needed
+      const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+      const salePrice = product.salePrice && parseFloat(product.salePrice) > 0 ?
+        (typeof product.salePrice === 'string' ? parseFloat(product.salePrice) : product.salePrice) :
+        price;
+
+      return sum + (salePrice * product.quantity);
+    }, 0).toFixed(2);
+  };
+
+  // Get the effective price (sale price if available, otherwise regular price)
+  const getEffectivePrice = (product) => {
+    const regularPrice = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+    const salePrice = product.salePrice && parseFloat(product.salePrice) > 0 ?
+      (typeof product.salePrice === 'string' ? parseFloat(product.salePrice) : product.salePrice) :
+      null;
+
+    return salePrice || regularPrice;
+  };
+
+  // Get the shop name from the first product in the list
+  const getShopName = (products) => {
+    if (!products || products.length === 0) return "Unknown Shop";
+    return products[0].shopName || "Unknown Shop";
+  };
 
   return (
     <div className="min-h-screen flex">
       <Sidebar />
       <div className="flex-1 container mx-auto py-10 px-8">
-        <h2 className="text-2xl font-bold text-[#FFA50B] mb-4">
-          Cancellations
+        <h2 className="text-2xl font-bold text-orange-500 mb-4">
+          Cancelled Orders
         </h2>
-
         {orders.length === 0 ? (
-          <p>No orders have canceled.</p>
+          <p>There are currently no completed orders.</p>
         ) : (
-          orders.map((order) => (
-            <div key={order.id} className="bg-white rounded-lg shadow p-6 mb-6">
-              {/* Header */}
-              <div className="flex justify-between items-center bg-gray-100 p-3 rounded mb-6">
-                <h3 className="text-lg font-medium">{order.shopName}</h3>
-                <span className="text-red-500 font-semibold">{order.status}</span>
-              </div>
+          orders.map((order) => {
+            // Calculate total for this order
+            const orderTotal = calculateTotal(order.productList);
+            const shopName = getShopName(order.productList);
 
-              {/* Items */}
-              <div className="space-y-4">
-                {order.items.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between border-b p-4">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-12 h-12 object-cover rounded"
-                      />
-                      <div>
-                        <p className="font-semibold">{item.name}</p>
-                        <p className="text-sm text-gray-500">Type: {item.type}</p>
-                        <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                      </div>
-                    </div>
-                    <p className="font-semibold">${item.price}</p>
+            return (
+              <div key={order.orderId} className="bg-white rounded-lg shadow p-6 mb-6">
+                {/* Header */}
+                <div className="flex justify-between items-center bg-gray-100 p-3 rounded mb-6">
+                  <h3 className="text-lg font-medium">{shopName}</h3>
+                  <span className="text-blue-500 font-semibold">{order.orderStatus}</span>
+                </div>
+
+                {/* Items */}
+                {order.productList.length === 0 ? (
+                  <p className="text-gray-500 italic py-4">No products in this order</p>
+                ) : (
+                  <div className="space-y-4">
+                    {order.productList.map((item) => {
+                      const effectivePrice = getEffectivePrice(item);
+                      const itemTotal = (effectivePrice * item.quantity).toFixed(2);
+
+                      return (
+                        <div key={item.id} className="flex items-center justify-between border-b p-4">
+                          <div className="flex items-center gap-4">
+                            <img
+                              src={item.thumbnailURL || "/api/placeholder/60/60"}
+                              alt={item.name}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                            <div>
+                              <p className="font-semibold">{item.name}</p>
+                              <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">${effectivePrice} × {item.quantity}</p>
+                            <p className="text-sm text-gray-700">${itemTotal}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                )}
 
-              {/* Footer */}
-              <div className="flex justify-between items-center mt-4">
-                <p className="font-bold">
-                  Total: <span className="text-red-500">${order.total}</span>
-                </p>
-                <div className="flex gap-4">
+                {/* Footer with calculated total */}
+                <div className="flex justify-between items-center mt-6 pt-4 border-t">
+                  <div>
+                    <p className="font-bold text-lg">
+                      Total: <span className="text-red-500">${orderTotal}</span>
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
                   <OutlineButton
                     title="Contact Shop"
-                    onClick={() => alert(`Contacting shop for order ${order.id}`)}
+                    onClick={() => alert(`Contacting shop for order ${order.orderId}`)}
                   />
                   <SecondaryButton
                     title="Reorder"
-                    onClick={() => alert(`Reordering order ${order.id}`)}
+                    onClick={() => alert(`Reordering order ${order.orderId}`)}
                   />
                 </div>
               </div>
-            </div>
-          ))
+              </div>
+            );
+          })
         )}
       </div>
+
     </div>
   );
 };

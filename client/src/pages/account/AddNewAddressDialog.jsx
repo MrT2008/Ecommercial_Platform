@@ -11,21 +11,22 @@ const AddNewAddressDialog = ({ isOpen, onClose, onSave, addressData }) => {
 
   useEffect(() => {
     if (addressData) {
+      // Sửa chỗ này để khớp với dữ liệu bên ngoài truyền vào
       setFullName(addressData.name || '');
       setPhoneNumber(addressData.phone || '');
       setAddress(addressData.address || '');
       setIsDefault(addressData.isDefault || false);
     } else {
+      // Reset khi thêm mới
       setFullName('');
       setPhoneNumber('');
       setAddress('');
       setIsDefault(false);
     }
-  }, [addressData, isOpen]);
+  }, [addressData, isOpen]); // Thêm `isOpen` để reset form khi mở lại
 
   const handleSave = () => {
     const newAddress = {
-      id:          addressData?.id,        // Đưa id nếu đang edit
       fullName,
       phoneNumber,
       address,
@@ -97,13 +98,7 @@ AddNewAddressDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
-  addressData: PropTypes.shape({
-    id:         PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    name:       PropTypes.string,
-    phone:      PropTypes.string,
-    address:    PropTypes.string,
-    isDefault:  PropTypes.bool,
-  }),
+  addressData: PropTypes.object,
 };
 
 export default AddNewAddressDialog;

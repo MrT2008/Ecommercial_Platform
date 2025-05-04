@@ -8,7 +8,7 @@ function ShopPage() {
   const { id } = useParams();
   
   return (
-    <div className="mx-auto p-8">
+    <div style={{ zoom: "90%" }} className="flex-1 justify-center p-8">
       {/* Shop Header */}
       <ShopHeaderShopPage shopId={id}/>
       

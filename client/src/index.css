@@ -17,6 +17,10 @@
   --secondary: #FFA50B;
   --main: #000144;
 }
+.zoom-80 {
+  zoom: 80%;
+}
+
 a {
   font-weight: 500;
   color: #999999;

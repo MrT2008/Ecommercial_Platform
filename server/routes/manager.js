@@ -5,8 +5,6 @@ const upload = require('../app/middlewares/uploadFile');
 
 const ManagerController = require('../app/controllers/ManagerController');
 
-router.post('/dashboard', authenticateToken, ManagerController.getDashboardData);
-
 router.post('/announcements/new', upload.single('imageURL'),authenticateToken, ManagerController.sendAnnouncement);
 router.put('/announcements/edit/:id', ManagerController.editAnnouncementById);
 router.put('/announcements/delete/:id', ManagerController.deleteAnnouncementById);

@@ -3,13 +3,14 @@ import api from "./axios";
 
 export const getAllProducts = async () => {
   try {
-    const response = await api.get("/guest/product");
-    return response.data;
+    const { data } = await api.get("/guest/product");
+    // backend trả về { message, allProducts: [...] }
+    return Array.isArray(data.allProducts) ? data.allProducts : [];
   } catch (error) {
     console.error("Error fetching all products:", error);
-    return null;
+    return [];
   }
-}
+};
 
 export const getProductById = async (id) => {
   try {

@@ -4,7 +4,7 @@ import OurProductsSection from "../components/shoppingElements/OurProductsSectio
 
 const HomePage = () => {
     return (
-      <div className=" mx-auto text-center p-8">
+      <div style={{ zoom: "90%" }} className="flex-1 p-8 justify-center">
         <Carosel />
         {/* <SalesSection /> */}
         <OurProductsSection /> 

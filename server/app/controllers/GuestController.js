@@ -13,6 +13,7 @@ class GuestController {
                         [models.Sequelize.Op.like]: `%${keyword}%`,
                     },
                 },
+                limit:100
             });
             const allProducts = await reuse.getProducts(products, req);
             if (allProducts.length === 0) {
@@ -27,7 +28,7 @@ class GuestController {
     }
     getAllProducts = async (req, res) => {
         try {
-            const products = await models.Product.findAll();
+            const products = await models.Product.findAll({limit:100});
             const allProducts = await reuse.getProducts(products, req);
             res.status(200).json({ message: 'Products retrieved successfully', allProducts });
         } catch (error) {
@@ -38,7 +39,7 @@ class GuestController {
 
     getAllProductsOnSale = async (req, res) => {
         try {
-            const products = await models.Product.findAll();
+            const products = await models.Product.findAll({limit:100});
             const onSaleProducts = products.filter(product => product.salePrice < product.price);
 
             res.status(200).json({ message: 'Products retrieved successfully', onSaleProducts });

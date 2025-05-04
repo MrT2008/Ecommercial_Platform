@@ -24,43 +24,54 @@ const ReviewList = ({ reviews }) => {
     };
     
     return (
-        <div className="space-y-6">
-            <TitleSection title={"Reviews"} />
-            {currentReviews.map(review => (
-                <div key={review.id} className="border-b pb-6">
+        <div>
+            {/* TitleSection remains outside the border */}
+            <div className="mb-6">
+                <TitleSection title="Reviews" />
+            </div>
+
+            {/* Only the review list and pagination are inside the bordered container */}
+            <div className="border-1 border-gray-400 rounded p-6 space-y-6">
+                {currentReviews.map((review) => (
+                <div key={review.id} className="border-b border-gray-300 pb-6 last:border-b-0">
                     <div className="flex items-center mb-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center mr-3">
-                            <span className="font-medium text-blue-800">
-                                {review.user.charAt(0)}
-                            </span>
+                    <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center mr-3">
+                        <span className="font-medium text-blue-800">
+                        {review.user.charAt(0)}
+                        </span>
+                    </div>
+                    <div>
+                        <h4 className="font-medium">{review.user}</h4>
+                        <div className="flex items-center">
+                        <div className="flex text-yellow-400">
+                            {Array(review.rating)
+                            .fill()
+                            .map((_, i) => (
+                                <FontAwesomeIcon key={i} icon={faStar} className="text-xs" />
+                            ))}
                         </div>
-                        <div>
-                            <h4 className="font-medium">{review.user}</h4>
-                            <div className="flex items-center">
-                                <div className="flex text-yellow-400">
-                                    {Array(review.rating).fill().map((_, i) => (
-                                        <FontAwesomeIcon key={i} icon={faStar} className="text-xs" />
-                                    ))}
-                                </div>
-                                <span className="text-xs text-gray-500 ml-2">{review.date}</span>
-                            </div>
+                        <span className="text-xs text-gray-500 ml-2">{review.date}</span>
                         </div>
+                    </div>
                     </div>
                     <p className="text-gray-700">{review.comment}</p>
                 </div>
-            ))}
-            
-            {/* Pagination controls */}
-            {totalPages > 1 && (
-                <Pagination
+                ))}
+
+                {/* Pagination controls */}
+                {totalPages > 1 && (
+                <div className="pt-4">
+                    <Pagination
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={handlePageChange}
                     totalItems={reviews.length}
                     itemsPerPage={reviewsPerPage}
-                />
-            )}
-        </div>
+/>
+                </div>
+                )}
+            </div>
+            </div>
     );
 };
 

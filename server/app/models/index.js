@@ -17,9 +17,6 @@ const Shop = require('./Shop');
 const Transaction = require('./Transaction');
 const User = require('./User');
 const UserRole = require('./UserRole');
-const ChatBox = require('./ChatBox');
-const Message = require('./Message');
-
 
 const models = {
   Announcement,
@@ -38,8 +35,6 @@ const models = {
   Transaction,
   User,
   UserRole,
-  ChatBox,
-  Message,
 };
 
 // User 1-N Announcement (as Sender)
@@ -167,12 +162,6 @@ Review.belongsTo(OrderDetail, {
   as: 'orderDetailByOrder',
   constraints: false,
 });
-
-ChatBox.belongsTo(User, { as: 'buyer', foreignKey: 'buyerId' });
-ChatBox.belongsTo(User, { as: 'seller', foreignKey: 'sellerId' });
-
-Message.belongsTo(ChatBox, { foreignKey: 'chatBoxId' });
-Message.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
 
 const syncModels = async () => {
   try {
