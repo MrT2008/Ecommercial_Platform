@@ -114,7 +114,7 @@ To create mock data, you can run the `CreateDataScript.sql` file in MySQL Workbe
 
 - Use the following credentials to log in as the manager:
   - **Email:** `manager@gmail.com`
-  - **Password:** `manager`
+  - **Password:** `password123`
 
 ## Contributing
 

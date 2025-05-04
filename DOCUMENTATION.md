@@ -264,6 +264,6 @@ COOKIE_EXPIRE = 10800000
 **Default Manager Account for Testing:**
 
 - Email: `manager@gmail.com`
-- Password: `manager`
+- Password: `password123`
 
 For more details, see the `README.md` in the root directory.
