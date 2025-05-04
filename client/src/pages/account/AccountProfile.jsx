@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../../components/account/accountSidebar";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import EditProfileDialog from "../account/EditProfileDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload} from "@fortawesome/free-solid-svg-icons";
-import { getBuyerId, updateProfile } from "../../api/buyerAPI"; 
+import { getBuyerId} from "../../api/buyerAPI"; 
 
 
 const AccountProfile = () => {
@@ -136,7 +136,7 @@ const AccountProfile = () => {
             {/* Avatar */}
             <div className="w-48 flex flex-col items-center">
               <img
-                src={image}
+                src={previewImage}
                 alt="Avatar"
                 className="w-24 h-24 object-cover rounded-full border mb-4"
               />
