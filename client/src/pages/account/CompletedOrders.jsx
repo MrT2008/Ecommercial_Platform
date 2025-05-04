@@ -1,81 +1,31 @@
-import React, { useState } from "react"; // Thêm useState vào đây
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/account/accountSidebar";
 import OutlineButton from "../../components/shares/OutlineButton";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import ReviewDialog from "../../pages/account/ReviewDialog";
+import { viewCompletedOrders } from "../../api/buyerAPI";
 
 const CompletedOrders = () => {
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const orders = [
-    {
-      id: 1,
-      shopName: "Shop's name",
-      status: "PENDING PAYMENT",
-      items: [
-        {
-          name: "LCD Monitor",
-          type: "red",
-          quantity: 1,
-          price: 650,
-          image: "https://mtv.vn/uploads/2023/02/25/meo-gg.jpg", // Placeholder image
-        },
-        {
-          name: "LCD Monitor",
-          type: "red",
-          quantity: 1,
-          price: 650,
-          image: "https://mtv.vn/uploads/2023/02/25/meo-gg.jpg", // Placeholder image
-        },
-      ],
-      total: 1000,
-    },
-    {
-      id: 2,
-      shopName: "Another Shop",
-      status: "COMPLETED ORDER",
-      items: [
-        {
-          name: "Gaming Mouse",
-          type: "black",
-          quantity: 2,
-          price: 50,
-          image: "https://mtv.vn/uploads/2023/02/25/meo-gg.jpg", // Placeholder image
-        },
-        {
-            name: "Gaming Mouse",
-            type: "black",
-            quantity: 2,
-            price: 50,
-            image: "https://mtv.vn/uploads/2023/02/25/meo-gg.jpg", // Placeholder image
-        },
-        {
-          name: "Mechanical Keyboard",
-          type: "white",
-          quantity: 1,
-          price: 120,
-          image: "https://mtv.vn/uploads/2023/02/25/meo-gg.jpg", // Placeholder image
-        },
-      ],
-      total: 170,
-    },
-    {
-      id: 3,
-      shopName: "Completed Shop",
-      status: "COMPLETED ORDER",
-      items: [
-        {
-          name: "Headphones",
-          type: "blue",
-          quantity: 1,
-          price: 100,
-          image: "https://mtv.vn/uploads/2023/02/25/meo-gg.jpg", // Placeholder image
-        },
-      ],
-      total: 100,
-    },
-  ];
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await viewCompletedOrders();
+        setOrders(list);
+      } catch (err) {
+        console.error(err);
+        setError("Không thể tải danh sách đơn đã hoàn thành");
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, []);
 
   const handleReview = (order) => {
     setSelectedOrder(order);
@@ -84,33 +34,55 @@ const CompletedOrders = () => {
 
   const handleSaveReview = (reviews) => {
     console.log("Reviews saved:", reviews);
+    setIsReviewOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
-      <div className="flex-1 container mx-auto py-10 px-8 ">
-        <h2 className="text-2xl font-bold text-[#FFA50B] mb-4">Completed Orders</h2>
-        {orders
-          .filter((order) => order.status === "COMPLETED ORDER")
-          .map((order) => (
+      <div className="flex-1 container mx-auto py-10 px-8">
+        <h2 className="text-2xl font-bold text-[#FFA50B] mb-4">
+          Completed Orders
+        </h2>
+
+        {orders.length === 0 ? (
+          <p>No orders have completed.</p>
+        ) : (
+          orders.map((order) => (
             <div key={order.id} className="bg-white rounded-lg shadow p-6 mb-6">
               {/* Header */}
-              <div className="flex justify-between items-center rounded-lg shadow p-3 mb-6">
-                <h2 className="text-lg font-bold">{order.shopName}</h2>
-                <span className="text-red-500 font-semibold">{order.status}</span>
+              <div className="flex justify-between items-center bg-gray-100 p-3 rounded mb-6">
+                <h3 className="text-lg font-medium">{order.shopName}</h3>
+                <span className="text-green-500 font-semibold">{order.status}</span>
               </div>
 
               {/* Items */}
               <div className="space-y-4">
                 {order.items.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between border-b border-gray-300 p-4"
-                  >
+                  <div key={idx} className="flex items-center justify-between border-b p-4">
                     <div className="flex items-center gap-4">
                       <img
                         src={item.image}
@@ -129,13 +101,10 @@ const CompletedOrders = () => {
               </div>
 
               {/* Footer */}
-              <div className="flex flex-col items-end pt-4 mt-4">
-                {/* Total */}
+              <div className="flex justify-between items-center mt-4">
                 <p className="font-bold">
                   Total: <span className="text-red-500">${order.total}</span>
                 </p>
-
-                {/* Buttons */}
                 <div className="flex gap-4">
                   <OutlineButton
                     title="Contact Shop"
@@ -148,8 +117,11 @@ const CompletedOrders = () => {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
       </div>
+
+      {/* Review Dialog */}
       <ReviewDialog
         isOpen={isReviewOpen}
         onClose={() => setIsReviewOpen(false)}

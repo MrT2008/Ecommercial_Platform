@@ -6,6 +6,7 @@ const upload = require('../app/middlewares/uploadFile');
 //Profile
 router.get('/:buyerId/viewProfile', BuyerController.viewProfileInformation) //.
 router.put('/:buyerId/editProfile',upload.single('imageURL'), BuyerController.editProfileInformation) //.
+
 //PaymentMethod
 router.post('/:buyerId/payment/', BuyerController.addPaymentMethod) //.
 router.get('/:buyerId/payment/', BuyerController.viewAllPaymentMethod) //.
@@ -27,7 +28,13 @@ router.post('/:buyerId/shippingInfo', BuyerController.addShippingInfo) //.
 router.get('/:buyerId/shippingInfo', BuyerController.getAllShippingInfo) //.
 router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippingInformation) //.
 router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
-// router.put('/:buyerId/shippingInfo/edit', BuyerController.editShippingInformation) //
+router.put('/:buyerId/shippingInfo/edit', BuyerController.editShippingInformation) //
+
+// Chat box
+router.post("/:id/createChat", BuyerController.createChat);
+router.get("/:id/getAllChat", BuyerController.getAllChat);
+router.get("/:id/getChat/:chatId", BuyerController.getChatById);
+router.post("/:id/postMessage", BuyerController.postMessage);
 
 //Shop
 router.post('/:buyerId/shop/create', BuyerController.createNewShop) //.
