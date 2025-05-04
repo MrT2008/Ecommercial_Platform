@@ -2,8 +2,8 @@ import api from "./axios";
 
 export const createShop = async (shopData, buyerID) => {
   try {
-    const response = await api.post(`/buyer/${buyerID}/shop/create`, shopData)
-    if ((response.status === 201)||(response.status === 200)) {
+    const response = await api.post(`/buyer/${buyerID}/shop/create`, shopData);
+    if (response.status === 201 || response.status === 200) {
       return true;
     }
     return false;
@@ -11,7 +11,7 @@ export const createShop = async (shopData, buyerID) => {
     console.error("Error creating shop:", error);
     return false;
   }
-}
+};
 export const addToCart = async (buyerID, productID, quantity) => {
   try {
     const response = await api.post(`/buyer/${buyerID}/product/addToCart`, {
@@ -19,12 +19,12 @@ export const addToCart = async (buyerID, productID, quantity) => {
       quantity,
     });
     console.log("Response from addToCart:", response.data);
-    return response.data
+    return response.data;
   } catch (error) {
     console.error("Error adding to cart:", error);
     return null;
   }
-}
+};
 
 export const getCartById = async (buyerID) => {
   try {
@@ -34,7 +34,7 @@ export const getCartById = async (buyerID) => {
     console.error("Error fetching cart:", error);
     return null;
   }
-}
+};
 
 //Manage account
 // export function getBuyerId() {
@@ -105,10 +105,7 @@ export const updateShippingInfo = async (buyerID, payload) => {
 };
 
 export const removeShippingInfo = async (buyerID, payload) => {
-  const res = await api.put(
-    `/buyer/${buyerID}/shippingInfo/remove`,
-    { id: payload.id }
-  );
+  const res = await api.put(`/buyer/${buyerID}/shippingInfo/remove`, { id: payload.id });
   return res.data;
 };
 
@@ -128,7 +125,7 @@ export const updateCart = async (buyerID, productID, quantity) => {
     console.error("Error updating cart:", error);
     return false;
   }
-}
+};
 
 export const removeFromCart = async (buyerID, productID) => {
   try {
@@ -140,7 +137,7 @@ export const removeFromCart = async (buyerID, productID) => {
     console.error("Error removing from cart:", error);
     return false;
   }
-}
+};
 
 export const getShippingInfo = async (buyerID) => {
   try {
@@ -150,20 +147,20 @@ export const getShippingInfo = async (buyerID) => {
     console.error("Error fetching shipping info:", error);
     return null;
   }
-}
+};
 
-export const proceedWithCheckout = async (buyerID, paymentMethod, productId) => {
+export const proceedWithCheckout = async (buyerID, paymentMethod, productIds) => {
   try {
     const response = await api.post(`/buyer/${buyerID}/checkout`, {
       paymentMethod,
-      productId,
+      productIds, // send as array
     });
     return response.data;
   } catch (error) {
     console.error("Error proceeding with checkout:", error);
     return null;
   }
-}
+};
 
 export const getAllOrdersByStatus = async (buyerID, status) => {
   try {
@@ -173,12 +170,12 @@ export const getAllOrdersByStatus = async (buyerID, status) => {
     console.error("Error fetching orders by status:", error);
     return null;
   }
-}
+};
 
 //Manage account
 export function getBuyerId() {
   try {
-    const raw = localStorage.getItem("user");  // key bạn dùng khi login
+    const raw = localStorage.getItem("user"); // key bạn dùng khi login
     if (!raw) return null;
     const user = JSON.parse(raw);
     return user.id || user.buyerId || null;
