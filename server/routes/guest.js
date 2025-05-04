@@ -9,6 +9,8 @@ router.get('/product', GuestController.getAllProducts);
 router.get('/product/onSale', GuestController.getAllProductsOnSale);
 router.get('/product/:id', GuestController.getProductById);
 router.get('/product/:id/reviews', GuestController.getAllProductReview);
+router.get('/product/category/:category', GuestController.getProductsByCategory);
+router.get('/product/categoryID/:id', GuestController.getProductByCategoryId);
 
 router.get('/promotions', GuestController.getAllPromotions);
 
