@@ -101,6 +101,10 @@ cd ../client
 npm run dev
 ```
 
+### 9. (Optional) Add mock data
+
+To create mock data, you can run the `CreateDataScript.sql` file in MySQL Workbench to add mock data to the database (after initializing the data using `npm start` in the server folder).
+
 ## Usage
 
 - Once the server is running, you can access the API at `http://localhost:8080`.

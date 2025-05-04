@@ -156,6 +156,12 @@ npm run dev
 
 ---
 
+### 9. (Optional) Add mock data
+
+To create mock data, you can run the `CreateDataScript.sql` file in MySQL Workbench to add mock data to the database
+
+---
+
 ## Environment Variables
 
 Create the `.env` file in the `server` directory with the following values:
