@@ -178,13 +178,13 @@ const ProductDetail = () => {
 
     return (
         <div style={{ zoom: "90%" }}  className="container mx-auto px-4 py-8">
-            <div className="flex items-center text-sm text-gray-500 mb-6">
+            {/* <div className="flex items-center text-sm text-gray-500 mb-6">
                 <a href="/account" className="hover:text-blue-600">Account</a>
                 <span className="mx-2">/</span>
                 <a href="/furniture" className="hover:text-blue-600">Furniture</a>
                 <span className="mx-2">/</span>
                 <span className="text-gray-700">{product.name}</span>
-            </div>
+            </div> */}
 
             <div className="flex flex-col md:flex-row gap-8 mb-12">
                 <div className="w-full md:w-1/2 bg-gray-100 p-8 rounded-lg">
