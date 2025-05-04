@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCartPlus } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-// import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { addToCart } from "../../api/buyerAPI";
 import { useAuth } from "../../hooks/useAuth";
 

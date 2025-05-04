@@ -260,44 +260,6 @@ class GuestController {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
-
-    getAllProductReview = async (req, res) => {
-        try {
-            const {id} = req.params;
-            const itemReviews = await models.Review.findAll({
-                where: {
-                    productId: id,
-                    isDeleted: false
-                }
-            })
-            const resMessage = itemReviews.length === 0 ? "This product has no review" : "Review found successfully"
-            let reviews = {}
-            let reviewIndex = 0
-
-            for (const review of itemReviews) {
-                const buyer = await models.User.findByPk(review.buyerId)
-                if (!buyer) {
-                    res.status(400).json({ message: "Buyer doesn\'t'\ exist" });
-                }
-
-                const reviewEntry = {
-                    buyerId: buyer.id,
-                    buyerName: buyer.fullName,
-                    rating: review.rating,
-                    comment: review.comment,
-                    imageURL: review.imageURL,
-                    productId: review.productId,
-                }
-                reviews[`review_${reviewIndex}`] = reviewEntry
-                reviewIndex++
-            }
-
-            return res.status(200).json({ message: resMessage, reviews});
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Internal Server Error' });
-        }
-    }
 }
 
 module.exports = new GuestController();

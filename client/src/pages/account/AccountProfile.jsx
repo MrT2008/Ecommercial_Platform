@@ -12,7 +12,6 @@ const AccountProfile = () => {
     username: "",
     email: "",
     image: "",
-    // phone:""
   });
   const [image, setImage] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);

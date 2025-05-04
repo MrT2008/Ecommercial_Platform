@@ -6,13 +6,13 @@ import OutlineButton from '../../components/shares/OutlineButton';
 const EditProfileDialog = ({ isOpen, onClose, onSave, user }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  // const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
-      // setPhoneNumber(user.phone || '');
+      setPhoneNumber(user.phone || '');
     }
   }, [user]);
 
@@ -20,7 +20,7 @@ const EditProfileDialog = ({ isOpen, onClose, onSave, user }) => {
     const updatedUserInfo = {
       username,
       email,
-      // phone: phoneNumber,
+      phone: phoneNumber,
     };
     onSave(updatedUserInfo); // Pass updated info back to parent component
   };
@@ -50,14 +50,14 @@ const EditProfileDialog = ({ isOpen, onClose, onSave, user }) => {
           />
         </div>
 
-        {/* <div className="my-4">
+        <div className="my-4">
           <label className="block mb-1">Phone Number</label>
           <input
             className="w-full p-2 bg-gray-100 rounded"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
           />
-        </div> */}
+        </div>
 
         <div className="flex justify-end gap-2 mt-6">
           <OutlineButton title="Cancel" onClick={onClose} />
