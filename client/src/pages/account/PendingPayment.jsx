@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/account/accountSidebar";
 import OutlineButton from "../../components/shares/OutlineButton";
 import SecondaryButton from "../../components/shares/SecondaryButton";
