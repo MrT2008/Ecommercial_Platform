@@ -20,8 +20,9 @@ class SellerController {
             }
             const shopData = shop.toJSON();
 
-            if (shopData.imageUrl) {
+            if (shopData.imageUrl && !shopData.imageUrl.startsWith('http')) {
                 // You may need to prepend the base URL if it's a relative path
+                
                 shopData.imageUrl = `${req.protocol}://${req.get('host')}/${shopData.imageUrl}`;
             }
 
@@ -183,7 +184,7 @@ class SellerController {
             if (!product) {
                 return res.status(404).json({ error: 'Product not found' });
             }
-            if (product.thumbnailURL) {
+            if (product.thumbnailURL && !product.thumbnailURL.startsWith('http')) {
                 product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
                 product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
             }
@@ -202,7 +203,7 @@ class SellerController {
                 return res.status(404).json({ error: 'Products not found' });
             }
             products.forEach(product => {
-                if (product.thumbnailURL) {
+                if (product.thumbnailURL && !product.thumbnailURL.startsWith('http')) {
                     product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
                     product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
                 }
@@ -309,11 +310,14 @@ class SellerController {
                     
                 }
                 const product = await models.Product.findOne({ where: { id: orderDetail.productId } });
-                product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
+                if(product.thumbnailURL && !product.thumbnailURL.startsWith('http')) {
+                    product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
+                    product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
+                }
                 if (product) {
                     allProducts.push({
                         name: product.name,
-                        thumbnailURL: `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`,
+                        thumbnailURL: product.thumbnailURL,
                         orderId: orderDetail.orderId,
                     });
                 }
@@ -384,7 +388,7 @@ class SellerController {
                 return res.status(404).json({ error: 'Promotions not found' });
             }
             promotions.forEach(promotion => {
-                if (promotion.imageURL) {
+                if (promotion.imageURL && !promotion.imageURL.startsWith('http')) {
                     promotion.imageURL = promotion.imageURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
                     promotion.imageURL = `${req.protocol}://${req.get('host')}/${promotion.imageURL}`;
                 }
@@ -465,7 +469,7 @@ class SellerController {
             if (!shop) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
-            if (shop.imageUrl) {
+            if (shop.imageUrl && !shop.imageUrl.startsWith('http')) {
                 shop.imageUrl = `${req.protocol}://${req.get('host')}/${shop.imageUrl}`;
             }
 

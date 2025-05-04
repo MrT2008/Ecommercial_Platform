@@ -272,7 +272,7 @@ const getTotalProductsByShopId = async (shopId) => {
 const getProducts = async (products, req) => {
     const allProducts = [];
     for (const product of products) {
-        if (product.thumbnailURL) {
+        if (product.thumbnailURL && !product.thumbnailURL.startsWith('http')) {
             product.thumbnailURL = product.thumbnailURL.replace(/^.*[\\\/]public[\\\/]/, '/'); // Normalize the path
             product.thumbnailURL = `${req.protocol}://${req.get('host')}/${product.thumbnailURL}`;
         }
