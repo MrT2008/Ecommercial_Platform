@@ -43,23 +43,56 @@ const CheckOut = () => {
         loadCheckoutItems();
     }, [navigate]);
 
-
     useEffect(() => {
         const fetchShippingInfo = async () => {
             try {
-                const response = await getShippingInfo(buyerID);
-                setShippingInfo(response.userShippingInfo);
-                // find the default shipping info by checking the status is active 
-                const defaultShippingInfo = response.userShippingInfo.find(info => info.status === 'active');
-                if (defaultShippingInfo) {
-                    setShippingInfoDefault(defaultShippingInfo);
+                const response = await fetch(`http://localhost:8080/buyer/${buyerID}/checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        productId: 10, // Hoặc lấy từ cartItems
+                        paymentMethod: 'cash'
+                    })
+                });
+    
+                if (!response.ok) throw new Error('Failed to fetch');
+    
+                const data = await response.json();
+    
+                // Gán shipping info vào state
+                if (data.shippingInformation) {
+                    setShippingInfoDefault(data.shippingInformation);
                 }
+    
             } catch (error) {
-                console.error("Error fetching shipping information:", error);
+                console.error('Error fetching shipping info:', error);
             }
         };
-        fetchShippingInfo();
-    }, []);
+    
+        if (buyerID) {
+            fetchShippingInfo();
+        }
+    }, [buyerID]);
+    
+
+    // useEffect(() => {
+    //     const fetchShippingInfo = async () => {
+    //         try {
+    //             const response = await getShippingInfo(buyerID);
+    //             setShippingInfo(response.userShippingInfo);
+    //             // find the default shipping info by checking the status is active 
+    //             const defaultShippingInfo = response.userShippingInfo.find(info => info.status === 'active');
+    //             if (defaultShippingInfo) {
+    //                 setShippingInfoDefault(defaultShippingInfo);
+    //             }
+    //         } catch (error) {
+    //             console.error("Error fetching shipping information:", error);
+    //         }
+    //     };
+    //     fetchShippingInfo();
+    // }, []);
 
     // const [cartItems, setCartItems] = useState([
     //     {
@@ -146,11 +179,11 @@ const CheckOut = () => {
             <div>
 
                 {/* Shipping Address */}
-                <ShippingAddress
+                {/* <ShippingAddress
                     recipientName={shippingInfoDefault.receiverName}
                     phoneNumber={shippingInfoDefault.phone}
                     deliveryAddress={shippingInfoDefault.address}
-                />
+                /> */}
                 {/* Cart Items - Grouped by Shop */}
                 {Object.values(itemsByShop).map((shop, shopIndex) => (
                     <div key={shopIndex} className="m-8 bg-white rounded-lg shadow-sm">

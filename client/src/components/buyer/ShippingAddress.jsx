@@ -17,12 +17,12 @@ const ShippingAddress = ({ recipientName, phoneNumber, deliveryAddress }) => {
 
             <div className="ml-8 space-y-2">
                 <div className="flex items-center">
-                    <label className="font-semibold text-base w-40">Recipient Name:</label>
-                    <input
+                    <label className="font-semibold text-base w-40">Recipient Name:</label> {recipientName}
+                    {/* <input
                         type="text"
                         defaultValue={recipientName}
                         className="border-b border-gray-300 focus:outline-none focus:border-blue-500 text-base flex-1 py-1"
-                    />
+                    /> */}
                 </div>
 
                 <div className="flex items-center">
