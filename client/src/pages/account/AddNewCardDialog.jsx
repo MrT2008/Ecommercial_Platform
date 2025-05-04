@@ -4,7 +4,6 @@ import SecondaryButton from '../../components/shares/SecondaryButton';
 import OutlineButton from '../../components/shares/OutlineButton';
 
 const AddNewCardDialog = ({ isOpen, onClose, onSave, cardData }) => {
-  const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const [bank, setBank] = useState('');
   const [isDefault, setIsDefault] = useState(false);
@@ -24,12 +23,10 @@ const AddNewCardDialog = ({ isOpen, onClose, onSave, cardData }) => {
 
   useEffect(() => {
     if (cardData) {
-      setName(cardData.name || '');
       setNumber(cardData.number || '');
       setBank(cardData.bank || '');
       setIsDefault(cardData.isDefault || false);
     } else {
-      setName('');
       setNumber('');
       setBank('');
       setIsDefault(false);
@@ -37,13 +34,12 @@ const AddNewCardDialog = ({ isOpen, onClose, onSave, cardData }) => {
   }, [cardData, isOpen]);
 
   const handleSave = () => {
-    if (!name || !number || !bank) {
+    if (!number || !bank) {
       alert('Please fill in all fields.');
       return;
     }
 
     const newCard = {
-      name,
       number,
       bank,
       isDefault,
@@ -60,16 +56,6 @@ const AddNewCardDialog = ({ isOpen, onClose, onSave, cardData }) => {
         <h2 className="text-xl font-bold text-[#FFA50B] mb-4">
           {cardData ? 'Edit Bank Card' : 'Add New Bank Card'}
         </h2>
-
-        <div className="mb-4">
-          <label className="block text-sm mb-1">Full Name</label>
-          <input
-            type="text"
-            className="w-full p-2 bg-gray-100 rounded outline-none"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
 
         <div className="mb-4">
           <label className="block text-sm mb-1">Account Number</label>

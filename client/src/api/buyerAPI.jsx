@@ -35,3 +35,84 @@ export const getCartById = async (buyerID) => {
     return null;
   }
 }
+
+//Manage account
+export function getBuyerId() {
+  try {
+    const raw = localStorage.getItem("user");  // key bạn dùng khi login
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    return user.id || user.buyerId || null;
+  } catch (err) {
+    console.error("buyerAPI.getBuyerId error:", err);
+    return null;
+  }
+}
+
+export const viewPendingOrders = async () => {
+  const buyerID = getBuyerId();
+  if (!buyerID) throw new Error("No buyerId");
+  const res = await api.get(`/buyer/${buyerID}/order/pending`);
+  return res.data.orders || [];
+};
+
+export const viewProcessingOrders = async () => {
+  const buyerID = getBuyerId();
+  if (!buyerID) throw new Error("No buyerId");
+  const res = await api.get(`/buyer/${buyerID}/order/processing`);
+  return res.data.orders || [];
+};
+
+export const viewCompletedOrders = async () => {
+  const buyerID = getBuyerId();
+  if (!buyerID) throw new Error("No buyerId");
+  const res = await api.get(`/buyer/${buyerID}/order/completed`);
+  return res.data.orders || [];
+};
+
+export const viewCancelledOrders = async () => {
+  const buyerID = getBuyerId();
+  if (!buyerID) throw new Error("No buyerId");
+  const res = await api.get(`/buyer/${buyerID}/order/cancelled`);
+  return res.data.orders || [];
+};
+
+// Edit Profile
+export const updateProfile = async (buyerID, payload) => {
+  // api là instance axios đã config baseURL + headers chung
+  const response = await api.put(`/buyer/${buyerID}/editProfile`, payload);
+  // axios tự động set application/json và stringify payload nếu là object
+  if (response.status !== 200 && response.status !== 201) {
+    throw new Error(response.statusText);
+  }
+  return response.data;
+};
+
+//Account Address
+export const getShippingInfo = async (buyerID) => {
+  const res = await api.get(`/buyer/${buyerID}/shippingInfo`);
+  return res.data.userShippingInfo;
+};
+
+export const addShippingInfo = async (buyerID, payload) => {
+  const res = await api.post(`/buyer/${buyerID}/shippingInfo`, payload);
+  return res.data;
+};
+
+export const updateShippingInfo = async (buyerID, payload) => {
+  const res = await api.put(`/buyer/${buyerID}/shippingInfo/edit`, payload);
+  return res.data;
+};
+
+export const removeShippingInfo = async (buyerID, payload) => {
+  const res = await api.put(
+    `/buyer/${buyerID}/shippingInfo/remove`,
+    { id: payload.id }
+  );
+  return res.data;
+};
+
+export const setDefaultShippingInfo = async (buyerID, payload) => {
+  const res = await api.put(`/buyer/${buyerID}/shippingInfo/setdefault`, payload);
+  return res.data;
+};

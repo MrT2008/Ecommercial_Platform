@@ -35,18 +35,20 @@ import ModeratorRole from "./pages/admin/ModeratorRole";
 import PrivacyPolicy from "./pages/quickLink/PrivacyPolicy";
 import TermOfUse from "./pages/quickLink/TermOfUse";
 import FAQ from "./pages/quickLink/FAQ";
+import Chat from "./components/chat/Chat";
 
 function App() {
   const { user, loading } = useAuth();
   if (loading) return null; // or a loading spinner
-  const isBuyer = user?.roles.includes("buyer");
-  const isSeller = user?.roles.includes("seller");
-  const isAdmin = user?.roles.includes("manager");
+  const isBuyer = user?.roles ? user.roles.includes("buyer") : false;
+  const isSeller = user?.roles ? user.roles.includes("seller") : false;
+  const isAdmin = user?.roles ? user.roles.includes("manager") : false;
   const userRoles = user?.roles || [];
 
 
   return (
     <Router>
+      <Chat />
       <Routes>
 
         {/* Public routes */}

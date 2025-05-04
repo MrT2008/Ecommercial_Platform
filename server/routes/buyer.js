@@ -16,10 +16,11 @@ router.put('/:buyerId/payment/remove', BuyerController.removePaymentMethod) //.
 //cart
 router.post('/:buyerId/product/addToCart', BuyerController.addProductToCart) //.
 router.get('/:buyerId/cart', BuyerController.viewCart) //.
+router.put('/:buyerId/cart/update/', BuyerController.updateCart) //.
 router.put('/:buyerId/cart/remove/', BuyerController.removeProductFromCart) //.
 
 //Checkout
-router.post('/:buyerId/checkout', BuyerController.proceedWithCheckout) 
+router.post('/:buyerId/checkout', BuyerController.proceedWithCheckout) //.
 router.get('/:buyerId/order/:status', BuyerController.viewAllOrderByStatus) //.
 
 //Shipping Information
@@ -27,14 +28,13 @@ router.post('/:buyerId/shippingInfo', BuyerController.addShippingInfo) //.
 router.get('/:buyerId/shippingInfo', BuyerController.getAllShippingInfo) //.
 router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippingInformation) //.
 router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
+router.put('/:buyerId/shippingInfo/edit', BuyerController.editShippingInformation) //
 
 // Chat box
 router.post("/:id/createChat", BuyerController.createChat);
 router.get("/:id/getAllChat", BuyerController.getAllChat);
 router.get("/:id/getChat/:chatId", BuyerController.getChatById);
 router.post("/:id/postMessage", BuyerController.postMessage);
-
-
 
 router.post('/:buyerId/shop/create', BuyerController.createNewShop)
 
