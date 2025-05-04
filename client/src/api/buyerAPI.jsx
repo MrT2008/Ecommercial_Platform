@@ -93,3 +93,16 @@ export const getAllOrdersByStatus = async (buyerID, status) => {
     return null;
   }
 }
+
+//Manage account
+export function getBuyerId() {
+  try {
+    const raw = localStorage.getItem("user");  // key bạn dùng khi login
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    return user.id || user.buyerId || null;
+  } catch (err) {
+    console.error("buyerAPI.getBuyerId error:", err);
+    return null;
+  }
+}

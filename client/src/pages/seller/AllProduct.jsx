@@ -12,7 +12,7 @@ const AllProduct = () => {
   const [error, setError] = useState(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [sellerId, setSellerId] = useState(null);
+  const [shopId] = useState(null);
   const [reloadProducts, setReloadProducts] = useState(false); // State to trigger reload
 
   // Fetch products when component mounts
@@ -22,7 +22,7 @@ const AllProduct = () => {
       try {
         const userId = getSellerId();
         const shopId = await getShopIdFromUserId(userId);
-  
+        
         const productRes = await fetch(`http://localhost:8080/seller/${shopId}/getProducts`);
         if (!productRes.ok) {
           throw new Error(`Error: ${productRes.status}`);
