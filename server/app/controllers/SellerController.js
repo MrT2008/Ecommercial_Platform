@@ -119,14 +119,8 @@ class SellerController {
     postProduct = async (req, res) => {
         try {
             const { id } = req.params;
-<<<<<<< HEAD
             const { name, price, description, quantity, category, discount } = req.body;
             const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg';
-=======
-            const { name, price, description, quantity, category,discount} = req.body;
-            const thumbnailURL = req.file ? req.file.path : 'D:\GitHub\Ecommercial_Platform\client\public\Pictures\defaut\Product.jpg'; 
-            
->>>>>>> parent of a2fa6fb (Merge branch 'dev1' into merge-dev1)
             if (!id) {
                 return res.status(400).json({ error: 'Shop ID is required' });
             }
@@ -314,15 +308,6 @@ class SellerController {
                 if (!orders || orders.length === 0) {
                     return res.status(404).json({ error: 'Orders not found' });
                 }
-<<<<<<< HEAD
-=======
-                for (const order of orders) {
-                    if(seenOrderIds.has(order.id)){
-                        continue;
-                    }
-                    const transaction = await models.Transaction.findOne({ where: { orderId: order.id } });
-                    const buyer = await models.User.findOne({ where: { id: order.buyerId }});
->>>>>>> parent of a2fa6fb (Merge branch 'dev1' into merge-dev1)
 
                 for (const order of orders) {
                     if (seenOrderIds.has(order.id)) continue;
@@ -333,13 +318,9 @@ class SellerController {
                     seenOrderIds.add(order.id);
                     allOrders.push({
                         ...order.toJSON(),
-<<<<<<< HEAD
                         name: product.name,
                         thumbnailURL: product.thumbnailURL,
                         buyerName: buyer ? buyer.fullName : 'Unknown Buyer',
-=======
-                        buyerName:buyer.fullName,
->>>>>>> parent of a2fa6fb (Merge branch 'dev1' into merge-dev1)
                         transaction: transaction ? transaction.toJSON() : null,
                     });
                 }
@@ -529,7 +510,6 @@ class SellerController {
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-<<<<<<< HEAD
     //Chat box
     createChat = async (req, res) => {
         try {
@@ -600,8 +580,6 @@ class SellerController {
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-=======
->>>>>>> parent of a2fa6fb (Merge branch 'dev1' into merge-dev1)
 
 
 }
