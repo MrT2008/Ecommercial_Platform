@@ -4,7 +4,8 @@ import SecondaryButton from "../../components/shares/SecondaryButton";
 import EditProfileDialog from "../account/EditProfileDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload} from "@fortawesome/free-solid-svg-icons";
-import { getBuyerId, updateProfile } from "../../api/buyerAPI";
+import { getBuyerId} from "../../api/buyerAPI"; 
+
 
 const AccountProfile = () => {
   const buyerId = getBuyerId();
@@ -23,9 +24,7 @@ const AccountProfile = () => {
     (async () => {
       if (!buyerId) return;
       try {
-        const res = await fetch(
-          `http://localhost:8080/buyer/${buyerId}/viewProfile`
-        );
+        const res = await fetch(`http://localhost:8080/buyer/${buyerId}/viewProfile`);
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         const user = data.data.User;
@@ -34,7 +33,7 @@ const AccountProfile = () => {
           email: user.email || "",
           image: user.imageURL || "/images/cat-avatar.jpg",
         });
-        setImage(user.imageURL || "/images/cat-avatar.jpg");
+        setPreviewImage(user.imageURL || "/images/cat-avatar.jpg");
       } catch (err) {
         console.error("Failed to fetch user data:", err);
         setError("Không thể tải dữ liệu người dùng");
@@ -42,24 +41,37 @@ const AccountProfile = () => {
     })();
   }, [buyerId]);
 
-  // Save updated profile
+  // Save profile
   const handleSaveProfile = async (updatedInfo) => {
     setIsSaving(true);
     setError(null);
     try {
-      const payload = {
-        fullName: updatedInfo.username,
-        email: updatedInfo.email,
-        imageURL: image,
-      };
-      // gọi API PUT
-      await updateProfile(buyerId, payload);
-      // cập nhật state
-      setUserInfo({
-        username: payload.fullName,
-        email: payload.email,
-        image: payload.imageURL,
+      const formData = new FormData();
+      formData.append("type", "user");
+      formData.append("fullName", updatedInfo.username);
+      formData.append("email", updatedInfo.email);
+      if (imageFile) {
+        formData.append("imageURL", imageFile);
+      }
+
+      const res = await fetch(`http://localhost:8080/buyer/${buyerId}/editProfile`, {
+        method: "PUT",
+        body: formData,
       });
+
+      if (!res.ok) throw new Error("Update failed");
+
+      const data = await res.json();
+      console.log("Profile updated:", data);
+
+      const updatedUser = await fetch(`http://localhost:8080/buyer/${buyerId}/viewProfile`);
+
+      setUserInfo((prev) => ({
+        ...prev,
+        username: updatedInfo.username,
+        email: updatedInfo.email,
+        image: updatedUser.imageURL || prev.image,
+      }));
       setIsEditDialogOpen(false);
     } catch (err) {
       console.error("Failed to update profile:", err);
@@ -72,9 +84,10 @@ const AccountProfile = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setImage(event.target.result);
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -122,7 +135,7 @@ const AccountProfile = () => {
             {/* Avatar */}
             <div className="w-48 flex flex-col items-center">
               <img
-                src={image}
+                src={previewImage}
                 alt="Avatar"
                 className="w-24 h-24 object-cover rounded-full border mb-4"
               />
