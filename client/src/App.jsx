@@ -35,6 +35,7 @@ import ModeratorRole from "./pages/admin/ModeratorRole";
 import PrivacyPolicy from "./pages/quickLink/PrivacyPolicy";
 import TermOfUse from "./pages/quickLink/TermOfUse";
 import FAQ from "./pages/quickLink/FAQ";
+import ShopPendingStatus from "./pages/buyer/ShopPendingStatus";
 
 function App() {
   const { user, loading } = useAuth();
@@ -56,11 +57,14 @@ function App() {
           <Route path="signup" element={<Signup />} />
           <Route path="product/:id" element={<ProductDetails />} />
           <Route path="guest/shop/:id" element={<ShopPage />} />
+
         </Route>
           
         <Route path="/buyer" element={<MainLayout />}>
           <Route path="cart" element={<Cart />} />
           <Route path="check-out" element={<CheckOut/>}/>
+          <Route path="shop-pending-status" element={<ShopPendingStatus/>}/>
+
         </Route>
         
         {/* Private routes for both buyers and sellers */}
