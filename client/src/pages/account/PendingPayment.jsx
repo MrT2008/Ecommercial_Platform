@@ -184,10 +184,10 @@ const PendingPayment = () => {
                     </p>
                   </div>
                   <div className="flex gap-4">
-                    <OutlineButton
+                    {/* <OutlineButton
                       title="Cancel"
                       onClick={() => alert(`Order ${order.orderId} canceled`)}
-                    />
+                    /> */}
                     <SecondaryButton
                       title="Contact Shop"
                       onClick={() => alert(`Contacting shop for order ${order.orderId}`)}

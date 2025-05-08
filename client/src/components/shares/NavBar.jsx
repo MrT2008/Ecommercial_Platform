@@ -1,5 +1,5 @@
 import { useAuth } from '../../hooks/useAuth';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getSellerId } from "../../api/sellerAPI";
 import { useState, useEffect } from 'react';
 
@@ -7,7 +7,10 @@ const Navbar = () => {
   const { user } = useAuth();
   const location = useLocation();
   const roles = user?.roles || [];
+  const navigate = useNavigate();
 
+  const [pendingShopId, setPendingShopId] = useState(null);
+  const [hasPendingShop, setHasPendingShop] = useState(false);
 
   const isSeller = roles.includes('seller');
   const isAdmin = roles.includes('admin');
@@ -30,12 +33,49 @@ const Navbar = () => {
     }
   }, [isSeller]);
 
+   // Check if the user has a pending shop application
+   useEffect(() => {
+    const checkPendingShop = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/manager/shops/pendings/');
+        const data = await res.json();
+        
+        if (data && data.shops && Array.isArray(data.shops)) {
+          // Find if current user has a pending shop
+          const pendingShop = data.shops.find(shop => shop.ownerId === user.id);
+          
+          if (pendingShop) {
+            setHasPendingShop(true);
+            setPendingShopId(pendingShop.id);
+          }
+        }
+      } catch (err) {
+        console.error("Error checking pending shops:", err);
+      }
+    };
+
+    if (user && user.id && !isSeller && !isAdmin) {
+      checkPendingShop();
+    }
+  }, [user, isSeller, isAdmin]);
+
+  // Redirect logic when clicking on "Become Seller"
+  const handleBecomeSeller = (e) => {
+    if (hasPendingShop) {
+      e.preventDefault();
+      navigate(`/shop-application-status/${pendingShopId}`);
+    }
+  };
 
   const menuItems = [
     { name: 'Home', path: '/' },
     // isSeller && { name: 'My Shop', path: '/guest/shop/${shopid}' },
     isSeller && shopId && { name: 'My Shop', path: `/guest/shop/${shopId}` },
-    !isSeller && !isAdmin && { name: 'Become Seller', path: '/become-seller' },
+    !isSeller && !isAdmin && { 
+      name: 'Become Seller', 
+      path: hasPendingShop ? `/buyer/shop-pending-status` : '/become-seller',
+      onClick: handleBecomeSeller 
+    },
     isAdmin && { name: 'Admin Dashboard', path: '/admin/admin-dashboard' },
   ].filter(Boolean);
 
