@@ -99,7 +99,10 @@ const CheckOut = () => {
     }
   };
 
-  if (loading || shippingInfoDefault === null) {
+  // if (loading || shippingInfoDefault === null) {
+  //   return <div className="p-8 text-center">Loading checkout information...</div>;
+  // }
+  if (loading) {
     return <div className="p-8 text-center">Loading checkout information...</div>;
   }
 
@@ -107,9 +110,34 @@ const CheckOut = () => {
     return <div className="p-8 text-center">No items selected for checkout.</div>;
   }
 
+  // if (!shippingInfoDefault) {
+  //   return <div className="p-8 text-center">No shipping information available.</div>;
+  // }
   if (!shippingInfoDefault) {
-    return <div className="p-8 text-center">No shipping information available.</div>;
+    return (
+      <div className="p-8">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <strong className="font-bold block">No shipping information!</strong>
+          <span className="block sm:inline"> Please add a shipping address to continue with checkout.</span>
+          <button 
+            className="block mt-3 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+            onClick={() => navigate('/account/address')}
+          >
+            Add Shipping Address
+          </button>
+        </div>
+        <div className="text-center mt-4">
+          <button 
+            className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
+            onClick={() => navigate('/cart')}
+          >
+            Return to Cart
+          </button>
+        </div>
+      </div>
+    );
   }
+
 
   return (
     <div className="min-h-screen flex flex-col justify-between">

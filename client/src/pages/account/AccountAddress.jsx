@@ -9,13 +9,17 @@ const AccountAddress = () => {
   const [addresses, setAddresses] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
+  
 
-  useEffect(() => {
+  const fetchAddresses = () => {
+    if (!userId) return;
+    
     fetch(`http://localhost:8080/buyer/${userId}/shippingInfo`)
       .then((res) => res.json())
       .then((data) => {
         if (data.userShippingInfo) {
           const formatted = data.userShippingInfo.map((item) => ({
+            id: item.id, // Lưu ID của địa chỉ để sử dụng khi cập nhật
             name: item.receiverName,
             phone: item.phone,
             address: item.address,
@@ -27,7 +31,14 @@ const AccountAddress = () => {
       .catch((err) => {
         console.error("Failed to fetch shipping info:", err);
       });
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchAddresses();
+    }
   }, [userId]);
+
   const openAddDialog = () => {
     setEditingAddress(null);
     setIsDialogOpen(true);
@@ -38,6 +49,63 @@ const AccountAddress = () => {
     setIsDialogOpen(true);
   };
 
+  // const handleSaveAddress = async (formData) => {
+  //   const payload = {
+  //     receiverName: formData.fullName,
+  //     address: formData.address,
+  //     phone: formData.phoneNumber,
+  //     status: formData.isDefault ? "active" : "inactive",
+  //   };
+
+  //   try {
+  //     const response = await fetch(`http://localhost:8080/buyer/${userId}/shippingInfo`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(payload),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to save address");
+  //     }
+
+  //     const savedAddress = await response.json();
+
+  //     const newAddress = {
+  //       name: savedAddress.receiverName,
+  //       phone: savedAddress.phone,
+  //       address: savedAddress.address,
+  //       isDefault: savedAddress.status === "active",
+  //     };
+
+  //     setAddresses((prev) => {
+  //       const updated = prev.map((addr) => ({
+  //         ...addr,
+  //         isDefault: formData.isDefault ? false : addr.isDefault,
+  //       }));
+
+  //       if (editingAddress && editingAddress.index !== undefined) {
+  //         updated[editingAddress.index] = newAddress;
+  //         return updated;
+  //       } else {
+  //         return [...updated, newAddress];
+  //       }
+  //     });
+
+  //     setIsDialogOpen(false);
+  //     setEditingAddress(null);
+  //   } catch (error) {
+  //     console.error("Error saving address:", error);
+  //   }
+  // };
+
+  // const handleDelete = (index) => {
+  //   if (window.confirm("Are you sure you want to delete this address?")) {
+  //     setAddresses((prev) => prev.filter((_, i) => i !== index));
+  //   }
+  // };
+
   const handleSaveAddress = async (formData) => {
     const payload = {
       receiverName: formData.fullName,
@@ -47,8 +115,17 @@ const AccountAddress = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:8080/buyer/${userId}/shippingInfo`, {
-        method: "POST",
+      let url = `http://localhost:8080/buyer/${userId}/shippingInfo`;
+      let method = "POST";
+      
+      // Nếu đang chỉnh sửa địa chỉ, thêm ID vào URL và sử dụng phương thức PUT
+      if (editingAddress && editingAddress.id) {
+        url = `http://localhost:8080/buyer/${userId}/shippingInfo/edit`;
+        method = "PUT";
+      }
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -56,44 +133,45 @@ const AccountAddress = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save address");
+        throw new Error(`Failed to ${editingAddress ? 'update' : 'save'} address`);
       }
 
-      const savedAddress = await response.json();
-
-      const newAddress = {
-        name: savedAddress.receiverName,
-        phone: savedAddress.phone,
-        address: savedAddress.address,
-        isDefault: savedAddress.status === "active",
-      };
-
-      setAddresses((prev) => {
-        const updated = prev.map((addr) => ({
-          ...addr,
-          isDefault: formData.isDefault ? false : addr.isDefault,
-        }));
-
-        if (editingAddress && editingAddress.index !== undefined) {
-          updated[editingAddress.index] = newAddress;
-          return updated;
-        } else {
-          return [...updated, newAddress];
-        }
-      });
-
+      // Sau khi cập nhật/thêm mới, tải lại danh sách địa chỉ để đảm bảo dữ liệu đồng bộ
+      fetchAddresses();
+      
       setIsDialogOpen(false);
       setEditingAddress(null);
     } catch (error) {
-      console.error("Error saving address:", error);
+      console.error(`Error ${editingAddress ? 'updating' : 'saving'} address:`, error);
     }
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
     if (window.confirm("Are you sure you want to delete this address?")) {
-      setAddresses((prev) => prev.filter((_, i) => i !== index));
+      try {
+        const addressToDelete = addresses[index];
+        
+        if (!addressToDelete || !addressToDelete.id) {
+          throw new Error("Address ID not found");
+        }
+
+        const response = await fetch(`http://localhost:8080/buyer/${userId}/shippingInfo/${addressToDelete.id}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete address");
+        }
+
+        // Cập nhật state sau khi xóa thành công
+        setAddresses((prev) => prev.filter((_, i) => i !== index));
+      } catch (error) {
+        console.error("Error deleting address:", error);
+      }
     }
   };
+
+
 
   const handleSetDefault = (index) => {
     setAddresses((prev) =>
