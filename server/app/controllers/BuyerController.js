@@ -797,6 +797,33 @@ class BuyerController {
       res.status(500).json({ message: "Internal Server Error" });
     }
   };
+
+  //edit shippingInfo
+  editShippingInformation = async (req, res) => {
+    try {
+      const {id, receiverName, address, phone } = req.body;
+
+      const shippingInfoToBeUpdated = await models.ShipInfo.findByPk(id);
+      if (!shippingInfoToBeUpdated) {
+        return res.status(404).json({ error: "Shipping information not found" });
+      }
+
+      if (shippingInfoToBeUpdated.status === "delete") {
+        return res.status(404).json({ error: "Shipping information has been deleted" });
+      }
+
+      const updatedShippingInfo = await shippingInfoToBeUpdated.update({
+        receiverName: (!receiverName || receiverName.length === 0 ) ? shippingInfoToBeUpdated.receiverName : receiverName,
+        address: (!address || address.length === 0 ) ? shippingInfoToBeUpdated.address : address,
+        phone: (!phone || phone.length === 0 ) ? shippingInfoToBeUpdated.phone : phone,
+      });
+
+      return res.status(200).json({message: "Shipping information updated successfully", updatedShippingInfo});
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
 }
 
 module.exports = new BuyerController();
