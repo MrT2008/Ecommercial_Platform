@@ -18,7 +18,10 @@ const AccountAddress = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.userShippingInfo) {
-          const formatted = data.userShippingInfo.map((item) => ({
+          // Lọc ra các địa chỉ có status khác "delete"
+          const activeAddresses = data.userShippingInfo.filter(item => item.status !== "delete");
+          
+          const formatted = activeAddresses.map((item) => ({
             id: item.id, // Lưu ID của địa chỉ để sử dụng khi cập nhật
             name: item.receiverName,
             phone: item.phone,
@@ -49,65 +52,9 @@ const AccountAddress = () => {
     setIsDialogOpen(true);
   };
 
-  // const handleSaveAddress = async (formData) => {
-  //   const payload = {
-  //     receiverName: formData.fullName,
-  //     address: formData.address,
-  //     phone: formData.phoneNumber,
-  //     status: formData.isDefault ? "active" : "inactive",
-  //   };
-
-  //   try {
-  //     const response = await fetch(`http://localhost:8080/buyer/${userId}/shippingInfo`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(payload),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error("Failed to save address");
-  //     }
-
-  //     const savedAddress = await response.json();
-
-  //     const newAddress = {
-  //       name: savedAddress.receiverName,
-  //       phone: savedAddress.phone,
-  //       address: savedAddress.address,
-  //       isDefault: savedAddress.status === "active",
-  //     };
-
-  //     setAddresses((prev) => {
-  //       const updated = prev.map((addr) => ({
-  //         ...addr,
-  //         isDefault: formData.isDefault ? false : addr.isDefault,
-  //       }));
-
-  //       if (editingAddress && editingAddress.index !== undefined) {
-  //         updated[editingAddress.index] = newAddress;
-  //         return updated;
-  //       } else {
-  //         return [...updated, newAddress];
-  //       }
-  //     });
-
-  //     setIsDialogOpen(false);
-  //     setEditingAddress(null);
-  //   } catch (error) {
-  //     console.error("Error saving address:", error);
-  //   }
-  // };
-
-  // const handleDelete = (index) => {
-  //   if (window.confirm("Are you sure you want to delete this address?")) {
-  //     setAddresses((prev) => prev.filter((_, i) => i !== index));
-  //   }
-  // };
-
+ 
   const handleSaveAddress = async (formData) => {
-    const payload = {
+    let payload = {
       receiverName: formData.fullName,
       address: formData.address,
       phone: formData.phoneNumber,
@@ -118,10 +65,14 @@ const AccountAddress = () => {
       let url = `http://localhost:8080/buyer/${userId}/shippingInfo`;
       let method = "POST";
       
-      // Nếu đang chỉnh sửa địa chỉ, thêm ID vào URL và sử dụng phương thức PUT
-      if (editingAddress && editingAddress.id) {
+       // Nếu đang chỉnh sửa địa chỉ, thêm ID vào payload và sử dụng URL edit
+       if (editingAddress && editingAddress.id) {
         url = `http://localhost:8080/buyer/${userId}/shippingInfo/edit`;
-        method = "PUT";
+        method = "PUT"; 
+        payload = {
+          ...payload,
+          id: editingAddress.id  // Thêm ID vào payload
+        };
       }
 
       const response = await fetch(url, {
@@ -155,8 +106,12 @@ const AccountAddress = () => {
           throw new Error("Address ID not found");
         }
 
-        const response = await fetch(`http://localhost:8080/buyer/${userId}/shippingInfo/${addressToDelete.id}`, {
-          method: "DELETE",
+        const response = await fetch(`http://localhost:8080/buyer/${userId}/shippingInfo/remove`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: addressToDelete.id }),
         });
 
         if (!response.ok) {
@@ -173,14 +128,35 @@ const AccountAddress = () => {
 
 
 
-  const handleSetDefault = (index) => {
-    setAddresses((prev) =>
-      prev.map((addr, i) => ({
-        ...addr,
-        isDefault: i === index,
-      }))
-    );
+  const handleSetDefault = async (index) => {
+    const selectedAddress = addresses[index];
+    
+    try {
+      const response = await fetch(`http://localhost:8080/buyer/${userId}/shippingInfo/setdefault`, {
+        method: 'PUT', // hoặc 'PUT' nếu backend yêu cầu
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: selectedAddress.id }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to set default address');
+      }
+  
+      // Nếu API thành công, cập nhật local state
+      setAddresses((prev) =>
+        prev.map((addr, i) => ({
+          ...addr,
+          isDefault: i === index,
+        }))
+      );
+    } catch (error) {
+      console.error('Error setting default address:', error);
+      // Bạn có thể hiển thị thông báo lỗi ở đây nếu muốn
+    }
   };
+  
 
   return (
     <div className="min-h-screen flex">

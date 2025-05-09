@@ -27,7 +27,7 @@ router.post('/:buyerId/shippingInfo', BuyerController.addShippingInfo) //.
 router.get('/:buyerId/shippingInfo', BuyerController.getAllShippingInfo) //.
 router.put('/:buyerId/shippingInfo/setdefault', BuyerController.setDefaultShippingInformation) //.
 router.put('/:buyerId/shippingInfo/remove', BuyerController.removeShippingInformation)
-// router.put('/:buyerId/shippingInfo/edit', BuyerController.editShippingInformation) //
+router.put('/:buyerId/shippingInfo/edit', BuyerController.editShippingInformation) //
 
 //Shop
 router.post('/:buyerId/shop/create', BuyerController.createNewShop) //.
