@@ -79,7 +79,7 @@ const ProductDetail = () => {
         const fetchShop = async () => {
             try {
                 const response = await getShopById(product?.shopId); // Assuming product has a shopId property
-                setShop(response.shop);
+                setShop(response.shop[0]);
             } catch (error) {
                 console.error('Error fetching shop:', error);
             }
@@ -147,9 +147,8 @@ const ProductDetail = () => {
     };
 
     if (!product) return <div className="p-10 text-center">Loading...</div>;
-    console.log(product);
 
-    
+    console.log('Shop:', shop);
 
     return (
         <div className="container mx-auto px-16 py-8">
@@ -245,18 +244,19 @@ const ProductDetail = () => {
             </div>
 
             {/* Shop Section */}
+            
             <div className="border-1 border-gray-400 rounded mb-8">
                 <div className="p-6 flex items-center justify-between">
                     <div className="flex items-center">
                     <img
-                        src={shop.image}
+                        src={shop.avatarURL}
                         alt={shop.name}
                         className="w-16 h-16 rounded-full object-cover mr-4"
                     />
                     <div>
                         <h3 className="font-medium text-lg">{shop.name}</h3>
                         <div className="flex text-yellow-400">
-                        {Array(5).fill().map((_, i) => (
+                        {Array(shop.totalRating).fill().map((_, i) => (
                             <FontAwesomeIcon key={i} icon={faStar} />
                         ))}
                         </div>
@@ -265,11 +265,11 @@ const ProductDetail = () => {
 
                     <div className="flex gap-8">
                     <div className="text-center">
-                        <div className="font-medium text-blue-600">{shop.evaluation}</div>
+                        <div className="font-medium text-blue-600">{shop.totalEvaluations}</div>
                         <div className="text-sm text-gray-500">Evaluate</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-medium">{shop.products}</div>
+                        <div className="font-medium">{shop.totalProducts}</div>
                         <div className="text-sm text-gray-500">Product</div>
                     </div>
                     </div>
