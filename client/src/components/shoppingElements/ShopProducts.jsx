@@ -140,11 +140,11 @@ const ShopProducts = ({ shopId }) => {
       sortProducts(products, activeFilter);
       setSelectedCategory(null);
     } else {
-      const selectedCat = categories.find(cat => cat === category);
-      setSelectedCategory(selectedCat);
-  
+      const selectedCat = categories.find(cat => cat.id === category);
+      setSelectedCategory(selectedCat); // select category object is the number 
+      
       const filteredProducts = products.filter(product =>
-        Array.isArray(product.categories) && product.categories.includes(category)
+        product.categories.some(cat => cat === selectedCat.name)
       );
   
       sortProducts(filteredProducts, activeFilter);
