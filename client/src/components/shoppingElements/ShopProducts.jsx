@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import ProductCard from "./ProductCard";
 import SecondaryButton from "../shares/SecondaryButton";
 import TitleSection from "../shares/TitleSection";
+import { useSearch } from "../../hooks/searchContext"; // Adjust path as needed
 
 const ShopProducts = ({ shopId }) => {
   const [products, setProducts] = useState([]);
-  const [displayProducts, setDisplayProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("Bestseller");
   const [categories, setCategories] = useState([]);
@@ -13,7 +13,8 @@ const ShopProducts = ({ shopId }) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showAllProducts, setShowAllProducts] = useState(false);
-
+  
+  const { searchQuery } = useSearch(); // Get search query from context
   const priceRef = useRef(null);
   const categoryRef = useRef(null);
 
@@ -31,128 +32,122 @@ const ShopProducts = ({ shopId }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await fetch(`http://localhost:8080/seller/${shopId}/getCategory`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch categories");
-        }
-
+        if (!response.ok) throw new Error("Failed to fetch categories");
         const data = await response.json();
-        const categories = data.categories.map((cat) => ({
-          id: cat.id,
-          name: cat.name,
-        }));
-
-        setCategories(categories); // hoặc xử lý theo logic app của bạn
+        setCategories(data.categories.map(cat => ({ id: cat.id, name: cat.name })));
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     };
-
     fetchCategories();
   }, [shopId]);
 
-
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(`http://localhost:8080/seller/${shopId}/getProducts`);
         const data = await response.json();
-
-        const formattedProducts = data.map((product) => ({
+        
+        const formattedProducts = data.map(product => ({
           id: product.id,
           name: product.name,
           price: parseFloat(product.price),
           salePrice: parseFloat(product.salePrice),
           saled: product.saled,
           createdAt: product.createdAt,
-          thumbnailURL: product.thumbnailURL.replace(/\\/g, "/"), // sửa dấu `\` thành `/` nếu có
+          thumbnailURL: product.thumbnailURL.replace(/\\/g, "/"),
           categories: product.categories || [],
           rating: product.totalRating || 0,
-          reviewCount: 0, // API không có reviewCount
+          reviewCount: 0,
         }));
-
+        
         setProducts(formattedProducts);
-        sortProducts(formattedProducts, activeFilter);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchProducts();
-  }, []);
+  }, [shopId]);
 
+  // Memoized filtered products based on search and category
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+    
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        product.categories.some(cat => cat.toLowerCase().includes(query))
+      );
+    }
+    
+    // Apply category filter
+    if (selectedCategory) {
+      result = result.filter(product => 
+        product.categories.some(cat => cat === selectedCategory.name)
+      );
+    }
+    
+    return result;
+  }, [products, searchQuery, selectedCategory]);
 
-  // Sort products based on active filter
-  const sortProducts = (productsToSort, filter) => {
-    let sorted = [...productsToSort];
-
-    switch (filter) {
+  // Memoized sorted products
+  const sortedProducts = useMemo(() => {
+    let result = [...filteredProducts];
+    
+    // Apply active filter (Bestseller/Newest)
+    switch (activeFilter) {
       case "Bestseller":
-        // Sort by highest sales
-        sorted.sort((a, b) => b.saled - a.saled);
+        result.sort((a, b) => b.saled - a.saled);
         break;
       case "Newest":
-        // Sort by creation date (newest first)
-        sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
       default:
         break;
     }
+    
+    return result;
+  }, [filteredProducts, activeFilter]);
 
-    setDisplayProducts(sorted);
+  // Price filter handler (now modifies the display directly)
+  const handlePriceFilter = (order) => {
+    let sorted = [...sortedProducts];
+    sorted.sort((a, b) => {
+      const aPrice = a.salePrice > 0 ? a.salePrice : a.price;
+      const bPrice = b.salePrice > 0 ? b.salePrice : b.price;
+      return order === "highToLow" ? bPrice - aPrice : aPrice - bPrice;
+    });
+    setShowPriceDropdown(false);
+    return sorted;
   };
+
+  // Final displayed products
+  const displayProducts = useMemo(() => {
+    return showAllProducts ? sortedProducts : sortedProducts.slice(0, 8);
+  }, [sortedProducts, showAllProducts]);
 
   // Handle filter changes
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
-    sortProducts(products, filter);
-  };
-
-  // Price filter handlers
-  const handlePriceFilter = (order) => {
-    let sorted = [...displayProducts];
-    if (order === "highToLow") {
-      sorted.sort((a, b) => {
-        const aPrice = a.salePrice > 0 ? a.salePrice : a.price;
-        const bPrice = b.salePrice > 0 ? b.salePrice : b.price;
-        return bPrice - aPrice;
-      });
-    } else {
-      sorted.sort((a, b) => {
-        const aPrice = a.salePrice > 0 ? a.salePrice : a.price;
-        const bPrice = b.salePrice > 0 ? b.salePrice : b.price;
-        return aPrice - bPrice;
-      });
-    }
-    setDisplayProducts(sorted);
-    setShowPriceDropdown(false);
+    setShowAllProducts(false);
   };
 
   // Category filter handler
   const handleCategoryFilter = (category) => {
-    if (category === null) {
-      // Reset filter
-      sortProducts(products, activeFilter);
-      setSelectedCategory(null);
-    } else {
-      const selectedCat = categories.find(cat => cat.id === category);
-      setSelectedCategory(selectedCat); // select category object is the number 
-      
-      const filteredProducts = products.filter(product =>
-        product.categories.some(cat => cat === selectedCat.name)
-      );
-  
-      sortProducts(filteredProducts, activeFilter);
-    }
+    setSelectedCategory(category ? categories.find(c => c.id === category) : null);
     setShowCategoryDropdown(false);
     setShowAllProducts(false);
   };
-  
 
   // Handle view all products
   const handleViewAllProducts = () => {
@@ -165,7 +160,7 @@ const ShopProducts = ({ shopId }) => {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      {/* Header with HomePage styling */}
+      {/* Header with filters */}
       <div className="flex items-center justify-between mb-4">
         <TitleSection title="Our Products" />
         <div className="flex items-center">
@@ -250,11 +245,13 @@ const ShopProducts = ({ shopId }) => {
 
       {/* Products grid */}
       <div className="bg-white p-4 rounded-lg">
-        {displayProducts.length === 0 ? (
-          <div className="text-center py-8">No products found for this shop</div>
+        {sortedProducts.length === 0 ? (
+          <div className="text-center py-8">
+            {searchQuery ? "No products match your search" : "No products found for this shop"}
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 gap-y-10">
-            {(showAllProducts ? displayProducts : displayProducts.slice(0, 8)).map((product) => (
+            {displayProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 id={product.id.toString()}
@@ -273,8 +270,8 @@ const ShopProducts = ({ shopId }) => {
         )}
       </div>
 
-      {/* Hiện nút "View All Products" chỉ khi có nhiều hơn 8 sản phẩm và chưa nhấp vào nút */}
-      {displayProducts.length > 8 && !showAllProducts && (
+      {/* View All button */}
+      {sortedProducts.length > 8 && !showAllProducts && (
         <div className="mt-6 flex justify-center">
           <SecondaryButton title="View All Products" onClick={handleViewAllProducts} />
         </div>
