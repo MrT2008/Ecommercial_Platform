@@ -99,9 +99,7 @@ const CheckOut = () => {
     }
   };
 
-  // if (loading || shippingInfoDefault === null) {
-  //   return <div className="p-8 text-center">Loading checkout information...</div>;
-  // }
+ 
   if (loading) {
     return <div className="p-8 text-center">Loading checkout information...</div>;
   }
@@ -110,9 +108,7 @@ const CheckOut = () => {
     return <div className="p-8 text-center">No items selected for checkout.</div>;
   }
 
-  // if (!shippingInfoDefault) {
-  //   return <div className="p-8 text-center">No shipping information available.</div>;
-  // }
+  
   if (!shippingInfoDefault) {
     return (
       <div className="p-8">
