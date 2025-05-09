@@ -67,7 +67,7 @@ function App() {
 
         {/* Private routes for buyers and sellers */}
         <Route element={<PrivateRoute isAllowed={isBuyer} redirectPath="/login"><MainLayout /></PrivateRoute>}>
-          <Route path="/buyer" element={<MainLayout />}>
+          <Route path="/buyer">
             <Route path="cart" element={<Cart />} />
             <Route path="check-out" element={<CheckOut />} />
             <Route path="shop-pending-status" element={<ShopPendingStatus />} />
@@ -104,7 +104,7 @@ function App() {
 
         {/* Private routes for admin and moderator */}
         <Route element={<PrivateRoute isAllowed={isAdmin || isModerator} redirectPath="/login"><MainLayout /></PrivateRoute>}>
-          <Route path="/admin" element={<MainLayout />}>
+          <Route path="/admin">
             <Route path="admin-dashboard" element={<Dashboard />} />
             <Route path="pending-shops" element={<PendingShops />} />
             <Route path="list-shops" element={<ListAllShops />} />
