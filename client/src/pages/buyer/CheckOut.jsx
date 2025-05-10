@@ -4,6 +4,7 @@ import { proceedWithCheckout } from "../../api/buyerAPI";
 import ShippingAddress from "../../components/buyer/ShippingAddress";
 import SecondaryButton from "../../components/shares/SecondaryButton";
 import { useAuth } from "../../hooks/useAuth";
+
 const CheckOut = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
@@ -15,6 +16,43 @@ const CheckOut = () => {
   const { user } = useAuth();
   const location = useLocation();
   const buyerID = user.id;
+  const [address, setAddresses] = useState([]);
+  // const [selectedAddress, setSelectedAddress] = useState(null);
+
+
+  const fetchAddresses = () => {
+    if (!buyerID) return;
+
+    fetch(`http://localhost:8080/buyer/${buyerID}/shippingInfo`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.userShippingInfo) {
+          const activeAddresses = data.userShippingInfo.filter(item => item.status !== "delete");
+          const formatted = activeAddresses.map((item) => ({
+            id: item.id,
+            name: item.receiverName,
+            phone: item.phone,
+            address: item.address,
+            isDefault: item.status === "active",
+          }));
+
+          setAddresses(formatted);
+
+          // Ưu tiên địa chỉ mặc định
+          const defaultAddress = formatted.find(addr => addr.isDefault) || formatted[0];
+          setAddresses(defaultAddress);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch shipping info:", err);
+      });
+  };
+
+  useEffect(() => {
+    if (buyerID) {
+      fetchAddresses();
+    }
+  }, [buyerID]);
 
   // Load checkout items from localStorage when component mounts
   useEffect(() => {
@@ -43,15 +81,18 @@ const CheckOut = () => {
   }, [navigate]);
 
   useEffect(() => {
+
     const fetchShippingInfo = async () => {
       try {
         const response = await fetch(`http://localhost:8080/buyer/${buyerID}/shippingInfo`);
         if (!response.ok) throw new Error("Failed to fetch");
         const data = await response.json();
+
         // Find the default shipping info (status === 'active')
         if (data.userShippingInfo && data.userShippingInfo.length > 0) {
           const defaultInfo = data.userShippingInfo.find((info) => info.status === "active");
-          setShippingInfoDefault(defaultInfo || data.userShippingInfo[0]);
+          setShippingInfoDefault(defaultInfo);
+          // console.log("Fetched shipping info:", shippingInfoDefault);
         } else {
           setShippingInfoDefault(null);
         }
@@ -63,8 +104,12 @@ const CheckOut = () => {
 
     if (buyerID) {
       fetchShippingInfo();
+
     }
   }, [buyerID]);
+  useEffect(() => {
+    console.log("Fetched shipping info:", shippingInfoDefault);
+  }, [shippingInfoDefault]);
 
   // Group items by shop
 
@@ -99,7 +144,7 @@ const CheckOut = () => {
     }
   };
 
- 
+
   if (loading) {
     return <div className="p-8 text-center">Loading checkout information...</div>;
   }
@@ -108,14 +153,14 @@ const CheckOut = () => {
     return <div className="p-8 text-center">No items selected for checkout.</div>;
   }
 
-  
+
   if (!shippingInfoDefault) {
     return (
       <div className="p-8">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
           <strong className="font-bold block">No shipping information!</strong>
           <span className="block sm:inline"> Please add a shipping address to continue with checkout.</span>
-          <button 
+          <button
             className="block mt-3 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
             onClick={() => navigate('/account/address')}
           >
@@ -123,7 +168,7 @@ const CheckOut = () => {
           </button>
         </div>
         <div className="text-center mt-4">
-          <button 
+          <button
             className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
             onClick={() => navigate('/cart')}
           >
@@ -139,9 +184,9 @@ const CheckOut = () => {
     <div className="min-h-screen flex flex-col justify-between">
       <div>
         <ShippingAddress
-          recipientName={shippingInfoDefault.receiverName}
-          phoneNumber={shippingInfoDefault.phone}
-          deliveryAddress={shippingInfoDefault.address}
+          initialRecipientName={address.name}
+          initialPhoneNumber={address.phone}
+          initialDeliveryAddress={address.address}
         />
         {Object.values(itemsByShop).map((shop, shopIndex) => (
           <div key={shopIndex} className="m-8 bg-white rounded-lg shadow-sm">

@@ -5,9 +5,12 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import AddressDialog from "../../pages/buyer/AddressDialog"; 
 
-const ShippingAddress = ({ recipientName, phoneNumber, deliveryAddress }) => {
+const ShippingAddress = ({  initialRecipientName, initialPhoneNumber, initialDeliveryAddress  }) => {
 
     const [showDialog, setShowDialog] = useState(false);
+    const [recipientName, setRecipientName] = useState(initialRecipientName);
+    const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber);
+    const [deliveryAddress, setDeliveryAddress] = useState(initialDeliveryAddress);
 
     const handleEditClick = () => {
         setShowDialog(true);
@@ -25,37 +28,47 @@ const ShippingAddress = ({ recipientName, phoneNumber, deliveryAddress }) => {
                 </div>
                 {showDialog && (
                 <AddressDialog
-                    onClose={() => setShowDialog(false)}
-                />
+                onClose={() => setShowDialog(false)}
+                onUpdateAddress={(newAddress) => {
+                    setRecipientName(newAddress.name);
+                    setPhoneNumber(newAddress.phone);
+                    setDeliveryAddress(newAddress.address);
+                    setShowDialog(false); // đóng dialog sau khi chọn
+                }}
+            />
+            
             )}
             </div>
 
             <div className="ml-8 space-y-2">
                 <div className="flex items-center">
                     <label className="font-semibold text-base w-40">Recipient Name:</label> 
-                    <input
-                        type="text"
-                        defaultValue={recipientName}
-                        className="border-b border-gray-300 focus:outline-none focus:border-blue-500 text-base flex-1 py-1"
-                    />
+                    <p>{recipientName}
+                        {/* type="text"
+                        value={recipientName}
+                        onChange={(e) => setRecipientName(e.target.value)}
+                        className="border-b border-gray-300 focus:outline-none focus:border-blue-500 text-base flex-1 py-1" */}
+                    </p>
                 </div>
 
                 <div className="flex items-center">
                     <label className="font-semibold text-base w-40">Phone Number:</label>
-                    <input
-                        type="text"
-                        defaultValue={phoneNumber}
-                        className="border-b border-gray-300 focus:outline-none focus:border-blue-500 text-base flex-1 py-1"
-                    />
+                    <p>{phoneNumber}
+                        {/* type="text"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        className="border-b border-gray-300 focus:outline-none focus:border-blue-500 text-base flex-1 py-1" */}
+                    </p>
                 </div>
 
                 <div className="flex items-center">
                     <label className="font-semibold text-base w-40">Delivery Address:</label>
-                    <input
-                        type="text"
-                        defaultValue={deliveryAddress}
-                        className="border-b border-gray-300 focus:outline-none focus:border-blue-500 text-base flex-1 py-1"
-                    />
+                    <p>{deliveryAddress}
+                        {/* type="text"
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        className="border-b border-gray-300 focus:outline-none focus:border-blue-500 text-base flex-1 py-1" */}
+                    </p>
                 </div>
 
                 {/* <div className="flex justify-end mt-3">
@@ -69,8 +82,16 @@ const ShippingAddress = ({ recipientName, phoneNumber, deliveryAddress }) => {
 };
 // validation
 ShippingAddress.propTypes = {
-    recipientName: PropTypes.string.isRequired,
-    phoneNumber: PropTypes.string.isRequired,
-    deliveryAddress: PropTypes.string.isRequired,
+    initialRecipientName: PropTypes.string.isRequired,
+    initialPhoneNumber: PropTypes.string.isRequired,
+    initialDeliveryAddress: PropTypes.string.isRequired,
 };
+
 export default ShippingAddress;
+
+
+
+
+
+
+

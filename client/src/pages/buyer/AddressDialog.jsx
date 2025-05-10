@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const AddressDialog = ({ onClose }) => {
+const AddressDialog = ({ onClose, onUpdateAddress }) => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     const userId = storedUser?.id;
     const [addresses, setAddresses] = useState([]);
@@ -39,43 +39,49 @@ const AddressDialog = ({ onClose }) => {
 
     const handleSubmit = async () => {
         try {
-            const response = await fetch("http://localhost:8080/buyer/6/shippingInfo/setdefault", {
-                method: "POST",
+            const response = await fetch(`http://localhost:8080/buyer/${userId}/shippingInfo/setdefault`, {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id: selectedId }),
             });
-
+    
             if (!response.ok) throw new Error("Failed to set default");
-
-            onClose(); // Đóng dialog nếu thành công
+    
+            // Lấy địa chỉ vừa chọn để truyền về parent
+            const newDefault = addresses.find(addr => addr.id === selectedId);
+    
+            // Gửi dữ liệu về ShippingAddress
+            if (onUpdateAddress && newDefault) {
+                onUpdateAddress(newDefault);
+            }
+    
         } catch (error) {
             console.error("Error:", error);
         }
     };
+    
+    
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-[400px]">
-                <h2 className="text-lg font-semibold mb-4">Chọn địa chỉ giao hàng</h2>
+            <div className="bg-white p-6 rounded-lg w-[600px]">
+                <h2 className="text-lg font-semibold mb-4">Change Shipping address</h2>
 
                 <ul className="space-y-2 max-h-60 overflow-y-auto">
-                    {/* {addresses.map(addr => (
-                        <li key={addr.id} className="flex items-center space-x-2">
+                    {addresses.map((address, index) => (
+                        <li
+                            key={address.id}
+                            className="bg-white p-4 rounded shadow flex items-start gap-4 cursor-pointer"
+                            onClick={() => setSelectedId(address.id)}
+                        >
                             <input
                                 type="radio"
-                                name="defaultAddress"
-                                checked={selectedId === addr.id}
-                                onChange={() => setSelectedId(addr.id)}
+                                name="address"
+                                checked={selectedId === address.id}
+                                onChange={() => setSelectedId(address.id)}
+                                className="mt-1 accent-blue-500"
                             />
-                            <span>{addr.recipientName} - {addr.deliveryAddress}</span>
-                        </li>
-                    ))} */}
-                    {addresses.map((address, index) => (
-                        <div
-                            key={index}
-                            className="bg-white p-6 rounded shadow flex justify-between items-center"
-                        >
-                            <div className="max-w-3xl break-words">
+                            <div className="flex-1 max-w-3xl break-words">
                                 <p className="font-bold flex items-center gap-2">
                                     {address.name}
                                     {address.isDefault && (
@@ -85,21 +91,21 @@ const AddressDialog = ({ onClose }) => {
                                 <p>{address.phone}</p>
                                 <p>{address.address}</p>
                             </div>
-
-                        </div>
+                        </li>
                     ))}
                 </ul>
 
+
                 <div className="flex justify-end space-x-3 mt-5">
                     <button onClick={onClose} className="px-4 py-1 bg-gray-300 rounded hover:bg-gray-400">
-                        Hủy
+                        Cancel
                     </button>
                     <button
                         onClick={handleSubmit}
                         className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                         disabled={selectedId === null}
                     >
-                        Đặt làm mặc định
+                        Set as default
                     </button>
                 </div>
             </div>
