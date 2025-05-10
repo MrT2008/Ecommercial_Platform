@@ -3,6 +3,8 @@ import ProductCard from "./ProductCard";
 import SecondaryButton from "../shares/SecondaryButton";
 import TitleSection from "../shares/TitleSection";
 import { useSearch } from "../../hooks/searchContext"; // Adjust path as needed
+import Button from "../shares/Button";
+import { useNavigate } from 'react-router-dom';
 
 const ShopProducts = ({ shopId }) => {
   const [products, setProducts] = useState([]);
@@ -13,11 +15,18 @@ const ShopProducts = ({ shopId }) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showAllProducts, setShowAllProducts] = useState(false);
+  const navigate = useNavigate();
   
   const { searchQuery } = useSearch(); // Get search query from context
   const priceRef = useRef(null);
   const categoryRef = useRef(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showExtraMessage, setShowExtraMessage] = useState(false);
 
+  const handleAddToCartSuccess = () => {
+    setShowSuccessMessage(true);
+    setTimeout(() => setShowSuccessMessage(false), 2000);
+  };
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -264,6 +273,8 @@ const ShopProducts = ({ shopId }) => {
                 reviewCount={product.reviewCount}
                 imageUrl={product.thumbnailURL}
                 isNew={new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)}
+                onAddToCartSuccess={handleAddToCartSuccess}
+                
               />
             ))}
           </div>
@@ -274,6 +285,47 @@ const ShopProducts = ({ shopId }) => {
       {sortedProducts.length > 8 && !showAllProducts && (
         <div className="mt-6 flex justify-center">
           <SecondaryButton title="View All Products" onClick={handleViewAllProducts} />
+        </div>
+      )}
+      {/* Success modal */}
+      {showSuccessMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white w-11/12 max-w-md p-6 rounded-xl shadow-lg text-center">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Product Added to Cart
+            </h2>
+            <p className="mt-3 text-gray-600">
+              You have successfully added the item to your cart.
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <Button
+                text="Go to Cart"
+                otherClassName="blue"
+                type="button"
+                onClick={() => {
+                  navigate("/buyer/cart");
+                  setShowSuccessMessage(false);
+                }}
+              />
+              <Button
+                text="Continue Shopping"
+                otherClassName="gray"
+                type="button"
+                onClick={() => {
+                  setShowSuccessMessage(false);
+                  setShowExtraMessage(true);
+                  setTimeout(() => setShowExtraMessage(false), 2000);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {showExtraMessage && (
+        <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-5 rounded shadow-lg z-50">
+          Successfully added to cart
         </div>
       )}
     </div>
