@@ -249,7 +249,7 @@ const ProductDetail = () => {
                 <div className="p-6 flex items-center justify-between">
                     <div className="flex items-center">
                     <img
-                        src={shop.avatarURL}
+                        src={shop.avatarUrl}
                         alt={shop.name}
                         className="w-16 h-16 rounded-full object-cover mr-4"
                     />
