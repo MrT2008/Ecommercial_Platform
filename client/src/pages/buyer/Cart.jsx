@@ -241,61 +241,61 @@ const Cart = () => {
 
                         {/* Shop Items */}
                         {itemsByShop[shopId].items.map((item) => (
-                            <div key={item.productId} className="grid grid-cols-6 gap-4 items-center border-b py-4">
-                                {/* Checkbox */}
-                                <div className="flex items-center">
+                            <div key={item.productId} className="grid grid-cols-6 gap-4 items-center border-b border-gray-300 py-4">
+                                {/* Checkbox + Product Info */}
+                                <div className="flex items-center gap-4 col-span-2">
                                     <input
                                         type="checkbox"
                                         checked={selectedItems[item.productId] || false}
                                         onChange={() => toggleSelectItem(item.productId)}
                                         className="mx-2"
                                     />
-                                </div>
-
-                                {/* Product Info */}
-                                <div className="flex items-center gap-4">
                                     <img src={item.productImage} alt={item.productName} className="w-16 h-16 object-cover" />
                                     <div>
                                         <div className="font-medium">{item.productName}</div>
                                         {item.variant && (
-                                            <div className="text-sm text-gray-500">
-                                                <span>{item.variantLabel} </span>
-                                                <span>{item.variant}</span>
-                                            </div>
+                                        <div className="text-sm text-gray-500">
+                                            <span>{item.variantLabel} </span>
+                                            <span>{item.variant}</span>
+                                        </div>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Price */}
-                                <div>${item.productSalePrice}</div>
+                                <div className="text-center">${item.productSalePrice}</div>
 
                                 {/* Quantity Control */}
-                                <div className="flex justify-center">
-                                    <button
-                                        className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-l"
-                                        onClick={() => decreaseQuantity(item.productId)}
-                                    >
-                                        -
-                                    </button>
-                                    <div className="px-4 py-1 border-t border-b">
-                                        {String(item.quantity).padStart(2, '0')}
+                                <td className="flex items-center justify-center h-full">
+                                    <div className="flex items-center border border-gray-300 rounded overflow-hidden w-fit text-center">
+                                        <button
+                                            className=" px-3 py-2 flex items-center justify-center border-r border-gray-300 hover:bg-gray-100"
+                                            onClick={() => decreaseQuantity(item.productId)}
+                                        >
+                                            -
+                                        </button>
+                                        <input
+                                            type="text"
+                                            value={String(item.quantity).padStart(2, '0')}
+                                            readOnly
+                                            className="w-12 text-center py-2 bg-white outline-none"
+                                        />
+                                        <button
+                                            className="px-3 py-2 flex items-center justify-center border-l border-gray-300 hover:bg-gray-100"
+                                            onClick={() => increaseQuantity(item.productId)}
+                                        >
+                                            +
+                                        </button>
                                     </div>
-                                    <button
-                                        className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded-r"
-                                        onClick={() => increaseQuantity(item.productId)}
-                                    >
-                                        +
-                                    </button>
-                                </div>
-
+                                </td>
                                 {/* Subtotal */}
-                                <div>${item.productSalePrice * item.quantity}</div>
+                                <div className="text-center">${item.productSalePrice * item.quantity}</div>
 
                                 {/* Remove Button */}
-                                <div className="flex justify-center">
+                                <div className="flex justify-center text-center">
                                     <button
                                         onClick={() => removeItem(item.productId)}
-                                        className="text-gray-500 hover:text-gray-700"
+                                        className="text-[#FF3838] hover:text-[#DF0000]"
                                         title="Remove item"
                                     >
                                         {/* <i className="fas fa-trash"></i> */}
@@ -322,13 +322,13 @@ const Cart = () => {
                     <span>Coupon:</span>
                     <span>-$0</span>
                 </div>
-                <div className="flex justify-between font-bold text-lg mt-4">
+                <div className="flex justify-between font-bold text-lg text-[#FF3838] mt-4">
                     <span>Total:</span>
                     <span>${getSelectedSubtotal()}</span>
                 </div>
 
                 {/* Checkout Button */}
-                <div className="flex justify-end mt-6">
+                <div className="flex justify-end mt-3">
                     <SecondaryButton title="Proceed to checkout" onClick={handleCheckout} />
                 </div>
                 {/* href="/user/check-out" */}

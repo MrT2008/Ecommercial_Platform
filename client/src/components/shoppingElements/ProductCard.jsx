@@ -69,10 +69,10 @@ const ProductCard = ({
           </div>
         )}
         <button
-          className="absolute top-4 right-4 bg-white p-1 px-2 rounded-full"
+          className="absolute top-3 right-3 bg-white p-3 rounded-full"
           onClick={handleAddToCart}
         >
-          <FontAwesomeIcon icon={faCartPlus} size="lg" className="text-gray-300" />
+          <FontAwesomeIcon icon={faCartPlus} size="lg" className="text-[#000282]" />
         </button>
         <img
           src={imageUrl}

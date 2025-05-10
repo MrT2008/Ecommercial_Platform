@@ -181,7 +181,7 @@ const CheckOut = () => {
 
 
   return (
-    <div className="min-h-screen flex flex-col justify-between">
+    <div className="max-w-7xl mx-auto">
       <div>
         <ShippingAddress
           initialRecipientName={address.name}
@@ -216,7 +216,7 @@ const CheckOut = () => {
           </div>
         ))}
         {/* Summary */}
-        <div className="m-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="m-8 grid grid-cols-1 gap-8 ">
           <div className="space-y-4">
             <div className="flex justify-between">
               <span>Subtotal :</span>
@@ -230,12 +230,12 @@ const CheckOut = () => {
               <span>Coupon:</span>
               <span>-$0</span>
             </div>
-            <div className="flex justify-between font-bold text-lg">
+            <div className="flex justify-between font-bold text-lg text-[#FF3838]">
               <span>Total:</span>
               <span>${subtotal}</span>
             </div>
             {/* Place Order Button */}
-            <div className="pt-4">
+            <div className="flex justify-end mt-3">
               <SecondaryButton title="Place Order" align="left" onClick={handlePlaceOrder} />
             </div>
           </div>
