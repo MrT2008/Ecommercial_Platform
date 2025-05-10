@@ -46,7 +46,6 @@ const AllProduct = () => {
     fetchProducts();
   }, [reloadProducts]);
 
-
   const handleSaveProduct = async (product) => {
     try {
       // Get the shop ID first
@@ -62,16 +61,23 @@ const AllProduct = () => {
           throw new Error("Shop ID not found in response");
         }
         console.log("Found shop ID:", shopId);
-        setReloadProducts(prev => !prev);
       } catch (err) {
         console.error("Error getting shop ID:", err);
         alert("Failed to find your shop. Please check if you're logged in properly.");
         return;
       }
 
-      const url = `http://localhost:8080/seller/${shopId}/postProduct`;
-      const method = editingProduct ? 'PUT' : 'POST';
-      const endpoint = editingProduct ? `${url}/${editingProduct.id}` : url;
+      // Check if we're editing an existing product or creating a new one
+      const isEditing = !!editingProduct;
+      const productId = editingProduct?.id;
+      
+      console.log("Save operation:", isEditing ? "EDITING" : "CREATING", "Product ID:", productId);
+        // Use correct routes for edit vs create
+      const baseUrl = `http://localhost:8080/seller/${shopId}`;
+      const method = isEditing ? 'PUT' : 'POST';
+      const endpoint = isEditing 
+          ? `${baseUrl}/updateProduct/${productId}` 
+          : `${baseUrl}/postProduct`;
 
       console.log("Sending request to:", endpoint);
 
@@ -81,16 +87,14 @@ const AllProduct = () => {
       // Add all fields with null checks
       formData.append('name', product.name || '');
       formData.append('price', product.price?.toString() || '0');
-      formData.append('description', product.description || '');
-
-      // Handle categories
+      formData.append('description', product.description || '');      // Handle categories
       if (Array.isArray(product.categories) && product.categories.length > 0) {
         product.categories.forEach((cat, index) => {
-          formData.append(`categories[${index}]`, cat);
+          formData.append(`category[${index}]`, cat);
         });
       } else {
         // Add a default category if none provided
-        formData.append('categories[0]', 'uncategorized');
+        formData.append('category[0]', 'uncategorized');
       }
 
       formData.append('quantity', product.quantity?.toString() || '0');
@@ -133,13 +137,20 @@ const AllProduct = () => {
         const errorData = await response.text();
         console.error('Server error response:', errorData);
         throw new Error(`Failed to save product: ${response.status} ${response.statusText}`);
-      }
-
-      // Show success message
+      }      // Show success message
       alert('Product saved successfully!');
-    } catch (err) {
+      
+      // Refresh product list to show updated data
+      setReloadProducts(prev => !prev);    } catch (err) {
       console.error("Error saving product:", err);
-      alert(`Error saving product: ${err.message}`);
+      
+      // More detailed error reporting
+      let errorMessage = err.message;
+      if (errorMessage === "Failed to fetch") {
+        errorMessage = "Không thể kết nối tới máy chủ. Kiểm tra server có đang chạy không hoặc có vấn đề mạng.";
+      }
+      
+      alert(`Error saving product: ${errorMessage}`);
     } finally {
       setEditingProduct(null);
       setDialogOpen(false);
@@ -266,11 +277,11 @@ const AllProduct = () => {
                     </div>
                   </td>
                   <td className="p-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
+                    <div className="flex items-center justify-center gap-2">                      <button
                         className="text-[#5F33E1]"
                         title="Edit"
                         onClick={() => {
+                          console.log("Editing product:", p);
                           setEditingProduct(p);
                           setDialogOpen(true);
                         }}>

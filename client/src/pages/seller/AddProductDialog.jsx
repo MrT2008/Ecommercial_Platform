@@ -14,18 +14,26 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
   const [image, setImage] = useState(null);
 
   const [allCategories, setAllCategories] = useState([]);
-  const [showCategories, setShowCategories] = useState(false);
-  useEffect(() => {
+  const [showCategories, setShowCategories] = useState(false);  useEffect(() => {
     // Initialize form values based on product prop
     if (product) {
+      console.log("Initializing form with product data:", product);
       setName(product.name || '');
       setDescription(product.description || '');
       setPrice(product.price?.toString() || '');
-      setDiscount(product.discount?.replace('%', '') || '');
-      setQuantity(product.quantity || 0);
+      // Handle both 'discount' or 'saled' property names
+      const discountValue = product.discount || product.saled || '';
+      setDiscount(typeof discountValue === 'string' ? 
+        discountValue.replace('%', '') : 
+        discountValue?.toString() || '');
+      // Handle both 'quantity' or 'stock' property names
+      setQuantity(product.quantity || product.stock || 0);
       setStatus(product.status || 'Active');
-      setCategory(product.category || []);
-      setImage(product.image || null);
+      // Handle both 'category' or 'categories' property names
+      setCategory(Array.isArray(product.categories) ? product.categories : 
+                  product.category ? product.category : []);
+      // Handle image property which might be under different names
+      setImage(product.image || product.thumbnailURL || null);
     } else {
       setName('');
       setDescription('');
@@ -53,7 +61,7 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
     };
 
     fetchCategories();
-  }, []);
+  }, [product]); // Add product as dependency so it refreshes when product changes
 
 
   const handleCategoryChange = (e) => {
@@ -74,85 +82,33 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
       reader.readAsDataURL(file);
     }
   };
-
-  const handleSave = async () => {
+  const handleSave = () => {
     try {
-      const userId = getSellerId();
-      const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
-      const shopData = await shopRes.json();
-      const shopId = shopData.data.shop.id;
-      // setLoading(true);
-      // setError(null);
-
-      if (!shopId) {
-        throw new Error("Shop ID not found");
-      }
-
-      // Create form data object
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('price', price);
-      formData.append('description', description);
-
-      // Add each category separately
-      category.forEach((cat, index) => {
-        formData.append(`category[${index}]`, cat);
-      });
-
-      formData.append('quantity', quantity);
-      formData.append('type', 'product'); // As seen in the API example
-      formData.append('discount', discount);
-      formData.append('saled', discount);
-
-      // Handle image upload
-      if (image && image.startsWith('data:')) {
-        // Convert base64 to blob
-        const response = await fetch(image);
-        const blob = await response.blob();
-        formData.append('thumbnailURL', blob, 'product-image.jpg');
-      }
-
-      // Make API request
+      // Create product object with current form values
+      const productData = {
+        id: product?.id, // Pass the ID for editing existing products
+        name: name,
+        price: parseFloat(price),
+        description: description,
+        categories: category, // Match the property name used in AllProduct.jsx
+        quantity: parseInt(quantity),
+        stock: parseInt(quantity), // Include both property names for compatibility
+        discount: discount,
+        saled: discount, // Include both property names for compatibility
+        status: status,
+        image: image,
+        thumbnailURL: image
+      };
       
-      try {
-        // Fetch the shop ID first
-        const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
-        const shopData = await shopRes.json();
-        if (!shopData.data?.shop?.id) {
-          throw new Error("Shop ID not found in response");
-        }
-        console.log("Found shop ID:", shopId);
-      } catch (err) {
-        console.error("Error getting shop ID:", err);
-        alert("Failed to find your shop. Please check if you're logged in properly.");
-        return;
-      }
-      const response = await fetch(`http://localhost:8080/seller/${shopId}/postProduct`, {
-        method: 'POST',
-        body: formData,
-        // Don't set Content-Type header, let the browser set it with boundary for FormData
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
-
-      // const data = await response.json();
-
-      // Call the onSave prop with the new product data
-      // onSave(data);
-
-      // Close dialog
-      onClose();
-     
-
+      console.log("Saving product with data:", productData);
+      
+      // Call the onSave function passed from parent component
+      onSave(productData);
+      
     } catch (err) {
-      console.error("Error creating product:", err);
-      // setError("Failed to create product. Please try again.");
+      console.error("Error preparing product data:", err);
+      alert("There was a problem preparing the product data. Please try again.");
     }
-    // finally {
-    // setLoading(false);
-    // }
   };
 
   if (!isOpen) return null;
