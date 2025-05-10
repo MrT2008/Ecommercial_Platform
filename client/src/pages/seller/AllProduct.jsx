@@ -291,7 +291,7 @@ const AllProduct = () => {
                         className="text-[#EA4335]"
                         title="Delete"
                         onClick={() => handleDeleteProduct(p.id)}>
-                        {p.id}
+                        {/* {p.id} */}
                         <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </div>
