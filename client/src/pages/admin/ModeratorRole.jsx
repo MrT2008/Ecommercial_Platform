@@ -143,7 +143,7 @@ const ModeratorRole = () => {
                     <td className="p-2">
                       <button
                         className="text-[#EA4335] border border-[#EA4335] px-3 py-1 rounded"
-                        onClick={() => handleDelete(index)}
+                        onClick={() => handleDelete(mod.id)}
                       >
                         <FontAwesomeIcon icon={faTrash} className="mr-1" />
                         Delete
