@@ -165,7 +165,7 @@ const ProductDetail = () => {
                     <img
                         src={product.thumbnailURL}
                         alt={product.name}
-                        className="w-full object-contain"
+                        className="w-full h-100 object-contain"
                     />
                 </div>
 
@@ -265,22 +265,22 @@ const ProductDetail = () => {
 
                     <div className="flex gap-8">
                     <div className="text-center">
-                        <div className="font-medium text-blue-600">{shop.totalEvaluations}</div>
+                        <div className="font-medium text-[#000282] ">{shop.totalEvaluations}</div>
                         <div className="text-sm text-gray-500">Evaluate</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-medium">{shop.totalProducts}</div>
+                        <div className="font-medium text-[#000282] ">{shop.totalProducts}</div>
                         <div className="text-sm text-gray-500">Product</div>
                     </div>
                     </div>
 
                     <div className="flex gap-2">
-                    <button className="border border-[#000282] text-[#000282] px-4 py-2 rounded hover:bg-blue-50">
+                    <button className="border-1 font-medium border-[#000282] text-[#000282] px-4 py-2 rounded hover:bg-blue-50">
                         Chat Now
                     </button>
                     <Link
                         to={`/guest/shop/${product.shopId}`}
-                        className="border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50 flex items-center justify-center"
+                        className="border border-gray-500 px-4 py-2 rounded hover:bg-white flex items-center justify-center"
                     >
                         View Shop
                     </Link>
