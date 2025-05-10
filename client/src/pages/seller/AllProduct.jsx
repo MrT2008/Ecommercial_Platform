@@ -22,14 +22,17 @@ const AllProduct = () => {
       try {
         const userId = getSellerId();
         const shopId = await getShopIdFromUserId(userId);
-        
+
         const productRes = await fetch(`http://localhost:8080/seller/${shopId}/getProducts`);
         if (!productRes.ok) {
           throw new Error(`Error: ${productRes.status}`);
         }
 
         const products = await productRes.json();
-        setProducts(products);
+        // ❗️Lọc sản phẩm không có status === "isdeleted"
+        const filteredProducts = products.filter(product => product.status !== "isdeleted");
+
+        setProducts(filteredProducts);
         setError(null);
       } catch (err) {
         console.error("Không thể fetch sản phẩm:", err);
@@ -41,9 +44,9 @@ const AllProduct = () => {
     };
 
     fetchProducts();
-  }, [reloadProducts]); 
-  
-  
+  }, [reloadProducts]);
+
+
   const handleSaveProduct = async (product) => {
     try {
       // Get the shop ID first
@@ -131,7 +134,7 @@ const AllProduct = () => {
         console.error('Server error response:', errorData);
         throw new Error(`Failed to save product: ${response.status} ${response.statusText}`);
       }
-      
+
       // Show success message
       alert('Product saved successfully!');
     } catch (err) {
@@ -144,6 +147,9 @@ const AllProduct = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
+    const userId = getSellerId();
+    const shopId = await getShopIdFromUserId(userId);
+
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         const response = await fetch(`http://localhost:8080/seller/${shopId}/deleteProduct/${productId}`, {
@@ -232,7 +238,7 @@ const AllProduct = () => {
                   </td>
                   <td className="p-2">{p.stock}</td>
                   <td className="p-2">${typeof p.price === 'number' ? p.price.toFixed(2) : p.price}</td>
-                  <td className="p-2">{p.saled + "%"|| '0%'}</td>
+                  <td className="p-2">{p.saled + "%" || '0%'}</td>
                   <td className="p-2">
                     <span
                       className={`px-2 py-1 rounded text-sm font-medium ${p.status === 'Active'
@@ -260,7 +266,7 @@ const AllProduct = () => {
                     </div>
                   </td>
                   <td className="p-2">
-                    <div className="flex items-center justify-center gap-5">
+                    <div className="flex items-center justify-center gap-2">
                       <button
                         className="text-[#5F33E1]"
                         title="Edit"
@@ -274,6 +280,7 @@ const AllProduct = () => {
                         className="text-[#EA4335]"
                         title="Delete"
                         onClick={() => handleDeleteProduct(p.id)}>
+                        {p.id}
                         <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </div>
@@ -290,7 +297,7 @@ const AllProduct = () => {
           onClose={() => {
             setDialogOpen(false);
             setEditingProduct(null);
-            setReloadProducts(prev => !prev); 
+            setReloadProducts(prev => !prev);
           }}
           onSave={handleSaveProduct}
           product={editingProduct}
