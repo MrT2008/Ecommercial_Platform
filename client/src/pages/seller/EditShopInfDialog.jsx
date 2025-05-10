@@ -26,7 +26,7 @@ const EditInfShopDialog = ({ isOpen, onClose, onSave, shop }) => {
     const updatedShopInfo = {
       name: shopName,
       email,
-      phone: phoneNumber,
+      phoneNumber,
       address,
       bankName: bankName,
       bankAccount: bankAccount,
@@ -64,7 +64,7 @@ const EditInfShopDialog = ({ isOpen, onClose, onSave, shop }) => {
 
         <div className="my-4">
           <label className="block mb-1">Bank Name</label>
-          <input className="w-full p-2 bg-gray-100 rounded" value={bankName} onChange={(e) => setBankAccount(e.target.value)} />
+          <input className="w-full p-2 bg-gray-100 rounded" value={bankName} onChange={(e) => setBankName(e.target.value)} />
         </div>
 
         <div className="my-4">

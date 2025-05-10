@@ -45,9 +45,9 @@ const HeadingBar = () => {
             <div className="w-full flex flex-col md:flex-row items-center justify-between border-b border-gray-300 px-4 py-3 gap-4">
                 {/* Left side - Logo */}
                 <div className="flex items-center">
-                    <a href="/" className="flex items-center">
+                    <Link to="/" className="flex items-center">
                         <Logo changeColor="black" changeID="mall" size="text-2xl" />
-                    </a>
+                    </Link>
                 </div>
     
                 {/* Center - Navbar + Search */}

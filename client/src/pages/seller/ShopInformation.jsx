@@ -11,6 +11,7 @@ const ShopInformation = () => {
     const [shopInfo, setShopInfo] = useState({});
     const [image, setImage] = useState("/images/fashion-store-logo.png");
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [avatar, setAvatar] = useState(null); // State to hold the selected image file
     // const [image, setImage] = useState(shopInfo.image);
     // const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State for controlling dialog visibility
 
@@ -55,9 +56,10 @@ const ShopInformation = () => {
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-                setImage(event.target.result);
+                setImage(event.target.result); // just for preview
             };
             reader.readAsDataURL(file);
+            setAvatar(file); // Save the file for upload
         }
     };
 
@@ -65,17 +67,40 @@ const ShopInformation = () => {
     //     setShopInfo(updatedShopInfo); // Update the shop info when saved
     //     setIsEditDialogOpen(false); // Close the dialog after saving
     // };
+    const handleSaveShopAvatar = async (updatedShopInfo) => {
+        try {
+            const userId = getSellerId();
+
+            const shopId = await getShopIdFromUserId(userId);
+            const response = await fetch(`http://localhost:8080/seller/${shopId}/updateInformation`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                },
+                body: updatedShopInfo,
+            });
+    
+            if (!response.ok) {
+                throw new Error('Cập nhật thông tin thất bại');
+            }
+    
+            const result = await response.json();
+    
+            setShopInfo(result.shop);  // Hoặc updatedShopInfo nếu backend không trả về
+            setIsEditDialogOpen(false); // Đóng dialog
+        } catch (error) {
+            console.error("Lỗi khi cập nhật shop:", error);
+        }
+    };
+
     const handleSaveShopInfo = async (updatedShopInfo) => {
         try {
             const userId = getSellerId();
-            console.log(`Đang fetch shop cho user ID: ${userId}`);
-
             const shopId = await getShopIdFromUserId(userId);
-            console.log(`Shop ID: ${shopId}`);
 
-            // Gửi POST request lên server
+            // Gửi PUT request lên server
             const response = await fetch(`http://localhost:8080/seller/${shopId}/updateInformation`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -177,7 +202,31 @@ const ShopInformation = () => {
 
                     {/* Save Button at bottom right */}
                     <div className="flex justify-end mt-6">
-                        <SecondaryButton title="Save" />
+                        <SecondaryButton 
+                        onClick={async () => {
+                            const formDataAvatar = new FormData();
+                            formDataAvatar.append('type', 'shop'); // Important for multer
+                            formDataAvatar.append('name', shopInfo.name || '');
+                            formDataAvatar.append('address', shopInfo.address || '');
+                            formDataAvatar.append('phoneNumber', shopInfo.phone || '');
+                            formDataAvatar.append('email', shopInfo.email || '');
+                            formDataAvatar.append('bankAccount', shopInfo.bankAccount || '');
+                            formDataAvatar.append('bankName', shopInfo.bankName || '');
+
+                            console.log('formDataAvatar:', avatar);
+
+                            if (avatar) {
+                                formDataAvatar.append('images', avatar);
+                            }
+                            for (let [key, value] of formDataAvatar.entries()) {
+                            console.log(key, value instanceof File ? 
+                                `File: ${value.name}` : 
+                                `Text: ${value}`
+                            );
+                            }
+                            await handleSaveShopAvatar(formDataAvatar);
+                        }}
+                        title="Save" />
                     </div>
                 </div>
             </div>
