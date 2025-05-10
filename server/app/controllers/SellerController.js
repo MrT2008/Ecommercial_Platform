@@ -113,6 +113,135 @@ class SellerController {
       return res.status(500).json({ error: "Internal Server Error" });
     }
   };
+
+  // Banner
+  getBanners = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const banners = await models.Banner.findAll({ where: { shopId: id } });
+
+      // Xử lý đường dẫn hình ảnh
+      const formattedBanners = banners.map((banner) => {
+        const bannerData = banner.toJSON();
+        if (bannerData.imageURL && !bannerData.imageURL.startsWith("http")) {
+          bannerData.imageURL = `${req.protocol}://${req.get("host")}/${bannerData.imageURL.replace(
+            /^.*[\\\/]public[\\\/]/,
+            ""
+          )}`;
+        }
+        return {
+          ...bannerData,
+          isActive: bannerData.status === "active",
+        };
+      });
+
+      return res.status(200).json({ banners: formattedBanners });
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
+  postBanner = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { title } = req.body;
+
+      if (!title) {
+        return res.status(400).json({ error: "Title is required" });
+      }
+
+      const imageURL = req.file ? req.file.path : null;
+      if (!imageURL) {
+        return res.status(400).json({ error: "Image is required" });
+      }
+
+      const shop = await models.Shop.findOne({ where: { id } });
+      if (!shop) {
+        return res.status(404).json({ error: "Shop not found" });
+      }
+
+      const banner = await models.Banner.create({
+        shopId: id,
+        title,
+        imageURL,
+        status: "active",
+      });
+
+      const bannerData = banner.toJSON();
+      if (bannerData.imageURL) {
+        bannerData.imageURL = `${req.protocol}://${req.get("host")}/${bannerData.imageURL.replace(
+          /^.*[\\\/]public[\\\/]/,
+          ""
+        )}`;
+      }
+
+      return res.status(201).json({
+        banner: {
+          ...bannerData,
+          isActive: bannerData.status === "active",
+        },
+      });
+    } catch (error) {
+      console.error("Error creating banner:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
+  updateBannerStatus = async (req, res) => {
+    try {
+      const { id, bannerId } = req.params;
+      const { status } = req.body;
+
+      if (!status || !["active", "inactive"].includes(status)) {
+        return res.status(400).json({ error: "Valid status (active/inactive) is required" });
+      }
+
+      const banner = await models.Banner.findOne({ where: { id: bannerId, shopId: id } });
+      if (!banner) {
+        return res.status(404).json({ error: "Banner not found" });
+      }
+
+      await banner.update({ status });
+
+      const bannerData = banner.toJSON();
+      if (bannerData.imageURL) {
+        bannerData.imageURL = `${req.protocol}://${req.get("host")}/${bannerData.imageURL.replace(
+          /^.*[\\\/]public[\\\/]/,
+          ""
+        )}`;
+      }
+
+      return res.status(200).json({
+        banner: {
+          ...bannerData,
+          isActive: bannerData.status === "active",
+        },
+      });
+    } catch (error) {
+      console.error("Error updating banner:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
+  deleteBanner = async (req, res) => {
+    try {
+      const { id, bannerId } = req.params;
+      const banner = await models.Banner.findOne({ where: { id: bannerId, shopId: id } });
+
+      if (!banner) {
+        return res.status(404).json({ error: "Banner not found" });
+      }
+
+      await banner.destroy();
+
+      return res.status(200).json({ message: "Banner deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting banner:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
   //Product
   postProduct = async (req, res) => {
     try {
