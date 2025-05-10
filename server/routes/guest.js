@@ -20,5 +20,5 @@ router.get('/shop/:id/products', GuestController.getProductsByShopId);
 
 router.get('/shop/:id/categories', GuestController.getCategoriesByShopId);
 router.get('/shop/:id/products/:cId', GuestController.getProductsByCategoryId);
-
+router.get('/product/shop/:id', GuestController.getShopByProductId);
 module.exports = router;

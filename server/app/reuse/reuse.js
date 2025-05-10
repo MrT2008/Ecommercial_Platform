@@ -113,14 +113,15 @@ const getAllShops = async (req) => {
 const getShopById = async (id, req) => {
   const shop = await models.Shop.findByPk(id);
   const shopDetails = [];
-  if (shop.avatarUrl) {
+  if (shop.avatarUrl && !shop.avatarUrl.startsWith("http")) {
     shop.avatarUrl = shop.avatarUrl.replace(/^.*[\\\/]public[\\\/]/, "/"); // Normalize the path
     shop.avatarUrl = `${req.protocol}://${req.get("host")}/${shop.avatarUrl}`;
   }
-  if (shop.backgroundUrl) {
+  if (shop.backgroundUrl && !shop.backgroundUrl.startsWith("http")) {
     shop.backgroundUrl = shop.backgroundUrl.replace(/^.*[\\\/]public[\\\/]/, "/"); // Normalize the path
     shop.backgroundUrl = `${req.protocol}://${req.get("host")}/${shop.backgroundUrl}`;
   }
+
   const orderDetails = await models.OrderDetail.findAll({
     where: { shopId: shop.id },
     include: {

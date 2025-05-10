@@ -4,6 +4,29 @@ const Category = require('../models/Category');
 const reuse = require('../reuse/reuse');
 
 class GuestController {
+    getShopByProductId = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const product = await models.Product.findOne({ where: { id } });
+            if (!product) {
+                return res.status(404).json({ error: 'Product not found' });
+            }
+
+            const shop = await models.Shop.findOne({ where: { id: product.shopId } });
+            if (!shop) {
+                return res.status(404).json({ error: 'Shop not found' });
+            }
+            if (shop.avatarUrl && shop.avatarUrl.startsWith("http")) {
+                shop.avatarUrl = shop.avatarUrl.replace(/^.*[\\\/]public[\\\/]/, "/");
+                shop.avatarUrl = `${req.protocol}://${req.get("host")}/${shop.avatarUrl}`;
+              }
+
+            res.status(200).json({ message: 'Shop retrieved successfully', shop });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
     searchProducts = async (req, res) => {
         try {
             const { keyword } = req.params;
@@ -166,7 +189,7 @@ class GuestController {
         try {
             const { id } = req.params;
             const shop = await reuse.getShopById(id,req);
-            if (!shop) {
+            if (!shop && !shop.imageUrl.startsWith("http") ) {
                 return res.status(404).json({ error: 'Shop not found' });
             }
 
