@@ -260,7 +260,7 @@ const AllProduct = () => {
                     </div>
                   </td>
                   <td className="p-2">
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-5">
                       <button
                         className="text-[#5F33E1]"
                         title="Edit"
@@ -274,7 +274,6 @@ const AllProduct = () => {
                         className="text-[#EA4335]"
                         title="Delete"
                         onClick={() => handleDeleteProduct(p.id)}>
-                        {p.id}
                         <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </div>
