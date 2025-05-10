@@ -12,48 +12,63 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
   const [status, setStatus] = useState('Active');
   const [category, setCategory] = useState([]);
   const [image, setImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [allCategories, setAllCategories] = useState([]);
   const [showCategories, setShowCategories] = useState(false);
+  const [shopId, setShopId] = useState(null);
+
+  
   useEffect(() => {
     // Initialize form values based on product prop
-    if (product) {
-      setName(product.name || '');
-      setDescription(product.description || '');
-      setPrice(product.price?.toString() || '');
-      setDiscount(product.discount?.replace('%', '') || '');
-      setQuantity(product.quantity || 0);
-      setStatus(product.status || 'Active');
-      setCategory(product.category || []);
-      setImage(product.image || null);
-    } else {
-      setName('');
-      setDescription('');
-      setPrice('');
-      setDiscount('');
-      setQuantity(0);
-      setStatus('Active');
-      setCategory([]);
-      setImage(null);
+    if (!isOpen){
+      return
     }
 
-    const fetchCategories = async () => {
+    const initializeData = async () => {
       try {
+        setIsLoading(true);
+        
+        // Initialize shop ID
         const userId = getSellerId();
         const shopRes = await fetch(`http://localhost:8080/seller/getShop/${userId}`);
         const shopData = await shopRes.json();
-        const shopId = shopData.data.shop.id;
+        const fetchedShopId = shopData.data.shop.id;
+        setShopId(fetchedShopId);
 
-        const res = await fetch(`http://localhost:8080/seller/${shopId}/getCategory`);
+        // Initialize categories
+        const res = await fetch(`http://localhost:8080/seller/${fetchedShopId}/getCategory`);
         const data = await res.json();
         setAllCategories(data.categories || []);
+
+        if (product) {
+          setName(product.name || '');
+          setDescription(product.description || '');
+          setPrice(product.price || '');
+          setDiscount(product.discount || '');
+          setQuantity(product.quantity || 0);
+          setStatus(product.status || 'Active');
+          setCategory(product.category || []);
+          setImage(product.thumbnailURL || null);
+        } else
+        {
+          setName('');
+          setDescription('');
+          setPrice('');
+          setDiscount('');
+          setQuantity(0);
+          setStatus('Active');
+          setCategory([]);
+          setImage(null);
+        }
       } catch (err) {
-        console.error("Lỗi khi fetch categories:", err);
+        console.error("Error fetching categories:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
-
-    fetchCategories();
-  }, []);
+    initializeData();
+  }, [isOpen, product]);
 
 
   const handleCategoryChange = (e) => {
@@ -153,6 +168,48 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
     // finally {
     // setLoading(false);
     // }
+    // for update product
+
+    try {
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('price', price);
+      formData.append('description', description);
+
+      // Add each category separately
+      category.forEach((cat, index) => {
+        formData.append(`category[${index}]`, cat);
+      });
+
+      formData.append('quantity', quantity);
+      formData.append('type', 'product'); // As seen in the API example
+      formData.append('discount', discount);
+      formData.append('saled', discount);
+
+      // Handle image upload
+      if (image && image.startsWith('data:')) {
+        // Convert base64 to blob
+        const response = await fetch(image);
+        const blob = await response.blob();
+        formData.append('thumbnailURL', blob, 'product-image.jpg');
+      }
+
+      // Make API request
+      const response = await fetch(`http://localhost:8080/seller/${shopId}/updateProduct/${product.id}`, {
+        method: 'PUT',
+        body: formData,
+        // Don't set Content-Type header, let the browser set it with boundary for FormData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+    } catch (err) {
+      console.error("Error updating product:", err);
+      // setError("Failed to update product. Please try again.");
+    }
+
   };
 
   if (!isOpen) return null;

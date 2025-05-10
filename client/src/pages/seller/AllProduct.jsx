@@ -61,7 +61,6 @@ const AllProduct = () => {
         if (!shopId) {
           throw new Error("Shop ID not found in response");
         }
-        console.log("Found shop ID:", shopId);
         setReloadProducts(prev => !prev);
       } catch (err) {
         console.error("Error getting shop ID:", err);
@@ -73,7 +72,6 @@ const AllProduct = () => {
       const method = editingProduct ? 'PUT' : 'POST';
       const endpoint = editingProduct ? `${url}/${editingProduct.id}` : url;
 
-      console.log("Sending request to:", endpoint);
 
       // Create FormData object instead of JSON
       const formData = new FormData();
@@ -170,7 +168,6 @@ const AllProduct = () => {
     }
   };
 
-  console.log("Products:", products);
 
   return (
     <div className="flex">
