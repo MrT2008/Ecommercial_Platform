@@ -14,7 +14,7 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
   const [image, setImage] = useState(null);
 
   const [allCategories, setAllCategories] = useState([]);
-
+  const [showCategories, setShowCategories] = useState(false);
   useEffect(() => {
     // Initialize form values based on product prop
     if (product) {
@@ -208,27 +208,41 @@ const AddProductDialog = ({ isOpen, onClose, onSave, product }) => {
           </select>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-6 relative">
           <label className="block mb-1">Category</label>
-          <div className="bg-gray-100 rounded p-2 flex flex-col gap-2">
-            {allCategories.map((cat) => (
-              <label key={cat.id || cat.name} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  value={cat.name}
-                  checked={category.includes(cat.name)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setCategory([...category, cat.name]);
-                    } else {
-                      setCategory(category.filter((c) => c !== cat.name));
-                    }
-                  }}
-                />
-                <span>{cat.name}</span>
-              </label>
-            ))}
-          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowCategories(!showCategories)}
+            className="w-full bg-gray-100 rounded p-2 flex justify-between items-center"
+          >
+            <span className="text-left truncate text-gray-600">
+              {category.length > 0 ? category.join(', ') : 'Select the category'}
+            </span>
+            <span>{showCategories ? '▲' : '▼'}</span>
+          </button>
+
+          {showCategories && (
+            <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded shadow w-full max-h-48 overflow-y-auto p-2 flex flex-col gap-2">
+              {allCategories.map((cat) => (
+                <label key={cat.id || cat.name} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    value={cat.name}
+                    checked={category.includes(cat.name)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setCategory([...category, cat.name]);
+                      } else {
+                        setCategory(category.filter((c) => c !== cat.name));
+                      }
+                    }}
+                  />
+                  <span>{cat.name}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-2">
