@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 const Sidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
@@ -9,47 +9,47 @@ const Sidebar = () => {
         <h2 className="text-lg font-bold mb-4">Manage Account</h2>
         <ul className="mb-6">
           <li className="mb-2">
-            <a href="/account/profile" className={`px-4 ${isActive('/account/profile') ? 'active' : ''}`}>
+            <Link to="/account/profile" className={`px-4 ${isActive('/account/profile') ? 'active' : ''}`}>
               Profile
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/account/address" className={`px-4 ${isActive('/account/address') ? 'active' : ''}`}>
+            <Link to="/account/address" className={`px-4 ${isActive('/account/address') ? 'active' : ''}`}>
               Address
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/account/credit_card" className={`px-4 ${isActive('/account/credit_card') ? 'active' : ''}`}>
+            <Link to="/account/credit_card" className={`px-4 ${isActive('/account/credit_card') ? 'active' : ''}`}>
               Credit Card
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/account/changing_password" className={`px-4 ${isActive('/account/changing_password') ? 'active' : ''}`}>
+            <Link to="/account/changing_password" className={`px-4 ${isActive('/account/changing_password') ? 'active' : ''}`}>
               Changing Password
-            </a>
+            </Link>
           </li>
         </ul>
         <h2 className="text-lg font-bold mb-4">Orders Management</h2>
         <ul className="mb-6">
           <li className="mb-2">
-            <a href="/account/pending" className={`px-4 ${isActive('/account/pending') ? 'active' : ''}`}>
+            <Link to="/account/pending" className={`px-4 ${isActive('/account/pending') ? 'active' : ''}`}>
               Pending Payment
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/account/ongoing" className={`px-4 ${isActive('/account/ongoing') ? 'active' : ''}`}>
+            <Link to="/account/ongoing" className={`px-4 ${isActive('/account/ongoing') ? 'active' : ''}`}>
               Ongoing Orders
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/account/completed" className={`px-4 ${isActive('/account/completed') ? 'active' : ''}`}>
+            <Link to="/account/completed" className={`px-4 ${isActive('/account/completed') ? 'active' : ''}`}>
               Completed Orders
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/account/cancellations" className={`px-4 ${isActive('/account/cancellations') ? 'active' : ''}`}>
+            <Link to="/account/cancellations" className={`px-4 ${isActive('/account/cancellations') ? 'active' : ''}`}>
               Cancellations
-            </a>
+            </Link>
           </li>
         </ul>
       </div>

@@ -39,6 +39,7 @@ const ShopHeaderShopPage = ({ shopId }) => {
         }
         return stars;
     };
+    console.log(shop);
 
   return (
     <div className="container mx-auto px-4 py-4 mb-6">
@@ -48,7 +49,7 @@ const ShopHeaderShopPage = ({ shopId }) => {
           <div className="flex items-center">
             <div className="mr-6">
               <img 
-                src={shop.image} 
+                src={`${shop.avatarUrl}`} 
                 alt={`${shop.name} logo`} 
                 className="w-28 h-28 rounded-full object-cover border-2 border-gray-200"
               />

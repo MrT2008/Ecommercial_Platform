@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 const Sidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
@@ -9,43 +9,40 @@ const Sidebar = () => {
         <h2 className="text-lg font-bold mb-4">Sale Analystics</h2>
         <ul className="mb-6">
           <li className="mb-2">
-          <a
-            href="/seller/seller-dashboard"
-            className={`px-4 ${isActive('/seller/seller-dashboard') ? 'active' : ''}`}
-          >
-              Dashboard
-            </a>
+              <Link to="/seller/seller-dashboard" className={`px-4 ${isActive('/seller/seller-dashboard') ? 'active' : ''}`}>
+                Dashboard 
+              </Link>
           </li>
         </ul>
         <h2 className="text-lg font-bold mb-4">Product Management</h2>
         <ul className="mb-6">
           <li className="mb-2">
-            <a href="/seller/all-order" className={`px-4 ${isActive('/seller/all-order') ? 'active' : ''}`}>
+            <Link to="/seller/all-order" className={`px-4 ${isActive('/seller/all-order') ? 'active' : ''}`}>
               All Orders
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/seller/all-product" className={`px-4 ${isActive('/seller/all-product') ? 'active' : ''}`}>
+            <Link to="/seller/all-product" className={`px-4 ${isActive('/seller/all-product') ? 'active' : ''}`}>
               All Products
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/seller/category" className={`px-4 ${isActive('/seller/category') ? 'active' : ''}`}>
+            <Link to="/seller/category" className={`px-4 ${isActive('/seller/category') ? 'active' : ''}`}>
               Categories
-            </a>
+            </Link>
           </li>
         </ul>
         <h2 className="text-lg font-bold mb-4">Shop Management</h2>
         <ul className="mb-6">
           <li className="mb-2">
-            <a href="/seller/shop-information" className={`px-4 ${isActive('/seller/shop-information') ? 'active' : ''}`}>
+            <Link to="/seller/shop-information" className={`px-4 ${isActive('/seller/shop-information') ? 'active' : ''}`}>
               Shop Information
-            </a>
+            </Link>
           </li>
           <li className="mb-2">
-            <a href="/seller/seller-banner" className={`px-4 ${isActive('/seller/seller-banner') ? 'active' : ''}`}>
+            <Link to="/seller/seller-banner" className={`px-4 ${isActive('/seller/seller-banner') ? 'active' : ''}`}>
               Marketing Banner
-            </a>
+            </Link>
           </li>
         </ul>
       </div>

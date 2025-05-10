@@ -20,9 +20,9 @@ class SellerController {
       }
       const shopData = shop.toJSON();
 
-      if (shopData.imageUrl && !shopData.imageUrl.startsWith("http")) {
-        // You may need to prepend the base URL if it's a relative path
-        shopData.imageUrl = `${req.protocol}://${req.get("host")}/${shopData.imageUrl}`;
+      if (shopData.avatarUrl && !shopData.avatarUrl.startsWith("http")) {
+        shopData.avatarUrl = shopData.avatarUrl.replace(/^.*[\\\/]public[\\\/]/, "/"); // Normalize the path
+        shopData.avatarUrl = `${req.protocol}://${req.get("host")}/${shopData.avatarUrl}`;
       }
 
       return res.status(200).json({
@@ -593,8 +593,9 @@ class SellerController {
       if (!shop) {
         return res.status(404).json({ error: "Shop not found" });
       }
-      if (shop.imageUrl && shop.imageUrl.startsWith("http")) {
-        shop.imageUrl = `${req.protocol}://${req.get("host")}/${shop.imageUrl}`;
+      if (shop.avatarUrl && !shop.avatarUrl.startsWith("http")) {
+        shop.avatarUrl = shop.avatarUrl.replace(/^.*[\\\/]public[\\\/]/, "/"); // Normalize the path
+        shop.avatarUrl = `${req.protocol}://${req.get("host")}/${shop.avatarUrl}`;
       }
 
       return res.status(200).json({ shop });
