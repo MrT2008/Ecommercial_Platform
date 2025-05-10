@@ -13,6 +13,7 @@ function ShopPage() {
       <ShopHeaderShopPage shopId={id} />
 
       {/* Shop Banner/Carousel */}
+      <Carousel />
 
       {/* Categories - now full width above products
       <ShopCategories shopId={id}/> */}
